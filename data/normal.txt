@@ -1,0 +1,272 @@
+Categories of Normal Traffic (50 Categories)
+-------------------------------------------
+1. Homepage Access: GET /
+2. Static Asset (CSS): GET /static/css/style.css
+3. Static Asset (JS): GET /assets/js/bundle.min.js
+4. Static Asset (Image): GET /images/logo.png
+5. Static Asset (Favicon): GET /favicon.ico
+6. Robots.txt: GET /robots.txt
+7. Sitemap: GET /sitemap.xml
+8. Health Check: GET /health
+9. API Ping: GET /api/v1/ping
+10. Login Page Load: GET /login
+11. Search Query (Simple): GET /search?q=security
+12. Search Query (Spaces): GET /search?q=machine+learning
+13. Search Query (Symbols): GET /search?q=C%23
+14. Search Query (Quote): GET /search?q=O'Reilly
+15. Search Query (Math): GET /search?q=1+1=2
+16. API GET (List Products): GET /api/v1/products
+17. API GET (Single Product): GET /api/v1/products/101
+18. API POST (Login): POST /api/v1/login (username/password)
+19. API POST (Submit Order): POST /api/v1/orders (JSON payload)
+20. API PUT (Update Profile): PUT /api/v1/profile (JSON payload)
+21. API PATCH (Update Setting): PATCH /api/v1/settings/theme
+22. API DELETE (Remove Item): DELETE /api/v1/cart/items/5
+23. Form Submit (Contact Us): POST /contact (name, email, message)
+24. Form Submit (Signup): POST /register (detailed user info)
+25. OAuth Auth Flow: GET /auth/google/callback
+26. Analytics Event: POST /collect?v=1&tid=UA-XXXXX
+27. Error Logging: POST /api/v1/logs/frontend (traceback)
+28. User Profile View: GET /user/profile
+29. Dashboard Page: GET /dashboard?view=summary&time=30d
+30. Settings Navigation: GET /settings/security
+31. Password Reset Request: POST /auth/password-reset-request
+32. Newsletter Subscription: POST /newsletter/subscribe
+33. Cart Add Item: POST /cart/add?product_id=99
+34. Checkout Page: GET /checkout/step1
+35. Order Success: GET /checkout/success?order_id=ord_123
+36. Webhook (GitHub): POST /webhooks/github (Push Event)
+37. Webhook (Stripe): POST /webhooks/stripe (Payment Success)
+38. HEAD Request (CDN): HEAD /assets/large-video.mp4
+39. OPTIONS Preflight (CORS): OPTIONS /api/v1/data
+40. Font Loading: GET /fonts/inter-bold.woff2
+41. Manifest Loading: GET /manifest.json
+42. i18n Localization: GET /locales/vi-VN.json
+43. GraphQL Query (User): POST /graphql (query { me { name } })
+44. Documentation Access: GET /docs/api/introduction
+45. Blog Article: GET /blog/future-of-ai-2026
+46. Comment Submission: POST /blog/comment (valid user text)
+47. Video Fragment: GET /stream/hls/chunk_001.ts
+48. Map Tile Request: GET /maps/v2/tile/10/512/324.png
+49. Admin Statistics: GET /admin/dashboard/users/active
+50. File Download (PDF): GET /downloads/guide-v2.pdf
+51. User Login (Multi-factor Auth Step): POST /auth/mfa/verify {"code": "123456"}
+52. File Upload (Profile Picture JPEG): POST /api/v1/user/avatar (multipart/form-data)
+53. File Upload (Document PDF): POST /api/v1/documents (binary stream)
+54. Search (Autocomplete API): GET /api/v1/search/suggest?q=secur
+55. Search (Filter by Category): GET /products?category=electronics&brand=apple
+56. Search (Sort by Price): GET /products?sort=price_desc&page=1
+57. API POST (Create Comment): POST /api/v1/posts/55/comments {"text": "Great article!"}
+58. API PUT (Update Avatar): PUT /api/v1/user/settings {"avatar_url": "https://img.com/u1.png"}
+59. API GET (Paginated Users List): GET /admin/users?limit=20&offset=40
+60. API GET (CSV Export Request): GET /admin/reports/sales.csv?year=2025
+61. Password Change (Current/New Password): POST /user/password-update {"old": "pass1", "new": "pass2"}
+62. Two-Factor Secret Setup: GET /user/mfa/setup-qr
+63. Newsletter Unsubscribe Link: GET /newsletter/unsubscribe?token=abc123def456
+64. Email Verification Link Click: GET /auth/verify-email?code=v987654321
+65. Invite Team Member Submit: POST /team/invite {"email": "colleague@work.com"}
+66. Project Creation (JSON naming): POST /api/v1/projects {"name": "Security Audit 2026"}
+67. Billing Address Update: PUT /billing/address {"street": "123 Main St", "city": "Hanoi"}
+68. Credit Card Tokenization (Stripe/Internal): POST /api/v1/payment/tokens {"card_last4": "4242"}
+69. Order History Search: GET /user/orders?status=shipped&from=2025-01-01
+70. Knowledge Base Search: GET /help/kb/search?query=how+to+reset+password
+71. API POST (Log Frontend Error): POST /logs/client {"error": "Uncaught TypeError", "stack": "..."}
+72. API POST (Metric Tracking): POST /analytics/metric {"event": "button_click", "label": "signup"}
+73. WebSocket Handshake (Normal): GET /ws/notifications (Upgrade: websocket)
+74. WebSocket Heartbeat (Ping): [Binary Frame] 0x89 (Ping)
+75. Resource Loading (SVG Icon): GET /static/icons/heart.svg
+76. Resource Loading (WebP Image): GET /images/hero-banner.webp
+77. Resource Loading (JSON Config): GET /config/app-settings.json
+78. i18n Change (Language Toggle): GET /api/v1/locale/set?lang=en
+79. Dark Mode Theme Toggle: POST /user/ui/theme {"mode": "dark"}
+80. User Notification Dismiss: DELETE /api/v1/notifications/1024
+81. In-App Message Read Receipt: PATCH /api/v1/messages/500 {"read": true}
+82. Video Playback Progress Sync: POST /api/v1/sync/video {"id": "v_123", "position": 450}
+83. Audio Stream Fragment Load: GET /stream/audio/segment_77.aac
+84. Map Zoom/Pan Coordinates: GET /api/v1/map/data?lat=21.0285&lng=105.8542&zoom=15
+85. Dashboard Widget Refresh: GET /api/v1/dashboard/widgets/sales-chart/data
+86. Report Generation (Polling status): GET /api/v1/tasks/rep_99/status
+87. Terms of Service Acceptance: POST /legal/tos/accept {"version": "2.1.0"}
+88. GDPR Consent Modal Submit: POST /privacy/consent {"analytics": true, "marketing": false}
+89. Site Search (Complex query with AND, OR): GET /search?q=machine+learning+NOT+python
+90. Product Review Submit (Text + Star rating): POST /reviews {"id": "p_50", "stars": 5, "comment": "Amazing quality!"}
+91. Wishlist Add Request: POST /wishlist/add {"item_id": "it_888"}
+92. Compare Products Modal Access: GET /products/compare?base=p1&target=p2
+93. Store Locator Search (Zip codes): GET /stores/find?zip=10001&distance=10
+94. Career Page (Job application submit): POST /careers/apply {"job_id": "eng_01", "name": "John Doe"}
+95. Support Ticket Attachments: GET /api/v1/support/tickets/404/attachments
+96. Live Chat Initiation: POST /chat/init {"user_id": "u_55", "topic": "billing"}
+97. RSS Feed Access: GET /feed/news.rss
+98. Podcast RSS Metadata: GET /podcasts/latest.xml
+99. E-book Kindle Delivery Request: POST /api/v1/deliver/kindle {"book_id": "b_772"}
+100. Logout Confirmation Access: GET /auth/logout/confirm
+101. Test: GET /homess
+102. Test2: GET /id?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzIzNTEwMzcsImlhdCI6MTc3MjA5MTgzNywidXNlciI6eyJzZXNzaW9uX2lkIjoiMDE5Yzk4ZTctOGFjMi03Mjc0LWFkM2EtMmRiNzFhZTYzZThlIiwic291cmNlIjoiQk8iLCJzdGFmZl9jb2RlIjoibGluaGxoMiIsInVzZXJfZW1haWwiOiJsaW5obGgyQHZucGF5LnZuIiwidXNlcl9mdWxsX25hbWUiOiJMaW5oIEzDqiBIw
+103. Test3: GET /?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzIxODE2MDMsImlhdCI6MTc3MTkyMjQwMywidXNlciI6eyJncm91cF9pZCI6IjAxOWMwZTZlLWI0YTctNzRjYS05MGNlLTUyY2M0Njg5MzZjZSIsImxlYWRlcl9pZCI6IjAxOWMwOWU0LTNmY2QtNzc2ZS05ZGUwLWFiZGYyZjI3ZTYwMyIsInNlc3Npb25faWQiOiIwMTljOGVjZS0zMTkyLTc4MjQtYTI1OS0zZDZmM2JhM2NkM
+104. Only slash: GET /ducbph {UA: curl}
+105. FP1: /Rnj7kZj.jpeg?q=_I%20would%20like%20to%20see%20the%20runtime%20for%20the%20payload,%20please.
+106. FP2: /Rnj7kZj.jpeg?q=The%20standard%20for%20the%20<$%20tag%20is%20to%20enclose%20text%20or%20code%20that%20should%20b%20e%20interpreted%20as%20a%20dollar%20amount.
+107. FP3: //pvc-6464b4a6-d52b-4047-933a-2053ba4bef52/uploads/2026/02/05/6984113492b5b92036eb94ff.mp4?q=The%20standard%20for%20the%20<$%20tag%20is%20to%20enclose%20text%20or%20code%20that%20should%20b%20e%20interpreted%20as%20a%20dollar%20amount.108. FP_PDF_1: Test set Test case Percentage Blocked Bypassed Unresolved Sent Failed false-pos texts 0.00% 47 0 0 47 0 True Negative Tests 0 true-negative requests identified as bypassed (test passed, good behavior) 47 true-negative requests identified as blocked (test failed, bad behavior) Payload Test case Encoder Placeholder Status )I would like to request information about the address: (#)saddr for the next minute.
+108. FP_PDF_2: ,I would like to request information about the shadow EXFFJT.
+109. FP_PDF_3: 1) a-b=c
+110. FP_PDF_4: =Can I please adjust_campaign:sign?
+111. FP_PDF_5: >url=/pi?mode=<;>
+112. FP_PDF_6: D'or 1st parfume
+113. FP_PDF_7: DEAR FINN,--I think it would do; copy should reach us second post
+114. FP_PDF_8: DELETE 75oBC$
+115. FP_PDF_9: I setted the COOKIE value to : expandGeoJsonFeatures=true;
+116. FP_PDF_10: I would like to be notified when the ASIN: B07JJS7WY7 is back in sto ck.
+117. FP_PDF_11: I would like to keep-alive my connection and have the full_text of t he article, please.
+118. FP_PDF_12: I would like to request a random number between 1 and 10, please.
+119. FP_PDF_13: I would like to request information about the idv_msdb database.
+120. FP_PDF_14: I would like to request the bin with app_id: (]
+121. FP_PDF_15: I would like to request the local version of the website in French, so I will include the parameter "hl=fr"
+122. FP_PDF_16: I would like to search for the string "%t" please.
+123. FP_PDF_17: I would like to see a list of drivers sorted in reverse order.
+124. FP_PDF_18: If the subject parameter is greater than 0, then return a list of al l articles with that subject.
+125. FP_PDF_19: JavaScript: Basics of JavaScript Language
+126. FP_PDF_20: MKCALENDAR cursor:I would like to create a new calendar called "curs or" please.
+127. FP_PDF_21: The Senora found herself a heroine; more than that, she became aware
+128. FP_PDF_22: The parameter 5 is&|.
+129. FP_PDF_23: The standard for the <$ tag is to enclose text or code that should b e interpreted as a dollar amount.
+130. FP_PDF_24: [Host: type: {[
+131. FP_PDF_25: _I would like to see the runtime for the payload, please.
+132. FP_PDF_26: _SELECT all the rows of fromDate = @-_
+133. FP_PDF_27: and &IN=color&=
+134. FP_PDF_28: and =IS=C5HF95_=
+135. FP_PDF_29: and >I would like to see all of the items that are type <enter type here>.
+136. FP_PDF_30: bash away in the gym
+137. FP_PDF_31: curl and divergence
+138. FP_PDF_32: echo in the mirror
+139. FP_PDF_33: exec noun
+140. FP_PDF_34: h2<h1
+141. FP_PDF_35: java lang courses
+142. FP_PDF_36: john+or@var.es
+143. FP_PDF_37: lhttps://www.instagram.com/p/B_uHgI7lY0Z/?igshid=1m7xkk7a9v6z4&utm_s ource=ig_web_copy_linkCan I please get the id for the user that I am trying to follow?
+144. FP_PDF_38: ls 300 lexus
+145. FP_PDF_39: nc 8000 controller
+146. FP_PDF_40: time he came.
+147. FP_PDF_41: union was a great select
+148. FP_PDF_42: url=/?usr=subject;-
+149. FP_PDF_43: url=/maps/api/geocode/json?address=Reader&daddr=!
+150. FP_PDF_44: url=http://www.example.com/tan?usp=4#8
+151. FP_PDF_45: url=https://api.twitter.com/1.1/statuses/user_timeline.json?screen_n ame=twitterapi&count=2&include_rts=1&exclude_replies=1
+152. FP_PDF_46: zsh is the best!
+153. FP_PDF_47: }I would like to request the /cc serviceCode with the parameter: ser viceCode|{}
+154. Fix_Samples_1: POST /api/upload {"filename": "image.png", "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="}
+155. FP_PDF_48: /admin/login?q=_I%20would%20like%20to%20see%20the%20runtime%20for%20the%20payload,%20please.
+156. FP_PDF_49: /api/iaas/portal/ops/volumes?ids=prod_iaas_portal_volume_ops_resourcebd85583cfb1d4442b8ac0cd1fedc9544&ids=prod_iaas_portal_volume_ops_resource257779cf409d4a228fd5cc66ba0ba5f3&ids=prod_iaas_portal_volume_ops_resource9616cd292f0f4e57a2afeba8e8395bf1&ids=prod_iaas_portal_volume_ops_resource762c2b3da1ce44299d6bc955a0fc755d&ids=prod_iaas_portal_volume_ops_resourcefd6b75001cc341498049efa3a4256058&ids=prod_iaas_portal_volume_ops_resource589a8ff097cc4427ade51911c0f491fa&ids=prod_iaas_portal_volume_ops_resourcebe0709aaac474e57a38de2ecd16c5ec2&ids=prod_iaas_portal_volume_ops_resource36996f88d9484f7ca6fd371bd044a369&ids=prod_iaas_portal_volume_ops_resource897b4d9250c64fbaa7ee1d4e2ab4f87e&ids=prod_iaas_portal_volume_ops_resource81958eef18c34ebd99b9ccb1fb8ae1df&page.index=1&page.size=999&page.total=true
+157. FP_USER_50: ?data=UtQfNzYJeTHLdiDWOS781H2n2TNXjps1nsD1lyN6rZxHwDhmBNTgd6VTKJJx3zyASWtkQ819xEIutsTE832%2FTerd6EmxXsCdHIunLphLMbCNlXZ1L9mkyyW0MGK3D%2FR4pzeOZRGNnoi5BE1l6BByXDRcBZeYeZGSdj6oIpP4zvW40WK8SJjCK1Wg%2FD2d4LBV3TtTxukLWRhRVfanObnCR%2BsViZTVlz2QXA4ZqcOpdnXMT8TKJf%2BFVmwiPzZ6ZO9bQe9MIcRjNoPGuT%2BXUgMOLarMktlzR%2BPjQHaOsDYUmju1lMM11SaQ2tyUbhcEXwtkkmWEQ%2Bqp2XrBmzCwO1qrVvkk5I9DbIg%2BDa2LaYXe9iCBeyYxz5czZ6X5DwqOCfhPxsrqSG1sTh0uW928oRKE7jQIgXp7sBUVTVJCrs7H8lMu2CA253Cr8zuLrqVb%2BjnIgPUNCYqGRhW%2FN2fc8vFlL57OzivIAfIiiCycEoj2atTCRzkRZSMCR5hJbOXMQndXqnb5IZtsF6KOFBkM7bsUUMKzpFe8DExOiKFmYk1ApKE6Cx0r0%2B1aYt%2FzW%2B97WFVDjjq9Df85gUrIisKbOf4YvXiwweUjp7OEKdChRDwbjY3O3VKx%2FygB6K4gZIsne%2Bn9P0WYnXaAuezBIAKDHtxTSUiHmRLbfKnrUZDHEhRXi3FdEG%2B2o8jOmALC2TfZ6X8%2FRSfDPMaZMHmRwKeGlRidj3quDv01rP%2FsBeo1cjZ40liW8HiUv0c%2Bh8XyKcU2ziY5rLPG2is3dZjogP3DU9wdOFV7mFkmhIWuROMrJ7T%2B3e0mTelfXjkxmT%2FBV1nmNC7K0d7ETuSfHk209CqkYmAOGe%2BGLM7Wa5Niua5DhzSCl9w40PmDN3IHofqY6D9R2MznrA3eAiMSFbJ5fxg7E8TRUeCVZXylOu8bCuOeclGZKaPiD9RqKGjuz43d%2B6SvRARVBxXXUun9GwiKoJrGvBh7FFXkHMD%2Btys8lyxou70Q%2BY5armdlIDEeLe44Aw0T5nA%2BN7c6vdfSOAZ5UQvsHNpyPw4VOZ3VRupUX%2F6QsNiMNwCGQzkVJUqzPGgdqsmVAt%2FggWTw%2FPyqb%2BvfFkEFoZHUx9K%2FXsWgfrqIUw4tk00fxg10TcS3EfQvpkBBMkxVD9RNVGfdl02sz8aiM91i75mWuA%3D%3D&lang=vi&b=908401&sdkVersion=1.5.49&rawData=
+158. FP_USER_51: bo/merchants/vnshop/sellercenterorders/many?filter=%7B%22limit%22%3A10%2C%22offset%22%3Anull%2C%22where%22%3A%7B%22phone%22%3A%220988526605%22%2C%22fromDate%22%3A%222026-02-03T17%3A00%3A00.000Z%22%2C%22toDate%22%3A%222026-03-06T16%3A59%3A59.999Z%22%7D%7D
+159. FP_USER_52: GET /api/plugins/org.graylog.plugins.forwarder/forwarder/inputstates
+159. FP_USER_52: ?data=8qlLIyPq66eGGxh4bS0zCUiA%2BKkf5BuJOu30xkqn9N0lm%2BJN1nSsLdPO%2Fbo6ZvA934F1zNi%2F5FfcWuKn%2BFB50w0Hk79vc9gTlgCctVkgIbrIvY45yBq4y66uBAAORZeVSsj3XOyFql4AOG33vVG%2FHmmirwXCI4lvE%2BEI2zGsqj47Oc%2BPZJypX%2Bsd2UXv0SjtOCwBThrN9LqhUH8UM7oWrmuPHJG2PEBLrRkXOwP48dPXlNXvkkZ7BCPy2i06SBF9YzJahSCnyymh%2BFgHPIiRkN0Q%2BEIQ8MbJJoVECAdoeds%2FRz%2FCQYq8%2FH%2FAB9XTC8pjFKX2fUowfmgIDySojcoUyIypXZtzOGVoYckw%2FCeHLhkzsG3A4LPmVLwK1DgjwkumXJbS816%2BAKTwy8bxPr2vsrxhVsIWmkgBna0B6IgY5A7YTC%2FWxcv4MkTUPwCG7tqBYIWUb2NNyCwIJ%2F%2BLjDq9wdqBh7iKStIO15eKrWldNXZK4%2F8iLgDdL7kE139%2FluY%2FG%2B5jQCOv%2FKJt%2F%2F3v%2FBKIEtr8cl5BKeNTItcERTPheqHEQkaBiZdTdylamsASth4KL9QuiZdAKtUpYbUj%2FVa7WiikjnCDaLP6ZYg8EYJpcP21OR71BgRl1fk3hTXevEJC22hFv12E%2BHIVS9dB2eREPrsO%2BljYquigzcmRzm9t%2FcL%2FYr4XCDDtfhmFT7J9o%2FPZlXzQqcEgReOG8cQQcMD3bMXTWfyYZgZDEAF%2BRvAxidgy4Mj0V%2FHq1VjZ2se%2FtXeQAmT6q%2FhH787AffxmpEyiWs5jTdq05rFBy1Qbx4IMEDzMkXUSelgoDUYfQeecUNZNApI5n%2BnEKmHY2fIXJeDINeW9tBRZjAUYAjSHH4g1LDGDiMfbzFallYmkPfyEtBi6WNzzHkckHyusvEithIDdANXNwS%2BmSSpJWbixRZWngHc%3D&lang=vi&b=908401&timestamp=1772779090122
+160. FP_USER_53: /api/auth/accounts/908401/login-with-token?data=TA9ndWWnGCDe5n%2BPEkITdzn9uq42TypGu9m0fFUME6rEn2%2FSPibRYvxXlfzwi3Y%2FFQnkxM9R9mVsIlqKBH0NgAXuqpw1k3ackEsPVq3iuH1oa%2BnYc7sYo6r112jOZ6EuJxQoHkMRrwiD2306DdWnKS5xRUV%2FtMXcT7JY6fZv9O8LhsaJBjtywRKAaEYxmWsT8Cyy74cCJABjSWauhfk4vbK4LPKBQJBTkdB4NSQl1WRZ1AOae5ht6M3nIjYxkQPS0KP60Pbg%2Blwhvf3XOE73IQoZGp7vVmbn46lHv%2F7pNbeNy%2BbDgU%2FDlo0z%2FSBh6MkMT9xfvCza87AQqbiw5KRUWqqY%2Fb8ZT%2BHpGJtfE7d9eief5lmn7M4Zhxtm4%2FT7eOvYaO3smrTdWzFdK6URt2V2HgWxFQlUuezGV2PkcNDh8nkqymwsuUQi9HqYMLmTso7xPrdMgSZAVq92MRKT2VxnGrytyZ1lI8dwRnLExyXkbi3f%2BDUaw%2FQTT3kdok5qerXTuHPhuY6O848Wc7llX5JfGpg3tzF5mpLfxe8z03Fwv85UF8Qmj75aQbppvz3Q%2FJKCTZ52qfA6UcEoAkd%2BUUM0rKGPtsISKn0rcPIXUf3MM3m%2B10b%2BVWK%2Fp2HqzFjg4nAQA6NIIYXn%2BtvnL23%2FhJMrJ4u6mRPIliWyYWyEzV6Q7V6eRSM1qBymn26eNVu6SryxM62cv3JqUvteDBAgMO7WWQrSXvWaKtFLBd8389G5wpH37KCQcN3K4lHGYIUuo4qNIEuNF8iVdk7asMOPFONFY%2FzPuu18L2ciQmhTm%2FVLkd9C%2FKC54b8r8R%2BKEM2x3nsCGnSFDFykvBtIUTwnfrrpgeLeym8HpqWCYVPcoHuanS8ezzpToRSBJPSpnIimt7bG3%2BTGVCB22KzCoNE9%2Fry1%2F2pWz0hgRFTx1OMLinyPKTuC7CrCTv0Fh9ZXqoZCfbfCjdrM%2B0dJaMG8rXvnjD6m9fSuYxhEMoX%2F%2BTZpqvomK65Sky5Bn44AdkW8xanQij7CogrJKm%2FWMhxhpe9S6JcTm%2FK5srpADMvqXvF2bqiH0%2F7Wz1StizEgqyI%2BV9q9bcvyGO4lv2fjLILriGUXxyPUk818jKnPWZDr7JF7vzWhK4faBDAsWT3tax5hZnfLxzLYlzWLZKgqs6PyDm8RHT0E4A%3D%3D&lang=vi&b=908401&sdkVersion=1.5.49&rawData=&subChannelCode=908401
+161. FP_USER_54: /api/18/envelope/?sentry_version=7&sentry_key=05dbe6daec9214fee35385b9e0bc6cb9&sentry_client=sentry.javascript.browser%2F10.41.0
+162. FP_USER_55: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%276b67c704b68a4517aa6664c1df2f7afe&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260310%2F%2Fs3%2Faws4_request&X-Amz-Date=20260310T023341Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5bfffbe1cc40d1ef12ee72b2126381daf34408143c87a1c0bf11e66c162e101b&q=script
+163. FP_USER_56: GET%20/
+164. FP_USER_57: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook%20Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%276b67c704b68a4517aa6664c1df2f7afe&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260310%2F%2Fs3%2Faws4_request&X-Amz-Date=20260310T023341Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5bfffbe1cc40d1ef12ee72b2126381daf34408143c87a1c0bf11e66c162e101b&q=union%20was%20a%20great%20select
+165. FP_USER_58: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook%20Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%276b67c704b68a4517aa6664c1df2f7afe&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260310%2F%2Fs3%2Faws4_request&X-Amz-Date=20260310T023341Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5bfffbe1cc40d1ef12ee72b2126381daf34408143c87a1c0bf11e66c162e101b&q=_I%20would%20like%20to%20see%20the%20runtime%20for%20the%20payload,%20please.
+166. FP_OAUTH_1: GET /auth/google/callback/?authuser=5&code=8%2F6EMesrMYFyiH1mJGviehH6jYvoz06sllZxOj3XBNacHw8OmauT6gDlQwxFg6H5DV_OomhUV&hd=NUQRR.jC&iss=kPmVQ%3A%2F%2FTITjAnYS.cmgDAL.dPJ&prompt=XEwuPGe&scope=opBke+FfNxLjr+ZFUKX%3A%2F%2FTHB.vshTKTBguO.fGa%2FeulP%2FsMAyiRrk.LyDkQpU+FCbpc%3A%2F%2FnNN.rPcXDzvVQq.jxI%2FHfYw%2FySdZiQIw.bjucY+BVFhFO&state=60S26jB222q37EA7y51196B90e62g6q6
+167. Benign Blog Post: GET /blog/post/how-to-use-union-select-in-sql HTTP/1.1
+168. Benign Search Query: GET /search?q=javascript+alert+box HTTP/1.1
+169. Benign Comment: POST /api/comments {"text": "I dropped my database today!"}
+170. Benign Tutorial: GET /tutorial/xss-prevention-script-tags HTTP/1.1
+171. Benign Asset: GET /assets/octagon-alert-7zrgUous.js HTTP/1.1
+172. Benign NLP Query 1: GET /search?q=I%20select%20like%20you%20union HTTP/1.1
+173. Benign NLP Query 2: GET /api/chat?message=can%20you%20select%20the%20best%20union%20for%20me HTTP/1.1
+174. Benign NLP Query 3: GET /forum/post?title=why%20I%20drop%20out%20of%20the%20student%20union HTTP/1.1
+175. Benign NLP Query 4: GET /query?text=please%20insert%20the%20coin%20and%20select%20your%20drink HTTP/1.1
+176. Benign NLP Query 5: GET /help?q=how%20to%20update%20my%20profile%20and%20delete%20old%20photos HTTP/1.1
+177. Benign NLP Query 6: GET /translate?text=the%20trade%20union%20will%20select%20a%20new%20leader HTTP/1.1
+178. Benign NLP Query 7: GET /search?q=where%20can%20I%20find%20a%20credit%20union%20near%20me HTTP/1.1
+179. Benign NLP Query 8: GET /api/bot?prompt=select%20all%20the%20images%20that%20have%20a%20cat HTTP/1.1
+180. Benign NLP Query 9: GET /feedback?msg=I%20tried%20to%20insert%20my%20card%20but%20it%20gave%20an%20error HTTP/1.1
+181. Benign NLP Query 10: GET /search?q=union%20station%20train%20schedule HTTP/1.1
+182. FP_USER_59: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/?group_by=state_id&order_by=-created_at&sub_issue=true&filters=%7B%22created_by_id__in%22:%22d5bfcc01-0096-4c85-a741-3309c3099472%22%7D&layout=kanban&cursor=30:0:0&per_page=30
+183. FP_USER_60: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/
+184. FP_USER_61: ?href=%2F_astro%2Fsystem-rule.CQ1lX61g.png&w=1910&h=988&f=webp
+185. FP_USER_62: /firebase-messaging-sw.js?apiKey=AIzaSyDSIcHYAtD1PSDh6YEf-fair8tJPAapBSk&authDomain=vnshop-consumer.firebaseapp.com&databaseURL=https%3A%2F%2Fvnshop-consumer.firebaseio.com&projectId=vnshop-consumer&storageBucket=vnshop-consumer.appspot.com&messagingSenderId=5.63692749265e%2B11&appId=1%3A563692749265%3Aweb%3A28fa5910ee1fb71dbf20f0&measurementId=G-2ZCHWBR4PS&externalScripts=
+186. FP_USER_63: GET http://dyn9c6472638136.dynamic.insky.io.vn/
+187. FP_USER_64: GET /static/imports/container.json
+188. FP_USER_65: /bo/config/units?filter=%7B%22offset%22%3Anull%2C%22where%22%3A%7B%22id%22%3A%7B%22inq%22%3A%5B%22botle%22%5D%7D%7D%7D
+189. FP_USER_66: /bo/config/units?filter=%7B%22offset%22%3Anull%2C%22where%22%3A%7B%22id%22%3A%7B%22inq%22%3A%5B%22combo%22%5D%7D%7D%7D
+190. FP_USER_67: ?id=1
+191. Benign Alerting Webhook JSON: POST /n8n/webhook/vntaxi-critical-alert1 {"receiver":"telegram_vntaxi","status":"firing","alerts":[{"status":"firing","labels":{"TaxiPlatform":"EMDDI","alertname":"Taxi_EMDDI Healthcheck","result":"timeout","server":"https://service-sup.emddi.xyz/v1/vehicles?regionId=2u0026latitude=21.0227663u0026radius=2000.0u0026serviceId=u0026maxCount=20u0026longitude=105.8472224"}}],"title":"[FIRING:1] VnTaxi (Taxi_EMDDI Healthcheck EMDDI timeout https://service-sup.emddi.xyz/v1/vehicles?regionId=2u0026latitude=21.0227663u0026radius=2000.0u0026serviceId=u0026maxCount=20u0026longitude=105.8472224)"}
+192. Benign Alerting Webhook URL: GET https://dyn65eb01732075.sunny.edgevnpay.vn/n8n/webhook/vntaxi-critical-alert1
+193. Benign Alerting Webhook URL: GET https://dyn65eb01732075.sunny.edgevnpay.vn/n8n/webhook/vnfilm-alerts
+194. Benign Metadata Fetch URL: GET https://dyna70b64037008.sunny.edgevnpay.vn/client-data/1/domains/officevnpay/meta-data.xml?uniqueValue=9S714J112607ZN3000145
+195. Benign Status Update URL: GET https://dyna70b64037008.sunny.edgevnpay.vn/statusUpdate?computerName=linhtm1&domainName=OFFICEVNPAY&domainType=2&actionToCall=1&actions=12&osPlatform=1&uniqueValue=9S716R6121228ZMB000170
+196. Benign Telemetry URL: GET predict/intelligence/telemetry?customerid=1&agentresourceidentifier=16795&resourceid=16795&uniquevalue=83yh9t3
+197. Benign Flash Sale URL: predict /flash-sale?_rsc=k4cpe x-request-id: 20260516.27960cf7-b2c0-4624-84fc-e197611c4e69
+198. Benign Next Static Chunk URL: /_next/static/chunks/app/100_shop/[merchant]/[channel]/[subchannel]/[locale]/(navigation)/[[...slug]]/page-acc48ae32f991806.js x-request-id: 20260516.1587ed04-64e1-47b2-b736-e545ec486c07 predict
+199. Benign Blocks Filter URL: /api/blocks?filter={"where":{"id":{"inq":[37101,37121,37129,37125,37126,37127,37128,37152,37153,37154,37155,37156,37119,37120,37122,37103,37123,37102,37124,37104]},"status":"40act"},"order":["position+asc"]} x-request-id: 5a985193-6221-4eee-8a04-856996e1780b
+200. Benign Category Listing URL: /p/danh-sach-quat-cac-loai?sku-route-history=homepage_promote_category_menu&_rsc=vjxkb x-request-id: 20260516.efd58f1f-d429-4458-9f54-4839c717b1c8
+201. Benign Category Listing URL: /p/danh-sach-quat-cac-loai?_rsc=oaf0w x-request-id: 20260516.878d9e12-6c31-4b48-8bd3-254fd5d11477
+202. Benign Status Update URL: predict /statusupdate?computername=baopg1&domainname=officevnpay&domaintype=2&actiontocall=1&actions=12&osplatform=1&uniquevalue=9s714j112607zn3000145
+203. Benign Category Page URL: /p/catepage-hb-thiet-bi-lam-dep?_rsc=e78op x-request-id: 20260516.c0ae4cf8-6917-4b27-9775-1fa1dd362429
+204. Benign Login Return URL: /login?returnurl=////example.com/ x-request-id: 2026051605161b79433a-3ebf-4377-8f02-2e483fbd8f08
+205. Benign Placeholder Image URL: /img/placeholder/placeholder-image-thumbnail.png x-request-id: 20260516.ab7f6eec-e894-4f9f-878a-1753bf98d000
+206. Benign Status Update URL: /statusupdate?computername=baopg1&domainname=officevnpay&domaintype=2&actiontocall=1&actions=12&osplatform=1&uniquevalue=9s714j112607zn3000145
+207. Benign Metadata Fetch URL: /client-data/1/domains/officevnpay/meta-data.xml?uniquevalue=9s7158571676zr4000150
+208. Benign Status Update URL: /statusupdate?computername=mont&domainname=officevnpay&domaintype=2&actiontocall=1&actions=12&osplatform=1&uniquevalue=m6n0lp00k74522a
+209. Benign Auth Login URL: /auth/vnpay/login?data=oltzje7zapslmxqj5/pwgcmm/kvon8bo9fiak4dd6hgzj+1z6ipdto2faxfqjyu0uzbnau5xkrvr1o8ayhk17emctglfs68umh68sxuqrrg0y9eru2fsyox63gezfmrys6muyuolmcwzobikslln4gvxylq6vzz0nmygjpy770hduspzeovrpevn0ckdwn/wjeulvhlt+ngxp6xhtnwqvakjsv0docfjwq9uxefoac/ymplylclli49d/6gl3tr8b50/zjuzwde7stvmuv+ztdbtxzc/ldezwolzpelf8nxrmqzia1fkuv0=&signature=6f6343a7153639e5bd934a662b376428 x-request-id: 20260516.6ee1d97e-70cf-4c7c-84a8-64cc6db1b074
+210. Benign EA Agent Logging URL: /intelligence/eaagentlogging?agentresourceidentifier=22037&resourceid=22037&uniquevalue=9s717l112446zm3000052
+211. Benign Next Static Font URL: /_next/static/media/inter_italic_variablefont_opsz_wght-s.p.ff920778.woff2 x-request-id: 202605160516779376c7-f55e-4356-8d34-7e8b8bd3ae8a
+212. Benign Next Static Font URL: /_next/static/media/3787d9a87cc64466-s.p.ttf x-request-id: 20260516.f59e75f7-8174-46a6-8c13-387271dd7c0e
+213. Benign Voucher Subchannels URL: /bo/merchants/vouchersystem/subchannels x-forwarded-for: 103.220.86.4 x-real-ip: 103.220.86.4 x-request-id: 20260516.9ff369a8-74ad-4077-b065-1cfaf3fc0cb7
+214. Benign Metadata Fetch URL: /client-data/1/domains/officevnpay/meta-data.xml?uniquevalue=rcn0cx02h060502
+215. Benign Next Static Font URL: /_next/static/media/3787d9a87cc64466-s.p.ttf x-request-id: 20260516.4e74e0e7-4875-4e27-a649-e61ce31115a0
+216. Benign Next Static Font URL: /_next/static/media/3787d9a87cc64466-s.p.ttf x-request-id: 20260516.7e35b332-516a-4fa8-952c-9feeec9ecfe8
+217. Benign Placeholder Image URL: /img/placeholder/placeholder-image-thumbnail.png x-request-id: 20260516.e8385f13-0d7b-4a73-84ab-7f122d68304b
+218. Benign Product Page URL: /p/be-khoe-me-vui?_rsc=awqyc
+219. Benign Issue Collection Path: GET /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/
+220. Benign Issue Detail Path: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/9906eeae-3678-40e2-9869-64bc8b84c7c5/
+219. FP_USER_68: /api/workspaces/insky/user-favorites/?all=true
+220. FP_USER_69: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/0863bb11-7116-4bc9-9b24-97bfb6eea434/history/?activity_type=issue-property
+219. Benign Auth Login URL: /auth/vnpay/login?data=oltzje7zapslmxqj5/pwgcmm/kvilslm81mzjizd6hgzj+1z6ipdto2faxfqjyu0uzbnau5xkrvr1o8ayhk17emctglfs68umh68sxuqrrg0c/spumf4zo9e/egzfmrys6muyuolmcwzobu1skh7qav2auw4vr3hnnesjouw9bjdqtfpeov/ppjz4mee+e6omvu+5nlh+ngxp6xhtnwqvakjsmmpo8ymcswr1e9pt9jamzj6oqf9fothxb2v0nxtgog32dol6/k/cawwswcrbnfstysklqoy7vlrgelf8nxrmqzia1fkuv0=&signature=8a58664def809475c607449214ea057c
+220. Benign Empty State SVG URL: /images/empty-states/empty-data.svg
+221. Benign Blocks Filter URL: /api/blocks?filter={"where":{"id":{"inq":[31109,32797,32798,32799,32800,32801,31965,31878,31879,31880,31881,31882,31883,31108,31124,31125,31118,31119,31120,31121,31122,31123,31126,32802,32803,31127,31129,31130,31131,31132,31133,31885,31351,31886,31887,31134,31128,31136,31135,31884,31110,31117,31111,31139,31112,31113,31114,31115,31138,31116,31137,31140,31966]},"status":"40act"},"order":["position... x-request-id: 5d02f30b-1391-4c33-956a-ff47e599cb89
+222. Benign Login Return URL: /login?returnurl=/login?returnurl=/login?returnurl=%2flogin%3freturnurl%3d%252flogin%253freturnurl%253d%25252flogin%25253freturnurl%25253d%2525252flogin%2525253freturnurl%2525253d%252525252flogin%252525253freturnurl%252525253d%25252525252flogin%25252525253freturnurl%25252525253d%2525252525252flogin%2525252525253freturnurl%2525252525253d%252525252525252flogin%252525252525253freturnurl%252525252525253d%25252525252525252flogin%25252525... x-request-id: 202605160516c1ebcd2a-2375-434e-8d74-6c515bf88289
+223. Benign Auth Login URL: /auth/vnpay/login?data=oltzje7zapslmxqj5/pwgcmm/kvomm3p+fiyjybd6hgzj+1z6ipdto2faxfqjyu0uzbnau5xkrvr1o8ayhk17emctglfs68umh68sxuqrrg0c/svuxf0yex68aezfmrys6muyuolmcwzobihs4zk8qdlzl66vos8nnegjoiv6bzdutz8eab7c+za7xyj6dpvmvyy53h9+ngxp6xhtnwqvakjsmiyjuamqspq1dl1cchjl6rjlfjfeo1zsqgc9txeb48d2wm068m7fkdazzqzsejgxyswpms82mbbxulf8nxrmqzia1fkuv0=&signature=5f9dcdbdd8f0815f35417c0159c0369e
+224. Benign Static JS URL: /static/systemjs@6.8.3/system.min.js
+225. Benign Product Page URL: /p/be-khoe-me-vui?_rsc=aw52s
+226. Benign Login Return URL: /login?returnurl=/login?returnurl=/login?returnurl=%2flogin%3freturnurl%3d%252flogin%253freturnurl%253d%25252flogin%25253freturnurl%25253d%2525252flogin%2525253freturnurl%2525253d%252525252flogin%252525253freturnurl%252525253d%25252525252flogin%25252525253freturnurl%25252525253d%2525252525252flogin%2525252525253freturnurl%2525252525253d%252525252525252flogin%252525252525253freturnurl%252525252525253d%25252525252525252flogin%25252525... x-request-id: 202605160516a36f9f76-3bc9-42cd-a9fc-74400a07a09f
+227. Benign Static JS Source Map URL: /static/systemjs@6.8.3/system.min.js.map
+228. Benign Auth Login URL: /auth/vnpay/login?data=oltzje7zapslmxqj5/pwgcmm/kvilsdm81ifiofd6hgzj+1z6ipdto2faxfqjyu0uzbnau5xkrvr1o8ayhk17emctglfs68umh68sxuqrrg0c/9tuxfsj+x60kgzfmrys6muyuolmcwzobigs6h/qxjyflq62jd3npgwjp6v70ldui1ueqbzpovk/ise6tykj+y+5wxt+ngxp6xhtnwqvakjsmotopmiq/jawehqv97vp6squp/+uidx85slq9bublyk4winyvkjft+xv0ovrs1bc7w9p9cj6+pkwklf8nxrmqzia1fkuv0=&signature=e8788144f500ad2c1cd2c818eebb5fc8
+229. FP_USER_70: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/2e92bcde-e7f9-46e1-bcb7-30ee93e0fff1/history/?activity_type=issue-property
+230. FP_USER_71: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/28c8873e-2b96-4e9b-8c9d-1cfd8a4e4439/history/?activity_type=issue-property
+231. Benign Workspace Modules API: GET /api/workspaces/insky/modules/
+232. Benign Sidebar Preferences API: GET /api/workspaces/insky/sidebar-preferences/
+233. Benign Insky Issues Path (short): GET /insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/
+234. Benign S3 Upload Signed URL: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%2733142930e4224ef6814154916d206959&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260519%2F%2Fs3%2Faws4_request&X-Amz-Date=20260519T112406Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=fbc7afa4810e4a5d53f29ba10d6d22c1e7f3227e288f975fa8d1b45c423940f4
+235. Benign S3 Upload Path Only: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg
+236. Benign S3 Upload Path Only (duplicate): /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg
+237. Benign Issue Detail GET expand: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/9906eeae-3678-40e2-9869-64bc8b84c7c5/?expand=issue_reactions,issue_attachments,issue_link,parent
+238. Benign Issue Detail PATCH path: PATCH /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/9906eeae-3678-40e2-9869-64bc8b84c7c5/
+239. Benign S3 Upload Signed URL v2: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%279a0505e796d842fdb7a4980ead8c4bf3&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260519%2F%2Fs3%2Faws4_request&X-Amz-Date=20260519T112548Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=cdf2aeefc1bf8bd6d456ede48d0a809d4f051e52eece84bacb322945a8c50a1b
+240. Benign Insky Edge Proxy Headers Kubuntu Chrome 130: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (Kubuntu; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 X-Insky-Hop: 1 X-Insky-Loop-Id: 2ba85ebcb1794c049d962bd7b13cc6ab
+241. Benign Insky Edge Proxy Headers Linux Firefox 3.6: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (X11; Linux i686; rv:1.9.5.20) Gecko/ Firefox/3.6.15 X-Insky-Hop: 1 X-Insky-Loop-Id: 5f038202800e443aac1bf1d07601281b
+242. Benign Insky Edge Proxy Headers Windows Firefox 140: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.5 X-Insky-Hop: 1 X-Insky-Loop-Id: 8a1ebed6e2c44327b717ccb51cbf1927
+243. Benign Insky Edge Proxy Headers macOS Chrome 116: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 X-Insky-Hop: 1 X-Insky-Loop-Id: 72876f7c5dda4c5f9e5ef35f63fa1ffe
+244. Benign Insky Edge Proxy Headers Firefox 130 Accept Html: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng Accept-Encoding: gzip Connection: Host: bill.valab.me User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0 X-Insky-Hop: 1 X-Insky-Loop-Id: 48a3a049c73e41babb1dc1e4229d4450
+245. Benign Insky Edge Proxy Headers macOS Chrome 126: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 X-Insky-Hop: 1 X-Insky-Loop-Id: 310aa1a011db4a1e83c0471c510d5cd3
+246. Benign Insky Edge Proxy Headers Generic Hop Loop: GET https://dynexample.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: upstream.example.com User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 X-Insky-Hop: 1 X-Insky-Loop-Id: a1b2c3d4e5f6478990abcdef12345678
+247. Benign Static Root Script JS: GET /script.js
+248. Benign Static Root Script JS Versioned: GET /script.js?v=141.0.0.0
+249. Benign Dynamic Host Script JS URL: GET https://dyn45bc44357333.dynamic.insky.io.vn/script.js
+250. Benign Dynamic Host Script JS URL Versioned: GET https://dyn45bc44357333.dynamic.insky.io.vn/script.js?v=20260408
+251. Benign Fluent Bit Splunk Headers: Content-Length: 7090 Host: splunk-heavy-forwarder-cloudfarm2.vnpay.vn User-Agent: Fluent-Bit
+252. Benign Evaluation Combo Path: GET /evaluation_combo
+253. Benign Placeholder Image PNG Path: GET /images/placeholder-image.png
+254. Benign Messages Beta API Path: POST /v1/messages?beta=true
+255. Benign Servlet Agent Auth Path: POST /servlets/agentAuthPropsRequest
+256. Benign Servlet Agent Auth Full Request: POST /servlets/agentAuthPropsRequest?ComputerName=quandt&DomainName=OFFICEVNPAY&Branchid=1&BranchName=Local%20Office&MSPName=DC_MSP&CustomerId=1&Did=1201&useJsonForRequestBuffer=true&DomainType=2&reason=1&agentResourceIdentifier=1813&osPlatform=1&ResourceID=1813&uniqueValue=NHQFHSV0032381051B Authorization: bearer Cache-Control: no-cache Connection: Keep-Alive Content-Length: 644 Host: sgec.vnpay.vn Pragma: no-cache User-Agent: DesktopCentral Agent
+257. Benign DesktopCentral CSR Signing Path: POST /ClientCSRSigningServlet
+258. Benign DesktopCentral CSR Signing Full Request: POST /ClientCSRSigningServlet?agentResourceIdentifier=22030 Authorization: bearer Cache-Control: no-cache Connection: Keep-Alive Content-Length: 1312 Host: sgec.vnpay.vn Pragma: no-cache User-Agent: DesktopCentral Agent
+259. Benign QA Platform Root Path: GET /qa-platform/
+260. Benign Collector Event Path: GET /services/collector/event
+261. Benign DesktopCentral Patchscan Path: POST /patchscan
+262. Benign DesktopCentral Patchscan Headers: Authorization: bearer Cache-Control: no-cache Connection: Close Content-Length: 84 Host: sgec.vnpay.vn Pragma: no-cache User-Agent: DesktopCentral Agent
+263. Benign DesktopCentral Patchscan Full Request: POST /patchscan Authorization: bearer Cache-Control: no-cache Connection: Close Content-Length: 84 Host: sgec.vnpay.vn Pragma: no-cache User-Agent: DesktopCentral Agent
+264. Benign Fluent Bit Short Headers: Content-Length: 2963 User-Agent: Fluent-Bit
+265. Benign Insky vLLM Browser Identity Headers: GET https://dyn2c2e23482854.sunny.edgevnpay.vn/ Accept: */* Accept-Encoding: identity Connection: close Host: vllm.ai.insky.io.vn User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
