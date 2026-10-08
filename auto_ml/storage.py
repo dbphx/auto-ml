@@ -14,7 +14,13 @@ def _s3_client():
         import boto3
     except ImportError as exc:
         raise RuntimeError("boto3 is required for s3:// inputs/outputs") from exc
-    return boto3.client("s3", region_name=os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION"))
+    endpoint_url = os.getenv("AWS_ENDPOINT_URL") or os.getenv("S3_ENDPOINT_URL")
+    options = {"region_name": os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION")}
+    if endpoint_url:
+        from botocore.config import Config
+        options["endpoint_url"] = endpoint_url.rstrip("/")
+        options["config"] = Config(s3={"addressing_style": "path"})
+    return boto3.client("s3", **options)
 
 
 def _split_s3(uri):

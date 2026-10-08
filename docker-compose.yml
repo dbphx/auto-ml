@@ -1,6 +1,7 @@
 services:
   trainer:
     build: .
+    user: "0:0"
     ports:
       - "${AUTO_ML_PORT:-8080}:8080"
     environment:
@@ -8,6 +9,8 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       CODEX_MODEL: ${CODEX_MODEL:-}
       CODEX_TIMEOUT_SECONDS: ${CODEX_TIMEOUT_SECONDS:-180}
+      CODEX_HOME: /home/appuser/.codex
+      CODEX_HOST_AUTH_FILE: /run/codex-host-auth.json
       LLM_API_URL: ${LLM_API_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-}
@@ -19,12 +22,16 @@ services:
       VLLM_API_KEY: ${VLLM_API_KEY:-}
       VLLM_MODEL: ${VLLM_MODEL:-}
       AWS_REGION: ${AWS_REGION:-ap-southeast-1}
+      AWS_ENDPOINT_URL: ${AWS_ENDPOINT_URL:-}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
     volumes:
       - ./data:/app/data:ro
       - auto-ml-output:/app/output
+      - ${HOME}/.codex/auth.json:/run/codex-host-auth.json:ro
+      - codex-home:/home/appuser/.codex
     restart: unless-stopped
 
 volumes:
   auto-ml-output:
+  codex-home:

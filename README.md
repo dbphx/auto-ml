@@ -25,17 +25,17 @@ python -m auto_ml.server
 docker compose up --build -d
 ```
 
-Compose mở server tại `http://localhost:8080`, mount `./data` read-only vào `/app/data` và lưu kết quả trong volume `auto-ml-output`. Copy `.env.example` thành `.env` để cấu hình LLM, Codex CLI hoặc AWS. Image đã cài Codex CLI; mode `codex` dùng `OPENAI_API_KEY` khi chọn LLM nội bộ.
+Compose mở server tại `http://localhost:8080`, mount `./data` read-only vào `/app/data` và lưu kết quả trong volume `auto-ml-output`. Chế độ Codex nội bộ dùng phiên ChatGPT CLI đã đăng nhập trên host qua `~/.codex/auth.json`; Compose đồng bộ file auth vào volume riêng trong container. Copy `.env.example` thành `.env` để cấu hình LLM hoặc AWS. Image đã cài Codex CLI.
 
 Gửi hook để khởi chạy một job (đường dẫn là đường dẫn **bên trong container**):
 
 ```bash
 curl -X POST http://localhost:8080/hook \
   -H 'Content-Type: application/json' \
-  -d '{"mode":"codex","input-path":{"normal":"/app/data/normal.txt","attack":"/app/data/attack.txt"},"output-path":"/app/output","llm":"external"}'
+  -d '{"mode":"codex","input-path":{"normal":"/app/data/normal.txt","attack":"/app/data/attack.txt"},"output-path":"/app/output"}'
 ```
 
-`mode` chọn `llm` (planner hiện tại) hoặc `codex` (Codex CLI tự tune). Trong mode `codex`, `llm` chọn `external` hoặc `internal`: `external` dùng URL/key từ `VLLM_*` hoặc `LLM_*` trong env; `internal` dùng endpoint/auth mặc định của Codex CLI. Model luôn lấy từ `.env`: `VLLM_MODEL`/`LLM_MODEL` cho external, hoặc `CODEX_MODEL` cho internal (nếu bỏ trống thì Codex CLI dùng model mặc định). Hook mặc định chạy tối đa 10 trials cho từng model trong một round và chọn trial có validation accuracy cao nhất. Validation đạt 90% không làm dừng search; `target_met` cuối cùng được quyết định bởi category test với ngưỡng 90%. Có thể ghi đè `target_accuracy`, `max_trials`, `category_target_accuracy` trong JSON. `input-path` nhận đường dẫn tới thư mục/CSV, một mảng `[normal-path, attack-path]`, hoặc object `{ "normal": "...", "attack": "..." }`. Các trường `normal-path` và `attack-path` riêng lẻ vẫn được hỗ trợ. `output-path` là thư mục gốc artifacts; mỗi job tạo thư mục con theo `job_id`. URL và API key luôn lấy từ môi trường container. Hook trả HTTP `202` cùng `job_id`; dùng `GET /jobs/<job_id>` để xem trạng thái.
+`mode` chọn `llm` (planner hiện tại) hoặc `codex` (Codex CLI tự tune). Trong mode `codex`, `llm` có thể chọn `external` hoặc `internal`; nếu bỏ qua thì mặc định là `internal`, dùng endpoint/auth mặc định của Codex CLI. Chế độ `external` dùng URL/key từ `VLLM_*` hoặc `LLM_*` trong env. Model luôn lấy từ `.env`: `VLLM_MODEL`/`LLM_MODEL` cho external, hoặc `CODEX_MODEL` cho internal (nếu bỏ trống thì Codex CLI dùng model mặc định). Hook mặc định chạy tối đa 10 trials cho từng model trong một round và chọn trial có validation accuracy cao nhất. Validation đạt 90% không làm dừng search; `target_met` cuối cùng được quyết định bởi category test với ngưỡng 90%. Có thể ghi đè `target_accuracy`, `max_trials`, `category_target_accuracy` trong JSON. `input-path` nhận đường dẫn tới thư mục/CSV, một mảng `[normal-path, attack-path]`, hoặc object `{ "normal": "...", "attack": "..." }`. Các trường `normal-path` và `attack-path` riêng lẻ vẫn được hỗ trợ. `output-path` là thư mục gốc artifacts; mỗi job tạo thư mục con theo `job_id`. URL và API key luôn lấy từ môi trường container. Hook trả HTTP `202` cùng `job_id`; dùng `GET /jobs/<job_id>` để xem trạng thái.
 
 Quản lý các task bằng API:
 
@@ -160,7 +160,7 @@ Có hai mode:
 - `llm` (mặc định): giữ planner hiện tại, gọi endpoint OpenAI-compatible để lập kế hoạch cho từng round; nếu category test chưa đạt, gửi feedback để lập kế hoạch round kế tiếp.
 - `codex`: gọi Codex CLI sau mỗi trial để xem metrics và chọn hyperparameter cho trial kế tiếp. Codex chỉ trả lời trong search space cho phép; trainer xác thực lại từng giá trị. Codex chạy trong sandbox read-only và không sửa code, dataset hoặc model artifacts. Cần cài và xác thực Codex CLI trên máy/container chạy trainer.
 
-Trong mode `codex`, chọn `"llm":"external"` để dùng URL/key/model từ `VLLM_*` (hoặc `LLM_*`); endpoint cần hỗ trợ `POST /v1/responses`. Endpoint chỉ hỗ trợ `/v1/chat/completions` dùng được với mode `llm`, nhưng không dùng trực tiếp được với Codex CLI. Chọn `"llm":"internal"` để dùng Codex provider/auth/model mặc định từ môi trường. Codex CLI hiện yêu cầu custom provider dùng Responses API và `wire_api = "responses"` ([tài liệu cấu hình](https://developers.openai.com/codex/config-reference/)).
+Trong mode `codex`, mặc định dùng Codex provider/auth/model nội bộ. Chọn `"llm":"external"` để dùng URL/key/model từ `VLLM_*` (hoặc `LLM_*`); endpoint cần hỗ trợ `POST /v1/responses`. Endpoint chỉ hỗ trợ `/v1/chat/completions` dùng được với mode `llm`, nhưng không dùng trực tiếp được với Codex CLI. Codex CLI hiện yêu cầu custom provider dùng Responses API và `wire_api = "responses"` ([tài liệu cấu hình](https://developers.openai.com/codex/config-reference/)).
 
 Chọn mode trong CLI:
 

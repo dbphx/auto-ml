@@ -20,12 +20,15 @@ RUN ln -sf /usr/local/lib/node_modules/@openai/codex/bin/codex.js /usr/local/bin
 COPY auto_ml ./auto_ml
 COPY src ./src
 COPY data ./data
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 
 RUN useradd --create-home --uid 10001 appuser \
     && mkdir -p /app/output \
+    && chmod 755 /usr/local/bin/docker-entrypoint \
     && chown -R appuser:appuser /app
 
 USER appuser
 EXPOSE 8080
 
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--threads", "8", "--access-logfile", "-", "auto_ml.server:app"]

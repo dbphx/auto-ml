@@ -73,8 +73,8 @@ def create_job():
             return jsonify({"error": "mode must be llm or codex"}), 400
         config["agent_mode"] = mode.lower()
     if mode and mode.lower() == "codex":
-        if request.path == "/hook" and not llm_choice:
-            return jsonify({"error": "llm is required for codex mode (external or internal)"}), 400
+        if not llm_choice:
+            llm_choice = "internal"
         if llm_choice is not None:
             if not isinstance(llm_choice, str) or llm_choice.lower() not in {"external", "internal"}:
                 return jsonify({"error": "llm must be external or internal in codex mode"}), 400
