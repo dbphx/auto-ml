@@ -276,13 +276,35 @@ def train_job(config, progress=None):
                 "target_accuracy": result["target_accuracy"],
                 "target_met": result["target_met"],
             })
+        available_category_scores = {
+            name: result for name, result in category_reports.items()
+            if name in best_by_model and result.get("status") == "completed"
+            and result.get("accuracy") is not None
+        }
+        if available_category_scores:
+            selected_name = max(available_category_scores,
+                                key=lambda name: available_category_scores[name]["accuracy"])
+            best = {"model": selected_name, **best_by_model[selected_name], "estimator": None}
+            selected_category = available_category_scores[selected_name]
+            selection = {"metric": "category_test_accuracy", "model": selected_name,
+                         "score": float(selected_category["accuracy"])}
+        else:
+            selected_category = None
+            selection = {"metric": score_key, "model": best["model"],
+                         "score": float(best["metrics"].get(score_key, 0.0)),
+                         "reason": "category test scores unavailable; used validation score"}
+    else:
+        selected_category = None
+        selection = {"metric": score_key, "model": best["model"],
+                     "score": float(best["metrics"].get(score_key, 0.0))}
     report = {"job_id": job_id, "round": round_number, "created_at": _now(), "dataset_path": data_path,
               "agent_mode": agent_mode,
               "task": task, "target": target, "targets": targets, "plan": plan,
+              "selection": selection,
               "best": {k: v for k, v in best.items() if k != "estimator"},
               "model_artifacts": model_artifacts, "category_tests": category_reports,
               "validation_target_met": _meets_targets(best["metrics"], targets),
-              "target_met": all(item.get("target_met", False) for item in category_reports.values()) if category_reports else _meets_targets(best["metrics"], targets),
+              "target_met": bool(selected_category.get("target_met", False)) if selected_category else _meets_targets(best["metrics"], targets),
               "trials": trial_log,
               "artifacts": str(output_root / job_id)}
     if task == "classification" and not report["target_met"] and round_number < max_rounds:
@@ -338,5 +360,6 @@ def train_job(config, progress=None):
             upload_directory(final_artifacts, output_s3.rstrip("/") + "/" + job_id)
         except Exception:
             pass
-    emit({"status": "completed", **report["best"], "target_met": report["target_met"], "artifacts": str(final_artifacts)})
+    emit({"status": "completed", **report["best"], "selection": report["selection"],
+          "target_met": report["target_met"], "artifacts": str(final_artifacts)})
     return report

@@ -131,7 +131,7 @@ Trong lúc train, các model/trial được ghi vào thư mục tạm. Khi hoàn
 - `category_results.json` (khi có category test)
 - `report.json`
 
-`validation_target_met` áp dụng cho validation search. Mỗi model được chấp nhận độc lập nếu `category_tests.<model>.accuracy >= 0.90`; ngưỡng này đổi bằng `--category-target-accuracy`.
+Sau khi category test chạy xong, trainer chọn model có `category_tests.<model>.accuracy` cao nhất. `target_met` kiểm tra ngưỡng trên model thắng cuộc; `validation_target_met` vẫn báo riêng kết quả validation của model đó. Ngưỡng category đổi bằng `--category-target-accuracy`.
 
 LLM là lớp lập kế hoạch tùy chọn. Có thể dùng `LLM_API_URL`, `LLM_API_KEY`, `LLM_MODEL` hoặc các biến VLLM tương ứng:
 
