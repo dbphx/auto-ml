@@ -19,6 +19,39 @@ pip install -r requirements.txt
 python -m auto_ml.server
 ```
 
+### Chạy server bằng Docker
+
+```bash
+docker compose up --build -d
+```
+
+Compose mở server tại `http://localhost:8080`, mount `./data` read-only vào `/app/data` và lưu kết quả trong volume `auto-ml-output`. Copy `.env.example` thành `.env` để cấu hình LLM, Codex CLI hoặc AWS. Image đã cài Codex CLI; mode `codex` dùng `OPENAI_API_KEY` khi chọn LLM nội bộ.
+
+Gửi hook để khởi chạy một job (đường dẫn là đường dẫn **bên trong container**):
+
+```bash
+curl -X POST http://localhost:8080/hook \
+  -H 'Content-Type: application/json' \
+  -d '{"mode":"codex","input-path":{"normal":"/app/data/normal.txt","attack":"/app/data/attack.txt"},"output-path":"/app/output","llm":"external"}'
+```
+
+`mode` chọn `llm` (planner hiện tại) hoặc `codex` (Codex CLI tự tune). Trong mode `codex`, `llm` chọn `external` hoặc `internal`: `external` dùng URL/key từ `VLLM_*` hoặc `LLM_*` trong env; `internal` dùng endpoint/auth mặc định của Codex CLI. Model luôn lấy từ `.env`: `VLLM_MODEL`/`LLM_MODEL` cho external, hoặc `CODEX_MODEL` cho internal (nếu bỏ trống thì Codex CLI dùng model mặc định). Hook mặc định chạy tối đa 10 trials cho từng model trong một round và chọn trial có validation accuracy cao nhất. Validation đạt 90% không làm dừng search; `target_met` cuối cùng được quyết định bởi category test với ngưỡng 90%. Có thể ghi đè `target_accuracy`, `max_trials`, `category_target_accuracy` trong JSON. `input-path` nhận đường dẫn tới thư mục/CSV, một mảng `[normal-path, attack-path]`, hoặc object `{ "normal": "...", "attack": "..." }`. Các trường `normal-path` và `attack-path` riêng lẻ vẫn được hỗ trợ. `output-path` là thư mục gốc artifacts; mỗi job tạo thư mục con theo `job_id`. URL và API key luôn lấy từ môi trường container. Hook trả HTTP `202` cùng `job_id`; dùng `GET /jobs/<job_id>` để xem trạng thái.
+
+Quản lý các task bằng API:
+
+```bash
+# Liệt kê task, chỉ lọc task đang chạy
+curl 'http://localhost:8080/tasks?status=running'
+
+# Xem chi tiết task và report nếu đã xong
+curl 'http://localhost:8080/tasks/<job_id>'
+
+# Xem process hiện tại và lịch sử các bước
+curl 'http://localhost:8080/tasks/<job_id>/process'
+```
+
+Trạng thái gồm `queued`, `running`, `retrying`, `completed` hoặc `failed`. Lịch sử process giữ tối đa 500 event gần nhất; `/jobs/<job_id>` vẫn được hỗ trợ.
+
 Mặc định dataset là cặp `data/normal.txt` và `data/attack.txt`; output nằm ở `output/`.
 
 Dataset có thể là S3 prefix chứa `normal.txt` và `attack.txt`. Nếu S3 không truy cập được, job tự fallback về local `data`.
@@ -71,10 +104,32 @@ CLI tự động làm đủ các bước:
 4. Refit model tốt nhất trên toàn bộ dữ liệu.
 5. Chạy category regression RAW + ENCODED trên cả hai model với `attack_fields.txt` và `normal_fields.txt`.
 
-Kết quả nằm trong `artifacts/<job_id>/report.json`, cùng các file:
+### Dùng hai file normal và attack tùy chọn
 
-- `random_forest/model.joblib`, `random_forest/vectorizer.joblib`, `random_forest/category_results.json`
-- `linear/model.joblib`, `linear/vectorizer.joblib`, `linear/category_results.json`
+Có thể chỉ định riêng từng file; mỗi đường dẫn là file local hoặc một S3 object (`s3://bucket/key`). File attack có thể đặt tên `malicious.txt`; nội dung cần theo định dạng category đánh số giống `data/attack.txt`.
+
+```bash
+python -m auto_ml.cli \
+  --normal-path /path/to/normal.txt \
+  --attack-path /path/to/malicious.txt
+```
+
+`--path1` và `--path2` là alias lần lượt cho `--normal-path` và `--attack-path`. Ví dụ với S3:
+
+```bash
+python -m auto_ml.cli \
+  --path1 s3://my-bucket/datasets/normal.txt \
+  --path2 s3://my-bucket/datasets/malicious.txt
+```
+
+API `POST /jobs` nhận cùng các trường `normal_path` và `attack_path` (hoặc alias `path1` và `path2`) trong JSON. Nếu chỉ truyền một trong hai đường dẫn, job báo lỗi; nếu truyền cả hai, cặp file này được dùng làm dữ liệu huấn luyện thay cho `--dataset`.
+
+Trong lúc train, các model/trial được ghi vào thư mục tạm. Khi hoàn tất, thư mục tạm bị xóa và `artifacts/<job_id>/` chỉ chứa artifact của model thắng cuộc cùng `report.json`:
+
+- `model.joblib`
+- `vectorizer.joblib`
+- `category_results.json` (khi có category test)
+- `report.json`
 
 `validation_target_met` áp dụng cho validation search. Mỗi model được chấp nhận độc lập nếu `category_tests.<model>.accuracy >= 0.90`; ngưỡng này đổi bằng `--category-target-accuracy`.
 
@@ -92,6 +147,26 @@ Service sẽ gọi OpenAI-compatible endpoint `/v1/chat/completions`. Có thể 
 python -m auto_ml.cli --require-llm --max-trials 12
 ```
 
-Nếu category test chưa đạt ngưỡng, job tự chạy round tuning tiếp theo với seed khác, tối đa 10 round mặc định. Đổi giới hạn bằng `--max-rounds`.
+Mặc định mỗi request LLM chờ tối đa 90 giây, retry tối đa 2 lần khi timeout/lỗi tạm thời, và dành 2048 token cho phản hồi. Nếu output bị cắt do hết token, retry sẽ tăng giới hạn đến 8192. Có thể đổi bằng `--llm-timeout-seconds`, `--llm-retries`, `--llm-max-tokens` hoặc các biến môi trường tương ứng.
 
-LLM lập kế hoạch/chọn hyperparameter cho model ML; nó không cập nhật weight của Random Forest/Linear Regression. Mọi đề xuất đều được validate và LLM không được phép tự thực thi code hay sửa dataset.
+Nếu category test chưa đạt ngưỡng, CLI có thể lặp round khi đặt `--max-rounds` lớn hơn 1. Mặc định hiện tại là 1 round để không lặp training round.
+
+LLM nhận kết quả train sau mỗi round và chọn lại hyperparameter trong bounded search space của project. Trainer tiếp tục kiểm tra đề xuất trước khi chạy; LLM không cập nhật weight trực tiếp, thực thi code hay sửa dataset. Để bắt buộc dùng LLM và dừng job nếu endpoint lỗi, bật `--require-llm`.
+
+### Chọn agent cho quá trình training
+
+Có hai mode:
+
+- `llm` (mặc định): giữ planner hiện tại, gọi endpoint OpenAI-compatible để lập kế hoạch cho từng round; nếu category test chưa đạt, gửi feedback để lập kế hoạch round kế tiếp.
+- `codex`: gọi Codex CLI sau mỗi trial để xem metrics và chọn hyperparameter cho trial kế tiếp. Codex chỉ trả lời trong search space cho phép; trainer xác thực lại từng giá trị. Codex chạy trong sandbox read-only và không sửa code, dataset hoặc model artifacts. Cần cài và xác thực Codex CLI trên máy/container chạy trainer.
+
+Trong mode `codex`, chọn `"llm":"external"` để dùng URL/key/model từ `VLLM_*` (hoặc `LLM_*`); endpoint cần hỗ trợ `POST /v1/responses`. Endpoint chỉ hỗ trợ `/v1/chat/completions` dùng được với mode `llm`, nhưng không dùng trực tiếp được với Codex CLI. Chọn `"llm":"internal"` để dùng Codex provider/auth/model mặc định từ môi trường. Codex CLI hiện yêu cầu custom provider dùng Responses API và `wire_api = "responses"` ([tài liệu cấu hình](https://developers.openai.com/codex/config-reference/)).
+
+Chọn mode trong CLI:
+
+```bash
+python -m auto_ml.cli --agent-mode llm
+python -m auto_ml.cli --agent-mode codex
+```
+
+Hoặc đặt `TRAINING_AGENT_MODE=codex`. Có thể cấu hình timeout mỗi quyết định bằng `CODEX_TIMEOUT_SECONDS` hoặc `--codex-timeout-seconds`. Khi chạy mode Codex, mỗi model có tối đa `max_trials - 1` lần gọi agent vì trial đầu dùng cấu hình khởi tạo; search chạy hết số trial đã đặt rồi mới đánh giá category target.

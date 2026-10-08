@@ -161,7 +161,13 @@ class FeatureEngineer:
         prepared = self._coerce_prepared(df_or_prepared)
 
         for field, texts in prepared['cleaned_field_texts'].items():
-            self.vectorizers[field].fit(texts)
+            # Some datasets contain no examples for a request component (for
+            # example, no headers or bodies). Give that vectorizer an isolated
+            # sentinel vocabulary so it can still transform empty values.
+            fit_texts = texts
+            if not texts.str.strip().any():
+                fit_texts = pd.Series(['__empty_request_component__'])
+            self.vectorizers[field].fit(fit_texts)
         return self
 
     def transform(self, df_or_prepared):

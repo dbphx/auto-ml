@@ -1,272 +1,1074 @@
-Categories of Normal Traffic (50 Categories)
--------------------------------------------
-1. Homepage Access: GET /
-2. Static Asset (CSS): GET /static/css/style.css
-3. Static Asset (JS): GET /assets/js/bundle.min.js
-4. Static Asset (Image): GET /images/logo.png
-5. Static Asset (Favicon): GET /favicon.ico
-6. Robots.txt: GET /robots.txt
-7. Sitemap: GET /sitemap.xml
-8. Health Check: GET /health
-9. API Ping: GET /api/v1/ping
-10. Login Page Load: GET /login
-11. Search Query (Simple): GET /search?q=security
-12. Search Query (Spaces): GET /search?q=machine+learning
-13. Search Query (Symbols): GET /search?q=C%23
-14. Search Query (Quote): GET /search?q=O'Reilly
-15. Search Query (Math): GET /search?q=1+1=2
-16. API GET (List Products): GET /api/v1/products
-17. API GET (Single Product): GET /api/v1/products/101
-18. API POST (Login): POST /api/v1/login (username/password)
-19. API POST (Submit Order): POST /api/v1/orders (JSON payload)
-20. API PUT (Update Profile): PUT /api/v1/profile (JSON payload)
-21. API PATCH (Update Setting): PATCH /api/v1/settings/theme
-22. API DELETE (Remove Item): DELETE /api/v1/cart/items/5
-23. Form Submit (Contact Us): POST /contact (name, email, message)
-24. Form Submit (Signup): POST /register (detailed user info)
-25. OAuth Auth Flow: GET /auth/google/callback
-26. Analytics Event: POST /collect?v=1&tid=UA-XXXXX
-27. Error Logging: POST /api/v1/logs/frontend (traceback)
-28. User Profile View: GET /user/profile
-29. Dashboard Page: GET /dashboard?view=summary&time=30d
-30. Settings Navigation: GET /settings/security
-31. Password Reset Request: POST /auth/password-reset-request
-32. Newsletter Subscription: POST /newsletter/subscribe
-33. Cart Add Item: POST /cart/add?product_id=99
-34. Checkout Page: GET /checkout/step1
-35. Order Success: GET /checkout/success?order_id=ord_123
-36. Webhook (GitHub): POST /webhooks/github (Push Event)
-37. Webhook (Stripe): POST /webhooks/stripe (Payment Success)
-38. HEAD Request (CDN): HEAD /assets/large-video.mp4
-39. OPTIONS Preflight (CORS): OPTIONS /api/v1/data
-40. Font Loading: GET /fonts/inter-bold.woff2
-41. Manifest Loading: GET /manifest.json
-42. i18n Localization: GET /locales/vi-VN.json
-43. GraphQL Query (User): POST /graphql (query { me { name } })
-44. Documentation Access: GET /docs/api/introduction
-45. Blog Article: GET /blog/future-of-ai-2026
-46. Comment Submission: POST /blog/comment (valid user text)
-47. Video Fragment: GET /stream/hls/chunk_001.ts
-48. Map Tile Request: GET /maps/v2/tile/10/512/324.png
-49. Admin Statistics: GET /admin/dashboard/users/active
-50. File Download (PDF): GET /downloads/guide-v2.pdf
-51. User Login (Multi-factor Auth Step): POST /auth/mfa/verify {"code": "123456"}
-52. File Upload (Profile Picture JPEG): POST /api/v1/user/avatar (multipart/form-data)
-53. File Upload (Document PDF): POST /api/v1/documents (binary stream)
-54. Search (Autocomplete API): GET /api/v1/search/suggest?q=secur
-55. Search (Filter by Category): GET /products?category=electronics&brand=apple
-56. Search (Sort by Price): GET /products?sort=price_desc&page=1
-57. API POST (Create Comment): POST /api/v1/posts/55/comments {"text": "Great article!"}
-58. API PUT (Update Avatar): PUT /api/v1/user/settings {"avatar_url": "https://img.com/u1.png"}
-59. API GET (Paginated Users List): GET /admin/users?limit=20&offset=40
-60. API GET (CSV Export Request): GET /admin/reports/sales.csv?year=2025
-61. Password Change (Current/New Password): POST /user/password-update {"old": "pass1", "new": "pass2"}
-62. Two-Factor Secret Setup: GET /user/mfa/setup-qr
-63. Newsletter Unsubscribe Link: GET /newsletter/unsubscribe?token=abc123def456
-64. Email Verification Link Click: GET /auth/verify-email?code=v987654321
-65. Invite Team Member Submit: POST /team/invite {"email": "colleague@work.com"}
-66. Project Creation (JSON naming): POST /api/v1/projects {"name": "Security Audit 2026"}
-67. Billing Address Update: PUT /billing/address {"street": "123 Main St", "city": "Hanoi"}
-68. Credit Card Tokenization (Stripe/Internal): POST /api/v1/payment/tokens {"card_last4": "4242"}
-69. Order History Search: GET /user/orders?status=shipped&from=2025-01-01
-70. Knowledge Base Search: GET /help/kb/search?query=how+to+reset+password
-71. API POST (Log Frontend Error): POST /logs/client {"error": "Uncaught TypeError", "stack": "..."}
-72. API POST (Metric Tracking): POST /analytics/metric {"event": "button_click", "label": "signup"}
-73. WebSocket Handshake (Normal): GET /ws/notifications (Upgrade: websocket)
-74. WebSocket Heartbeat (Ping): [Binary Frame] 0x89 (Ping)
-75. Resource Loading (SVG Icon): GET /static/icons/heart.svg
-76. Resource Loading (WebP Image): GET /images/hero-banner.webp
-77. Resource Loading (JSON Config): GET /config/app-settings.json
-78. i18n Change (Language Toggle): GET /api/v1/locale/set?lang=en
-79. Dark Mode Theme Toggle: POST /user/ui/theme {"mode": "dark"}
-80. User Notification Dismiss: DELETE /api/v1/notifications/1024
-81. In-App Message Read Receipt: PATCH /api/v1/messages/500 {"read": true}
-82. Video Playback Progress Sync: POST /api/v1/sync/video {"id": "v_123", "position": 450}
-83. Audio Stream Fragment Load: GET /stream/audio/segment_77.aac
-84. Map Zoom/Pan Coordinates: GET /api/v1/map/data?lat=21.0285&lng=105.8542&zoom=15
-85. Dashboard Widget Refresh: GET /api/v1/dashboard/widgets/sales-chart/data
-86. Report Generation (Polling status): GET /api/v1/tasks/rep_99/status
-87. Terms of Service Acceptance: POST /legal/tos/accept {"version": "2.1.0"}
-88. GDPR Consent Modal Submit: POST /privacy/consent {"analytics": true, "marketing": false}
-89. Site Search (Complex query with AND, OR): GET /search?q=machine+learning+NOT+python
-90. Product Review Submit (Text + Star rating): POST /reviews {"id": "p_50", "stars": 5, "comment": "Amazing quality!"}
-91. Wishlist Add Request: POST /wishlist/add {"item_id": "it_888"}
-92. Compare Products Modal Access: GET /products/compare?base=p1&target=p2
-93. Store Locator Search (Zip codes): GET /stores/find?zip=10001&distance=10
-94. Career Page (Job application submit): POST /careers/apply {"job_id": "eng_01", "name": "John Doe"}
-95. Support Ticket Attachments: GET /api/v1/support/tickets/404/attachments
-96. Live Chat Initiation: POST /chat/init {"user_id": "u_55", "topic": "billing"}
-97. RSS Feed Access: GET /feed/news.rss
-98. Podcast RSS Metadata: GET /podcasts/latest.xml
-99. E-book Kindle Delivery Request: POST /api/v1/deliver/kindle {"book_id": "b_772"}
-100. Logout Confirmation Access: GET /auth/logout/confirm
-101. Test: GET /homess
-102. Test2: GET /id?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzIzNTEwMzcsImlhdCI6MTc3MjA5MTgzNywidXNlciI6eyJzZXNzaW9uX2lkIjoiMDE5Yzk4ZTctOGFjMi03Mjc0LWFkM2EtMmRiNzFhZTYzZThlIiwic291cmNlIjoiQk8iLCJzdGFmZl9jb2RlIjoibGluaGxoMiIsInVzZXJfZW1haWwiOiJsaW5obGgyQHZucGF5LnZuIiwidXNlcl9mdWxsX25hbWUiOiJMaW5oIEzDqiBIw
-103. Test3: GET /?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzIxODE2MDMsImlhdCI6MTc3MTkyMjQwMywidXNlciI6eyJncm91cF9pZCI6IjAxOWMwZTZlLWI0YTctNzRjYS05MGNlLTUyY2M0Njg5MzZjZSIsImxlYWRlcl9pZCI6IjAxOWMwOWU0LTNmY2QtNzc2ZS05ZGUwLWFiZGYyZjI3ZTYwMyIsInNlc3Npb25faWQiOiIwMTljOGVjZS0zMTkyLTc4MjQtYTI1OS0zZDZmM2JhM2NkM
-104. Only slash: GET /ducbph {UA: curl}
-105. FP1: /Rnj7kZj.jpeg?q=_I%20would%20like%20to%20see%20the%20runtime%20for%20the%20payload,%20please.
-106. FP2: /Rnj7kZj.jpeg?q=The%20standard%20for%20the%20<$%20tag%20is%20to%20enclose%20text%20or%20code%20that%20should%20b%20e%20interpreted%20as%20a%20dollar%20amount.
-107. FP3: //pvc-6464b4a6-d52b-4047-933a-2053ba4bef52/uploads/2026/02/05/6984113492b5b92036eb94ff.mp4?q=The%20standard%20for%20the%20<$%20tag%20is%20to%20enclose%20text%20or%20code%20that%20should%20b%20e%20interpreted%20as%20a%20dollar%20amount.108. FP_PDF_1: Test set Test case Percentage Blocked Bypassed Unresolved Sent Failed false-pos texts 0.00% 47 0 0 47 0 True Negative Tests 0 true-negative requests identified as bypassed (test passed, good behavior) 47 true-negative requests identified as blocked (test failed, bad behavior) Payload Test case Encoder Placeholder Status )I would like to request information about the address: (#)saddr for the next minute.
-108. FP_PDF_2: ,I would like to request information about the shadow EXFFJT.
-109. FP_PDF_3: 1) a-b=c
-110. FP_PDF_4: =Can I please adjust_campaign:sign?
-111. FP_PDF_5: >url=/pi?mode=<;>
-112. FP_PDF_6: D'or 1st parfume
-113. FP_PDF_7: DEAR FINN,--I think it would do; copy should reach us second post
-114. FP_PDF_8: DELETE 75oBC$
-115. FP_PDF_9: I setted the COOKIE value to : expandGeoJsonFeatures=true;
-116. FP_PDF_10: I would like to be notified when the ASIN: B07JJS7WY7 is back in sto ck.
-117. FP_PDF_11: I would like to keep-alive my connection and have the full_text of t he article, please.
-118. FP_PDF_12: I would like to request a random number between 1 and 10, please.
-119. FP_PDF_13: I would like to request information about the idv_msdb database.
-120. FP_PDF_14: I would like to request the bin with app_id: (]
-121. FP_PDF_15: I would like to request the local version of the website in French, so I will include the parameter "hl=fr"
-122. FP_PDF_16: I would like to search for the string "%t" please.
-123. FP_PDF_17: I would like to see a list of drivers sorted in reverse order.
-124. FP_PDF_18: If the subject parameter is greater than 0, then return a list of al l articles with that subject.
-125. FP_PDF_19: JavaScript: Basics of JavaScript Language
-126. FP_PDF_20: MKCALENDAR cursor:I would like to create a new calendar called "curs or" please.
-127. FP_PDF_21: The Senora found herself a heroine; more than that, she became aware
-128. FP_PDF_22: The parameter 5 is&|.
-129. FP_PDF_23: The standard for the <$ tag is to enclose text or code that should b e interpreted as a dollar amount.
-130. FP_PDF_24: [Host: type: {[
-131. FP_PDF_25: _I would like to see the runtime for the payload, please.
-132. FP_PDF_26: _SELECT all the rows of fromDate = @-_
-133. FP_PDF_27: and &IN=color&=
-134. FP_PDF_28: and =IS=C5HF95_=
-135. FP_PDF_29: and >I would like to see all of the items that are type <enter type here>.
-136. FP_PDF_30: bash away in the gym
-137. FP_PDF_31: curl and divergence
-138. FP_PDF_32: echo in the mirror
-139. FP_PDF_33: exec noun
-140. FP_PDF_34: h2<h1
-141. FP_PDF_35: java lang courses
-142. FP_PDF_36: john+or@var.es
-143. FP_PDF_37: lhttps://www.instagram.com/p/B_uHgI7lY0Z/?igshid=1m7xkk7a9v6z4&utm_s ource=ig_web_copy_linkCan I please get the id for the user that I am trying to follow?
-144. FP_PDF_38: ls 300 lexus
-145. FP_PDF_39: nc 8000 controller
-146. FP_PDF_40: time he came.
-147. FP_PDF_41: union was a great select
-148. FP_PDF_42: url=/?usr=subject;-
-149. FP_PDF_43: url=/maps/api/geocode/json?address=Reader&daddr=!
-150. FP_PDF_44: url=http://www.example.com/tan?usp=4#8
-151. FP_PDF_45: url=https://api.twitter.com/1.1/statuses/user_timeline.json?screen_n ame=twitterapi&count=2&include_rts=1&exclude_replies=1
-152. FP_PDF_46: zsh is the best!
-153. FP_PDF_47: }I would like to request the /cc serviceCode with the parameter: ser viceCode|{}
-154. Fix_Samples_1: POST /api/upload {"filename": "image.png", "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="}
-155. FP_PDF_48: /admin/login?q=_I%20would%20like%20to%20see%20the%20runtime%20for%20the%20payload,%20please.
-156. FP_PDF_49: /api/iaas/portal/ops/volumes?ids=prod_iaas_portal_volume_ops_resourcebd85583cfb1d4442b8ac0cd1fedc9544&ids=prod_iaas_portal_volume_ops_resource257779cf409d4a228fd5cc66ba0ba5f3&ids=prod_iaas_portal_volume_ops_resource9616cd292f0f4e57a2afeba8e8395bf1&ids=prod_iaas_portal_volume_ops_resource762c2b3da1ce44299d6bc955a0fc755d&ids=prod_iaas_portal_volume_ops_resourcefd6b75001cc341498049efa3a4256058&ids=prod_iaas_portal_volume_ops_resource589a8ff097cc4427ade51911c0f491fa&ids=prod_iaas_portal_volume_ops_resourcebe0709aaac474e57a38de2ecd16c5ec2&ids=prod_iaas_portal_volume_ops_resource36996f88d9484f7ca6fd371bd044a369&ids=prod_iaas_portal_volume_ops_resource897b4d9250c64fbaa7ee1d4e2ab4f87e&ids=prod_iaas_portal_volume_ops_resource81958eef18c34ebd99b9ccb1fb8ae1df&page.index=1&page.size=999&page.total=true
-157. FP_USER_50: ?data=UtQfNzYJeTHLdiDWOS781H2n2TNXjps1nsD1lyN6rZxHwDhmBNTgd6VTKJJx3zyASWtkQ819xEIutsTE832%2FTerd6EmxXsCdHIunLphLMbCNlXZ1L9mkyyW0MGK3D%2FR4pzeOZRGNnoi5BE1l6BByXDRcBZeYeZGSdj6oIpP4zvW40WK8SJjCK1Wg%2FD2d4LBV3TtTxukLWRhRVfanObnCR%2BsViZTVlz2QXA4ZqcOpdnXMT8TKJf%2BFVmwiPzZ6ZO9bQe9MIcRjNoPGuT%2BXUgMOLarMktlzR%2BPjQHaOsDYUmju1lMM11SaQ2tyUbhcEXwtkkmWEQ%2Bqp2XrBmzCwO1qrVvkk5I9DbIg%2BDa2LaYXe9iCBeyYxz5czZ6X5DwqOCfhPxsrqSG1sTh0uW928oRKE7jQIgXp7sBUVTVJCrs7H8lMu2CA253Cr8zuLrqVb%2BjnIgPUNCYqGRhW%2FN2fc8vFlL57OzivIAfIiiCycEoj2atTCRzkRZSMCR5hJbOXMQndXqnb5IZtsF6KOFBkM7bsUUMKzpFe8DExOiKFmYk1ApKE6Cx0r0%2B1aYt%2FzW%2B97WFVDjjq9Df85gUrIisKbOf4YvXiwweUjp7OEKdChRDwbjY3O3VKx%2FygB6K4gZIsne%2Bn9P0WYnXaAuezBIAKDHtxTSUiHmRLbfKnrUZDHEhRXi3FdEG%2B2o8jOmALC2TfZ6X8%2FRSfDPMaZMHmRwKeGlRidj3quDv01rP%2FsBeo1cjZ40liW8HiUv0c%2Bh8XyKcU2ziY5rLPG2is3dZjogP3DU9wdOFV7mFkmhIWuROMrJ7T%2B3e0mTelfXjkxmT%2FBV1nmNC7K0d7ETuSfHk209CqkYmAOGe%2BGLM7Wa5Niua5DhzSCl9w40PmDN3IHofqY6D9R2MznrA3eAiMSFbJ5fxg7E8TRUeCVZXylOu8bCuOeclGZKaPiD9RqKGjuz43d%2B6SvRARVBxXXUun9GwiKoJrGvBh7FFXkHMD%2Btys8lyxou70Q%2BY5armdlIDEeLe44Aw0T5nA%2BN7c6vdfSOAZ5UQvsHNpyPw4VOZ3VRupUX%2F6QsNiMNwCGQzkVJUqzPGgdqsmVAt%2FggWTw%2FPyqb%2BvfFkEFoZHUx9K%2FXsWgfrqIUw4tk00fxg10TcS3EfQvpkBBMkxVD9RNVGfdl02sz8aiM91i75mWuA%3D%3D&lang=vi&b=908401&sdkVersion=1.5.49&rawData=
-158. FP_USER_51: bo/merchants/vnshop/sellercenterorders/many?filter=%7B%22limit%22%3A10%2C%22offset%22%3Anull%2C%22where%22%3A%7B%22phone%22%3A%220988526605%22%2C%22fromDate%22%3A%222026-02-03T17%3A00%3A00.000Z%22%2C%22toDate%22%3A%222026-03-06T16%3A59%3A59.999Z%22%7D%7D
-159. FP_USER_52: GET /api/plugins/org.graylog.plugins.forwarder/forwarder/inputstates
-159. FP_USER_52: ?data=8qlLIyPq66eGGxh4bS0zCUiA%2BKkf5BuJOu30xkqn9N0lm%2BJN1nSsLdPO%2Fbo6ZvA934F1zNi%2F5FfcWuKn%2BFB50w0Hk79vc9gTlgCctVkgIbrIvY45yBq4y66uBAAORZeVSsj3XOyFql4AOG33vVG%2FHmmirwXCI4lvE%2BEI2zGsqj47Oc%2BPZJypX%2Bsd2UXv0SjtOCwBThrN9LqhUH8UM7oWrmuPHJG2PEBLrRkXOwP48dPXlNXvkkZ7BCPy2i06SBF9YzJahSCnyymh%2BFgHPIiRkN0Q%2BEIQ8MbJJoVECAdoeds%2FRz%2FCQYq8%2FH%2FAB9XTC8pjFKX2fUowfmgIDySojcoUyIypXZtzOGVoYckw%2FCeHLhkzsG3A4LPmVLwK1DgjwkumXJbS816%2BAKTwy8bxPr2vsrxhVsIWmkgBna0B6IgY5A7YTC%2FWxcv4MkTUPwCG7tqBYIWUb2NNyCwIJ%2F%2BLjDq9wdqBh7iKStIO15eKrWldNXZK4%2F8iLgDdL7kE139%2FluY%2FG%2B5jQCOv%2FKJt%2F%2F3v%2FBKIEtr8cl5BKeNTItcERTPheqHEQkaBiZdTdylamsASth4KL9QuiZdAKtUpYbUj%2FVa7WiikjnCDaLP6ZYg8EYJpcP21OR71BgRl1fk3hTXevEJC22hFv12E%2BHIVS9dB2eREPrsO%2BljYquigzcmRzm9t%2FcL%2FYr4XCDDtfhmFT7J9o%2FPZlXzQqcEgReOG8cQQcMD3bMXTWfyYZgZDEAF%2BRvAxidgy4Mj0V%2FHq1VjZ2se%2FtXeQAmT6q%2FhH787AffxmpEyiWs5jTdq05rFBy1Qbx4IMEDzMkXUSelgoDUYfQeecUNZNApI5n%2BnEKmHY2fIXJeDINeW9tBRZjAUYAjSHH4g1LDGDiMfbzFallYmkPfyEtBi6WNzzHkckHyusvEithIDdANXNwS%2BmSSpJWbixRZWngHc%3D&lang=vi&b=908401&timestamp=1772779090122
-160. FP_USER_53: /api/auth/accounts/908401/login-with-token?data=TA9ndWWnGCDe5n%2BPEkITdzn9uq42TypGu9m0fFUME6rEn2%2FSPibRYvxXlfzwi3Y%2FFQnkxM9R9mVsIlqKBH0NgAXuqpw1k3ackEsPVq3iuH1oa%2BnYc7sYo6r112jOZ6EuJxQoHkMRrwiD2306DdWnKS5xRUV%2FtMXcT7JY6fZv9O8LhsaJBjtywRKAaEYxmWsT8Cyy74cCJABjSWauhfk4vbK4LPKBQJBTkdB4NSQl1WRZ1AOae5ht6M3nIjYxkQPS0KP60Pbg%2Blwhvf3XOE73IQoZGp7vVmbn46lHv%2F7pNbeNy%2BbDgU%2FDlo0z%2FSBh6MkMT9xfvCza87AQqbiw5KRUWqqY%2Fb8ZT%2BHpGJtfE7d9eief5lmn7M4Zhxtm4%2FT7eOvYaO3smrTdWzFdK6URt2V2HgWxFQlUuezGV2PkcNDh8nkqymwsuUQi9HqYMLmTso7xPrdMgSZAVq92MRKT2VxnGrytyZ1lI8dwRnLExyXkbi3f%2BDUaw%2FQTT3kdok5qerXTuHPhuY6O848Wc7llX5JfGpg3tzF5mpLfxe8z03Fwv85UF8Qmj75aQbppvz3Q%2FJKCTZ52qfA6UcEoAkd%2BUUM0rKGPtsISKn0rcPIXUf3MM3m%2B10b%2BVWK%2Fp2HqzFjg4nAQA6NIIYXn%2BtvnL23%2FhJMrJ4u6mRPIliWyYWyEzV6Q7V6eRSM1qBymn26eNVu6SryxM62cv3JqUvteDBAgMO7WWQrSXvWaKtFLBd8389G5wpH37KCQcN3K4lHGYIUuo4qNIEuNF8iVdk7asMOPFONFY%2FzPuu18L2ciQmhTm%2FVLkd9C%2FKC54b8r8R%2BKEM2x3nsCGnSFDFykvBtIUTwnfrrpgeLeym8HpqWCYVPcoHuanS8ezzpToRSBJPSpnIimt7bG3%2BTGVCB22KzCoNE9%2Fry1%2F2pWz0hgRFTx1OMLinyPKTuC7CrCTv0Fh9ZXqoZCfbfCjdrM%2B0dJaMG8rXvnjD6m9fSuYxhEMoX%2F%2BTZpqvomK65Sky5Bn44AdkW8xanQij7CogrJKm%2FWMhxhpe9S6JcTm%2FK5srpADMvqXvF2bqiH0%2F7Wz1StizEgqyI%2BV9q9bcvyGO4lv2fjLILriGUXxyPUk818jKnPWZDr7JF7vzWhK4faBDAsWT3tax5hZnfLxzLYlzWLZKgqs6PyDm8RHT0E4A%3D%3D&lang=vi&b=908401&sdkVersion=1.5.49&rawData=&subChannelCode=908401
-161. FP_USER_54: /api/18/envelope/?sentry_version=7&sentry_key=05dbe6daec9214fee35385b9e0bc6cb9&sentry_client=sentry.javascript.browser%2F10.41.0
-162. FP_USER_55: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%276b67c704b68a4517aa6664c1df2f7afe&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260310%2F%2Fs3%2Faws4_request&X-Amz-Date=20260310T023341Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5bfffbe1cc40d1ef12ee72b2126381daf34408143c87a1c0bf11e66c162e101b&q=script
-163. FP_USER_56: GET%20/
-164. FP_USER_57: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook%20Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%276b67c704b68a4517aa6664c1df2f7afe&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260310%2F%2Fs3%2Faws4_request&X-Amz-Date=20260310T023341Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5bfffbe1cc40d1ef12ee72b2126381daf34408143c87a1c0bf11e66c162e101b&q=union%20was%20a%20great%20select
-165. FP_USER_58: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook%20Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%276b67c704b68a4517aa6664c1df2f7afe&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260310%2F%2Fs3%2Faws4_request&X-Amz-Date=20260310T023341Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5bfffbe1cc40d1ef12ee72b2126381daf34408143c87a1c0bf11e66c162e101b&q=_I%20would%20like%20to%20see%20the%20runtime%20for%20the%20payload,%20please.
-166. FP_OAUTH_1: GET /auth/google/callback/?authuser=5&code=8%2F6EMesrMYFyiH1mJGviehH6jYvoz06sllZxOj3XBNacHw8OmauT6gDlQwxFg6H5DV_OomhUV&hd=NUQRR.jC&iss=kPmVQ%3A%2F%2FTITjAnYS.cmgDAL.dPJ&prompt=XEwuPGe&scope=opBke+FfNxLjr+ZFUKX%3A%2F%2FTHB.vshTKTBguO.fGa%2FeulP%2FsMAyiRrk.LyDkQpU+FCbpc%3A%2F%2FnNN.rPcXDzvVQq.jxI%2FHfYw%2FySdZiQIw.bjucY+BVFhFO&state=60S26jB222q37EA7y51196B90e62g6q6
-167. Benign Blog Post: GET /blog/post/how-to-use-union-select-in-sql HTTP/1.1
-168. Benign Search Query: GET /search?q=javascript+alert+box HTTP/1.1
-169. Benign Comment: POST /api/comments {"text": "I dropped my database today!"}
-170. Benign Tutorial: GET /tutorial/xss-prevention-script-tags HTTP/1.1
-171. Benign Asset: GET /assets/octagon-alert-7zrgUous.js HTTP/1.1
-172. Benign NLP Query 1: GET /search?q=I%20select%20like%20you%20union HTTP/1.1
-173. Benign NLP Query 2: GET /api/chat?message=can%20you%20select%20the%20best%20union%20for%20me HTTP/1.1
-174. Benign NLP Query 3: GET /forum/post?title=why%20I%20drop%20out%20of%20the%20student%20union HTTP/1.1
-175. Benign NLP Query 4: GET /query?text=please%20insert%20the%20coin%20and%20select%20your%20drink HTTP/1.1
-176. Benign NLP Query 5: GET /help?q=how%20to%20update%20my%20profile%20and%20delete%20old%20photos HTTP/1.1
-177. Benign NLP Query 6: GET /translate?text=the%20trade%20union%20will%20select%20a%20new%20leader HTTP/1.1
-178. Benign NLP Query 7: GET /search?q=where%20can%20I%20find%20a%20credit%20union%20near%20me HTTP/1.1
-179. Benign NLP Query 8: GET /api/bot?prompt=select%20all%20the%20images%20that%20have%20a%20cat HTTP/1.1
-180. Benign NLP Query 9: GET /feedback?msg=I%20tried%20to%20insert%20my%20card%20but%20it%20gave%20an%20error HTTP/1.1
-181. Benign NLP Query 10: GET /search?q=union%20station%20train%20schedule HTTP/1.1
-182. FP_USER_59: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/?group_by=state_id&order_by=-created_at&sub_issue=true&filters=%7B%22created_by_id__in%22:%22d5bfcc01-0096-4c85-a741-3309c3099472%22%7D&layout=kanban&cursor=30:0:0&per_page=30
-183. FP_USER_60: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/
-184. FP_USER_61: ?href=%2F_astro%2Fsystem-rule.CQ1lX61g.png&w=1910&h=988&f=webp
-185. FP_USER_62: /firebase-messaging-sw.js?apiKey=AIzaSyDSIcHYAtD1PSDh6YEf-fair8tJPAapBSk&authDomain=vnshop-consumer.firebaseapp.com&databaseURL=https%3A%2F%2Fvnshop-consumer.firebaseio.com&projectId=vnshop-consumer&storageBucket=vnshop-consumer.appspot.com&messagingSenderId=5.63692749265e%2B11&appId=1%3A563692749265%3Aweb%3A28fa5910ee1fb71dbf20f0&measurementId=G-2ZCHWBR4PS&externalScripts=
-186. FP_USER_63: GET http://dyn9c6472638136.dynamic.insky.io.vn/
-187. FP_USER_64: GET /static/imports/container.json
-188. FP_USER_65: /bo/config/units?filter=%7B%22offset%22%3Anull%2C%22where%22%3A%7B%22id%22%3A%7B%22inq%22%3A%5B%22botle%22%5D%7D%7D%7D
-189. FP_USER_66: /bo/config/units?filter=%7B%22offset%22%3Anull%2C%22where%22%3A%7B%22id%22%3A%7B%22inq%22%3A%5B%22combo%22%5D%7D%7D%7D
-190. FP_USER_67: ?id=1
-191. Benign Alerting Webhook JSON: POST /n8n/webhook/vntaxi-critical-alert1 {"receiver":"telegram_vntaxi","status":"firing","alerts":[{"status":"firing","labels":{"TaxiPlatform":"EMDDI","alertname":"Taxi_EMDDI Healthcheck","result":"timeout","server":"https://service-sup.emddi.xyz/v1/vehicles?regionId=2u0026latitude=21.0227663u0026radius=2000.0u0026serviceId=u0026maxCount=20u0026longitude=105.8472224"}}],"title":"[FIRING:1] VnTaxi (Taxi_EMDDI Healthcheck EMDDI timeout https://service-sup.emddi.xyz/v1/vehicles?regionId=2u0026latitude=21.0227663u0026radius=2000.0u0026serviceId=u0026maxCount=20u0026longitude=105.8472224)"}
-192. Benign Alerting Webhook URL: GET https://dyn65eb01732075.sunny.edgevnpay.vn/n8n/webhook/vntaxi-critical-alert1
-193. Benign Alerting Webhook URL: GET https://dyn65eb01732075.sunny.edgevnpay.vn/n8n/webhook/vnfilm-alerts
-194. Benign Metadata Fetch URL: GET https://dyna70b64037008.sunny.edgevnpay.vn/client-data/1/domains/officevnpay/meta-data.xml?uniqueValue=9S714J112607ZN3000145
-195. Benign Status Update URL: GET https://dyna70b64037008.sunny.edgevnpay.vn/statusUpdate?computerName=linhtm1&domainName=OFFICEVNPAY&domainType=2&actionToCall=1&actions=12&osPlatform=1&uniqueValue=9S716R6121228ZMB000170
-196. Benign Telemetry URL: GET predict/intelligence/telemetry?customerid=1&agentresourceidentifier=16795&resourceid=16795&uniquevalue=83yh9t3
-197. Benign Flash Sale URL: predict /flash-sale?_rsc=k4cpe x-request-id: 20260516.27960cf7-b2c0-4624-84fc-e197611c4e69
-198. Benign Next Static Chunk URL: /_next/static/chunks/app/100_shop/[merchant]/[channel]/[subchannel]/[locale]/(navigation)/[[...slug]]/page-acc48ae32f991806.js x-request-id: 20260516.1587ed04-64e1-47b2-b736-e545ec486c07 predict
-199. Benign Blocks Filter URL: /api/blocks?filter={"where":{"id":{"inq":[37101,37121,37129,37125,37126,37127,37128,37152,37153,37154,37155,37156,37119,37120,37122,37103,37123,37102,37124,37104]},"status":"40act"},"order":["position+asc"]} x-request-id: 5a985193-6221-4eee-8a04-856996e1780b
-200. Benign Category Listing URL: /p/danh-sach-quat-cac-loai?sku-route-history=homepage_promote_category_menu&_rsc=vjxkb x-request-id: 20260516.efd58f1f-d429-4458-9f54-4839c717b1c8
-201. Benign Category Listing URL: /p/danh-sach-quat-cac-loai?_rsc=oaf0w x-request-id: 20260516.878d9e12-6c31-4b48-8bd3-254fd5d11477
-202. Benign Status Update URL: predict /statusupdate?computername=baopg1&domainname=officevnpay&domaintype=2&actiontocall=1&actions=12&osplatform=1&uniquevalue=9s714j112607zn3000145
-203. Benign Category Page URL: /p/catepage-hb-thiet-bi-lam-dep?_rsc=e78op x-request-id: 20260516.c0ae4cf8-6917-4b27-9775-1fa1dd362429
-204. Benign Login Return URL: /login?returnurl=////example.com/ x-request-id: 2026051605161b79433a-3ebf-4377-8f02-2e483fbd8f08
-205. Benign Placeholder Image URL: /img/placeholder/placeholder-image-thumbnail.png x-request-id: 20260516.ab7f6eec-e894-4f9f-878a-1753bf98d000
-206. Benign Status Update URL: /statusupdate?computername=baopg1&domainname=officevnpay&domaintype=2&actiontocall=1&actions=12&osplatform=1&uniquevalue=9s714j112607zn3000145
-207. Benign Metadata Fetch URL: /client-data/1/domains/officevnpay/meta-data.xml?uniquevalue=9s7158571676zr4000150
-208. Benign Status Update URL: /statusupdate?computername=mont&domainname=officevnpay&domaintype=2&actiontocall=1&actions=12&osplatform=1&uniquevalue=m6n0lp00k74522a
-209. Benign Auth Login URL: /auth/vnpay/login?data=oltzje7zapslmxqj5/pwgcmm/kvon8bo9fiak4dd6hgzj+1z6ipdto2faxfqjyu0uzbnau5xkrvr1o8ayhk17emctglfs68umh68sxuqrrg0y9eru2fsyox63gezfmrys6muyuolmcwzobikslln4gvxylq6vzz0nmygjpy770hduspzeovrpevn0ckdwn/wjeulvhlt+ngxp6xhtnwqvakjsv0docfjwq9uxefoac/ymplylclli49d/6gl3tr8b50/zjuzwde7stvmuv+ztdbtxzc/ldezwolzpelf8nxrmqzia1fkuv0=&signature=6f6343a7153639e5bd934a662b376428 x-request-id: 20260516.6ee1d97e-70cf-4c7c-84a8-64cc6db1b074
-210. Benign EA Agent Logging URL: /intelligence/eaagentlogging?agentresourceidentifier=22037&resourceid=22037&uniquevalue=9s717l112446zm3000052
-211. Benign Next Static Font URL: /_next/static/media/inter_italic_variablefont_opsz_wght-s.p.ff920778.woff2 x-request-id: 202605160516779376c7-f55e-4356-8d34-7e8b8bd3ae8a
-212. Benign Next Static Font URL: /_next/static/media/3787d9a87cc64466-s.p.ttf x-request-id: 20260516.f59e75f7-8174-46a6-8c13-387271dd7c0e
-213. Benign Voucher Subchannels URL: /bo/merchants/vouchersystem/subchannels x-forwarded-for: 103.220.86.4 x-real-ip: 103.220.86.4 x-request-id: 20260516.9ff369a8-74ad-4077-b065-1cfaf3fc0cb7
-214. Benign Metadata Fetch URL: /client-data/1/domains/officevnpay/meta-data.xml?uniquevalue=rcn0cx02h060502
-215. Benign Next Static Font URL: /_next/static/media/3787d9a87cc64466-s.p.ttf x-request-id: 20260516.4e74e0e7-4875-4e27-a649-e61ce31115a0
-216. Benign Next Static Font URL: /_next/static/media/3787d9a87cc64466-s.p.ttf x-request-id: 20260516.7e35b332-516a-4fa8-952c-9feeec9ecfe8
-217. Benign Placeholder Image URL: /img/placeholder/placeholder-image-thumbnail.png x-request-id: 20260516.e8385f13-0d7b-4a73-84ab-7f122d68304b
-218. Benign Product Page URL: /p/be-khoe-me-vui?_rsc=awqyc
-219. Benign Issue Collection Path: GET /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/
-220. Benign Issue Detail Path: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/9906eeae-3678-40e2-9869-64bc8b84c7c5/
-219. FP_USER_68: /api/workspaces/insky/user-favorites/?all=true
-220. FP_USER_69: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/0863bb11-7116-4bc9-9b24-97bfb6eea434/history/?activity_type=issue-property
-219. Benign Auth Login URL: /auth/vnpay/login?data=oltzje7zapslmxqj5/pwgcmm/kvilslm81mzjizd6hgzj+1z6ipdto2faxfqjyu0uzbnau5xkrvr1o8ayhk17emctglfs68umh68sxuqrrg0c/spumf4zo9e/egzfmrys6muyuolmcwzobu1skh7qav2auw4vr3hnnesjouw9bjdqtfpeov/ppjz4mee+e6omvu+5nlh+ngxp6xhtnwqvakjsmmpo8ymcswr1e9pt9jamzj6oqf9fothxb2v0nxtgog32dol6/k/cawwswcrbnfstysklqoy7vlrgelf8nxrmqzia1fkuv0=&signature=8a58664def809475c607449214ea057c
-220. Benign Empty State SVG URL: /images/empty-states/empty-data.svg
-221. Benign Blocks Filter URL: /api/blocks?filter={"where":{"id":{"inq":[31109,32797,32798,32799,32800,32801,31965,31878,31879,31880,31881,31882,31883,31108,31124,31125,31118,31119,31120,31121,31122,31123,31126,32802,32803,31127,31129,31130,31131,31132,31133,31885,31351,31886,31887,31134,31128,31136,31135,31884,31110,31117,31111,31139,31112,31113,31114,31115,31138,31116,31137,31140,31966]},"status":"40act"},"order":["position... x-request-id: 5d02f30b-1391-4c33-956a-ff47e599cb89
-222. Benign Login Return URL: /login?returnurl=/login?returnurl=/login?returnurl=%2flogin%3freturnurl%3d%252flogin%253freturnurl%253d%25252flogin%25253freturnurl%25253d%2525252flogin%2525253freturnurl%2525253d%252525252flogin%252525253freturnurl%252525253d%25252525252flogin%25252525253freturnurl%25252525253d%2525252525252flogin%2525252525253freturnurl%2525252525253d%252525252525252flogin%252525252525253freturnurl%252525252525253d%25252525252525252flogin%25252525... x-request-id: 202605160516c1ebcd2a-2375-434e-8d74-6c515bf88289
-223. Benign Auth Login URL: /auth/vnpay/login?data=oltzje7zapslmxqj5/pwgcmm/kvomm3p+fiyjybd6hgzj+1z6ipdto2faxfqjyu0uzbnau5xkrvr1o8ayhk17emctglfs68umh68sxuqrrg0c/svuxf0yex68aezfmrys6muyuolmcwzobihs4zk8qdlzl66vos8nnegjoiv6bzdutz8eab7c+za7xyj6dpvmvyy53h9+ngxp6xhtnwqvakjsmiyjuamqspq1dl1cchjl6rjlfjfeo1zsqgc9txeb48d2wm068m7fkdazzqzsejgxyswpms82mbbxulf8nxrmqzia1fkuv0=&signature=5f9dcdbdd8f0815f35417c0159c0369e
-224. Benign Static JS URL: /static/systemjs@6.8.3/system.min.js
-225. Benign Product Page URL: /p/be-khoe-me-vui?_rsc=aw52s
-226. Benign Login Return URL: /login?returnurl=/login?returnurl=/login?returnurl=%2flogin%3freturnurl%3d%252flogin%253freturnurl%253d%25252flogin%25253freturnurl%25253d%2525252flogin%2525253freturnurl%2525253d%252525252flogin%252525253freturnurl%252525253d%25252525252flogin%25252525253freturnurl%25252525253d%2525252525252flogin%2525252525253freturnurl%2525252525253d%252525252525252flogin%252525252525253freturnurl%252525252525253d%25252525252525252flogin%25252525... x-request-id: 202605160516a36f9f76-3bc9-42cd-a9fc-74400a07a09f
-227. Benign Static JS Source Map URL: /static/systemjs@6.8.3/system.min.js.map
-228. Benign Auth Login URL: /auth/vnpay/login?data=oltzje7zapslmxqj5/pwgcmm/kvilsdm81ifiofd6hgzj+1z6ipdto2faxfqjyu0uzbnau5xkrvr1o8ayhk17emctglfs68umh68sxuqrrg0c/9tuxfsj+x60kgzfmrys6muyuolmcwzobigs6h/qxjyflq62jd3npgwjp6v70ldui1ueqbzpovk/ise6tykj+y+5wxt+ngxp6xhtnwqvakjsmotopmiq/jawehqv97vp6squp/+uidx85slq9bublyk4winyvkjft+xv0ovrs1bc7w9p9cj6+pkwklf8nxrmqzia1fkuv0=&signature=e8788144f500ad2c1cd2c818eebb5fc8
-229. FP_USER_70: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/2e92bcde-e7f9-46e1-bcb7-30ee93e0fff1/history/?activity_type=issue-property
-230. FP_USER_71: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/28c8873e-2b96-4e9b-8c9d-1cfd8a4e4439/history/?activity_type=issue-property
-231. Benign Workspace Modules API: GET /api/workspaces/insky/modules/
-232. Benign Sidebar Preferences API: GET /api/workspaces/insky/sidebar-preferences/
-233. Benign Insky Issues Path (short): GET /insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/
-234. Benign S3 Upload Signed URL: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%2733142930e4224ef6814154916d206959&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260519%2F%2Fs3%2Faws4_request&X-Amz-Date=20260519T112406Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=fbc7afa4810e4a5d53f29ba10d6d22c1e7f3227e288f975fa8d1b45c423940f4
-235. Benign S3 Upload Path Only: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg
-236. Benign S3 Upload Path Only (duplicate): /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg
-237. Benign Issue Detail GET expand: /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/9906eeae-3678-40e2-9869-64bc8b84c7c5/?expand=issue_reactions,issue_attachments,issue_link,parent
-238. Benign Issue Detail PATCH path: PATCH /api/workspaces/insky/projects/bce0a79c-90d2-4558-9084-945ad6acbdae/issues/9906eeae-3678-40e2-9869-64bc8b84c7c5/
-239. Benign S3 Upload Signed URL v2: /uploads/628668cae9db4d51b4edf55214b73fca-Facebook Image.jpg?response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%279a0505e796d842fdb7a4980ead8c4bf3&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=9wnmzzHYVGwlnTscRdzx%2F20260519%2F%2Fs3%2Faws4_request&X-Amz-Date=20260519T112548Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=cdf2aeefc1bf8bd6d456ede48d0a809d4f051e52eece84bacb322945a8c50a1b
-240. Benign Insky Edge Proxy Headers Kubuntu Chrome 130: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (Kubuntu; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 X-Insky-Hop: 1 X-Insky-Loop-Id: 2ba85ebcb1794c049d962bd7b13cc6ab
-241. Benign Insky Edge Proxy Headers Linux Firefox 3.6: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (X11; Linux i686; rv:1.9.5.20) Gecko/ Firefox/3.6.15 X-Insky-Hop: 1 X-Insky-Loop-Id: 5f038202800e443aac1bf1d07601281b
-242. Benign Insky Edge Proxy Headers Windows Firefox 140: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.5 X-Insky-Hop: 1 X-Insky-Loop-Id: 8a1ebed6e2c44327b717ccb51cbf1927
-243. Benign Insky Edge Proxy Headers macOS Chrome 116: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 X-Insky-Hop: 1 X-Insky-Loop-Id: 72876f7c5dda4c5f9e5ef35f63fa1ffe
-244. Benign Insky Edge Proxy Headers Firefox 130 Accept Html: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng Accept-Encoding: gzip Connection: Host: bill.valab.me User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0 X-Insky-Hop: 1 X-Insky-Loop-Id: 48a3a049c73e41babb1dc1e4229d4450
-245. Benign Insky Edge Proxy Headers macOS Chrome 126: GET https://dyn9c6472638136.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: bill.valab.me User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 X-Insky-Hop: 1 X-Insky-Loop-Id: 310aa1a011db4a1e83c0471c510d5cd3
-246. Benign Insky Edge Proxy Headers Generic Hop Loop: GET https://dynexample.dynamic.insky.io.vn/ Accept: */* Accept-Encoding: gzip Accept-Language: en Connection: close Host: upstream.example.com User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 X-Insky-Hop: 1 X-Insky-Loop-Id: a1b2c3d4e5f6478990abcdef12345678
-247. Benign Static Root Script JS: GET /script.js
-248. Benign Static Root Script JS Versioned: GET /script.js?v=141.0.0.0
-249. Benign Dynamic Host Script JS URL: GET https://dyn45bc44357333.dynamic.insky.io.vn/script.js
-250. Benign Dynamic Host Script JS URL Versioned: GET https://dyn45bc44357333.dynamic.insky.io.vn/script.js?v=20260408
-251. Benign Fluent Bit Splunk Headers: Content-Length: 7090 Host: splunk-heavy-forwarder-cloudfarm2.vnpay.vn User-Agent: Fluent-Bit
-252. Benign Evaluation Combo Path: GET /evaluation_combo
-253. Benign Placeholder Image PNG Path: GET /images/placeholder-image.png
-254. Benign Messages Beta API Path: POST /v1/messages?beta=true
-255. Benign Servlet Agent Auth Path: POST /servlets/agentAuthPropsRequest
-256. Benign Servlet Agent Auth Full Request: POST /servlets/agentAuthPropsRequest?ComputerName=quandt&DomainName=OFFICEVNPAY&Branchid=1&BranchName=Local%20Office&MSPName=DC_MSP&CustomerId=1&Did=1201&useJsonForRequestBuffer=true&DomainType=2&reason=1&agentResourceIdentifier=1813&osPlatform=1&ResourceID=1813&uniqueValue=NHQFHSV0032381051B Authorization: bearer Cache-Control: no-cache Connection: Keep-Alive Content-Length: 644 Host: sgec.vnpay.vn Pragma: no-cache User-Agent: DesktopCentral Agent
-257. Benign DesktopCentral CSR Signing Path: POST /ClientCSRSigningServlet
-258. Benign DesktopCentral CSR Signing Full Request: POST /ClientCSRSigningServlet?agentResourceIdentifier=22030 Authorization: bearer Cache-Control: no-cache Connection: Keep-Alive Content-Length: 1312 Host: sgec.vnpay.vn Pragma: no-cache User-Agent: DesktopCentral Agent
-259. Benign QA Platform Root Path: GET /qa-platform/
-260. Benign Collector Event Path: GET /services/collector/event
-261. Benign DesktopCentral Patchscan Path: POST /patchscan
-262. Benign DesktopCentral Patchscan Headers: Authorization: bearer Cache-Control: no-cache Connection: Close Content-Length: 84 Host: sgec.vnpay.vn Pragma: no-cache User-Agent: DesktopCentral Agent
-263. Benign DesktopCentral Patchscan Full Request: POST /patchscan Authorization: bearer Cache-Control: no-cache Connection: Close Content-Length: 84 Host: sgec.vnpay.vn Pragma: no-cache User-Agent: DesktopCentral Agent
-264. Benign Fluent Bit Short Headers: Content-Length: 2963 User-Agent: Fluent-Bit
-265. Benign Insky vLLM Browser Identity Headers: GET https://dyn2c2e23482854.sunny.edgevnpay.vn/ Accept: */* Accept-Encoding: identity Connection: close Host: vllm.ai.insky.io.vn User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+Categories of Normal Traffic (1072 Categories)
+----------------------------------------------
+1. Health Check: POST /service-t/v1/ping
+2. Resource Loading (Image): GET /ott-backend-v2/20260923/66f930c2-ef76-4828-a8b4-12448cda3878.jpg
+3. Resource Loading (Image): GET /static/banner-home/MB/banner-20260914-01.jpg
+4. Resource Loading (Image): GET /ott-backend-v2/20260922/b4e7fdb4-60b6-4c8a-a54f-0cb551c3b5c2.jpg
+5. Resource Loading (Font): GET /sdk-document-file/20250623/PlusJakartaSans-Regular.ttf
+6. Resource Loading (Image): GET /sdk-document-file/20240205/image_film_default.png
+7. Resource Loading (Image): GET /sdk-document-file/20231107/logo_vnpay.png
+8. Resource Loading (Font): GET /sdk-document-file/20250623/PlusJakartaSans-SemiBold.ttf
+9. Resource Loading (Image): GET /static/banner-home/MB/banner-20260822-02.jpg
+10. Form Submit (Service T Active): POST /service-t/v1/active
+11. Resource Loading (Image): GET /ott-backend-v2/20260918/f03df3d3-048a-4850-9d9a-a940e467f038.jpg
+12. Resource Loading (Image): GET /ott-backend-v2/20260924/d5944bfb-a172-4ae5-87f6-259f5a9d4518.jpg
+13. Resource Loading (Image): GET /ott-backend-v2/20260924/bbd664ca-3965-4c92-831d-b0cd366d731e.jpg
+14. Resource Loading (Image): GET /static/banner-home/MB/banner-20260827-03.jpg
+15. Resource Loading (Image): GET /ott-backend-v2/20260922/970488_popup.2209.jpg
+16. Resource Loading (Font): GET /sdk-document-file/20260105/Manrope-Medium.ttf
+17. Resource Loading (Font): GET /sdk-document-file/20260106/Sigmar-Regular.ttf
+18. Form Submit (Collector Event): POST /services/collector/event
+19. Form Submit (Service T Tracking): POST /service-t/v1/tracking
+20. Resource Loading (Image): GET /static/icon-chuc-nang/cai-dat-tien-ich/fortune-wheel-2.png
+21. Resource Loading (Image): GET /sdk-document-file/20251128/banner.png
+22. Resource Loading (Image): GET /static/icon-chuc-nang/favourite/nap-tien-dien-thoai.png
+23. Resource Loading (Image): GET /static/icon-chuc-nang/favourite/nap-data.png
+24. Resource Loading (Image): GET /eps/20260911/dbacc907440f4534bbca0d6e660cc37e.png
+25. Resource Loading (Image): GET /static/banner-ban-cheo/MB/banner-20260311-01.jpg
+26. Resource Loading (Image): GET /live/uploads/20260825/20260825092457_1_VTB-Banner-uu-dai-343-193-x2.jpg
+27. Resource Loading (Font): GET /sdk-document-file/20251020/FSMagistral-Book.ttf
+28. Resource Loading (Font): GET /sdk-document-file/20251020/FSMagistral-ExtraBold.ttf
+29. Resource Loading (Image): GET /static/icon-chuc-nang/favourite/taptopay.png
+30. Resource Loading (Image): GET /sdk-document-file/20241023/ic_banner.png
+31. Resource Loading (Image): GET /live/uploads/20260622/20260622100335_1_iPay%20390x260.jpg
+32. Resource Loading (Image): GET /ott-backend/20260923/059250ae-3c5e-4a3b-aa03-3d311df8fdb2.jpg
+33. Resource Loading (Image): GET /eps/20260915/1bc31298583843f38f8ee45f6e4996fe.jpg
+34. API POST (Traces): POST /v1/traces
+35. Resource Loading (Image): GET /static/logo-bank/logo6char/970449-update.png
+36. Resource Loading (Font): GET /sdk-document-file/20251229/PGSans-Regular.ttf
+37. Resource Loading (Font): GET /sdk-document-file/20250623/PlusJakartaSans-ExtraBold.ttf
+38. Resource Loading (Font): GET /sdk-document-file/20251229/PGSans-Medium.ttf
+39. Resource Loading (Font): GET /sdk-document-file/20251229/PGSans-SemiBold.ttf
+40. Resource Loading (Font): GET /sdk-document-file/20251229/PGSans-Bold.ttf
+41. Resource Loading (Image): GET /static/logo-bank/logo6char/970414_update_01.png
+42. Form Submit (LoginService Loginbt): POST /sposservice/loginService/loginbt/920023/
+43. Form Submit (MessageService GetpeddingmsgV2): POST /sposservice/messageService/getpeddingmsgV2/920023/
+44. Form Submit (MessageService GetmsgAdv): POST /sposservice/messageService/getmsgAdv/920023/
+45. Resource Loading (Image): GET /sdk-document-file/20221103/VJ_short@3x.png
+46. Resource Loading (Image): GET /static/logo-bank/logo6char/970406.png
+47. API POST (Flashsales Ongoing): POST /v1/vnpay_app/flashsales/ongoing
+48. API POST (Products List): POST /v1/vnpay_app/products/list
+49. API POST (Products Stock): POST /v1/vnpay_app/products/stock
+50. API POST (Search Products): POST /api/search/products
+51. Resource Loading (Image): GET /avatar-vtb/20250724/ae5112321bdd4bd6933770b4abf28fa1_240x240.png
+52. Resource Loading (Image): GET /static/logo-bank/logo6char/971025.png
+53. Static Asset (CSS): GET /_next/static/css/acdafc0d242073a5.css
+54. Resource Loading (Font): GET /sdk-document-file/20250623/PlusJakartaSans-Bold.ttf
+55. Resource Loading (Image): GET /static/icon-chuc-nang/icon-taskbar/VNPAY-Taxi.png
+56. API GET (Notifications Count): GET /api/notifications/count?filter=%7B%22where%22%3A%7B%22readAt%22%3Anull%7D%7D
+57. Resource Loading (Image): GET /static/logo-bank/logo6char/970454.png
+58. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00001.png
+59. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00003.png
+60. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00012.png
+61. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00010.png
+62. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00002.png
+63. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00015.png
+64. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00013.png
+65. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00014.png
+66. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00011.png
+67. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00006.png
+68. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00007.png
+69. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00009.png
+70. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00016.png
+71. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00005.png
+72. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00017.png
+73. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00021.png
+74. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00027.png
+75. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00008.png
+76. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00020.png
+77. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00018.png
+78. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00004.png
+79. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00019.png
+80. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00023.png
+81. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00030.png
+82. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00022.png
+83. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00031.png
+84. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00026.png
+85. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00025.png
+86. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00037.png
+87. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00032.png
+88. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00029.png
+89. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00028.png
+90. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00024.png
+91. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00043.png
+92. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00040.png
+93. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00033.png
+94. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00039.png
+95. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00038.png
+96. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00034.png
+97. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00035.png
+98. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00036.png
+99. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00044.png
+100. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00041.png
+101. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00042.png
+102. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00047.png
+103. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00045.png
+104. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00048.png
+105. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00046.png
+106. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00049.png
+107. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00050.png
+108. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00051.png
+109. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00054.png
+110. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00057.png
+111. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00058.png
+112. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00053.png
+113. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00056.png
+114. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00059.png
+115. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00052.png
+116. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00055.png
+117. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00060.png
+118. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00065.png
+119. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00064.png
+120. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00063.png
+121. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00061.png
+122. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00066.png
+123. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00067.png
+124. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00062.png
+125. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00073.png
+126. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00074.png
+127. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00072.png
+128. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00083.png
+129. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00076.png
+130. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00078.png
+131. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00068.png
+132. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00071.png
+133. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00069.png
+134. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00077.png
+135. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00084.png
+136. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00075.png
+137. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00079.png
+138. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00082.png
+139. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00070.png
+140. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00085.png
+141. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00080.png
+142. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00081.png
+143. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00093.png
+144. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00086.png
+145. Resource Loading (Image): GET /avatar/prod/583843933725982720_1779355023251.jpg
+146. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00090.png
+147. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00087.png
+148. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00089.png
+149. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00091.png
+150. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00088.png
+151. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00092.png
+152. Resource Loading (Image): GET /sdk-document-file/20240220/Overlay.png
+153. Resource Loading (Image): GET /payment-prd/v6.1.0_1/loading/Comp%203_00000.png
+154. Resource Loading (Image): GET /2/608/332/ts/ds/11/76/58/f3a03f7dc5f7c7447d0b57730587e124.jpg?v=3.1.18
+155. Static Asset (JS): GET /_next/static/chunks/66a8c16702b8a250.js
+156. API GET (App Version): GET /service-staff/api/v1/app/version?os_type=ANDROID&device_type=PHONE&key=F5oWZfTtVnajkhfjV9UePnF5oWZfTtVnajkhfjV9UePn&client_version=1.1.2
+157. Resource Loading (Image): GET /rs/205_205/avatar/prod/696066560299999232_1787282875195.jpg
+158. Resource Loading (Image): GET /img/favicon-32x32.png
+159. Resource Loading (Image): GET /ts/ds/8e/03/81/9ca0d79544e05f5ad7f747dedb6c5735.jpg
+160. Resource Loading (Image): GET /checkin-images/images_new/logo@3x.png
+161. Form Submit (MessageService Confirmnotify): POST /vntservice/messageService/confirmnotify/908421
+162. Page Load (Cdn Cgi Trace): GET /cdn-cgi/trace
+163. Resource Loading (Image): GET /static/banner-home/MB/banner-20260821-01.png
+164. API POST (Pages): POST /api/pages
+165. API POST (MessageService ConfirmVoice): POST /vntservice/messageService/api/v1/confirmVoice/908421/
+166. API GET (Carts): GET /api/carts
+167. Resource Loading (Image): GET /ts/ds/26/9b/6e/c6cb8e3b992f3aa926597862e8f5dcfd.png
+168. Resource Loading (Image): GET /ts/ds/50/06/c8/6c8f842216d3e06f8fd7c06967589b14.png
+169. Resource Loading (Image): GET /ts/ds/b7/11/d5/b332f949726ae9a9527d2b059d3a79e5.png
+170. Resource Loading (Image): GET /ts/ds/e0/26/80/5ee52fcbdaff4db037ff0a561062fc45.png
+171. Resource Loading (Image): GET /ts/ds/f2/fc/a1/52645325fe252f52c4714724103cc6fc.png
+172. Resource Loading (Image): GET /97/Sach2_59bb8fb2ef.png
+173. Resource Loading (Image): GET /a0/trung_thu_1_2x_188ebaeedb.png
+174. Resource Loading (Image): GET /13/GRO_a847a76a4f.png
+175. Resource Loading (Image): GET /6c/2409_V000097_2x_35cd7c9600.png
+176. API GET (Blocks): GET /api/blocks?filter=%7B%22where%22%3A%7B%22subchannel%22%3A%22VBA%22%2C%22channel%22%3A%22CH1004%22%2C%22pages.slug%22%3A%22index%22%2C%22status%22%3A%2240ACT%22%7D%2C%22order%22%3A%5B%22position+asc%22%5D%7D&fs=1790177801430
+177. Resource Loading (Image): GET /2e/nha_dep_dung_y_64f8d0e4ed.gif
+178. Resource Loading (Image): GET /62/vui_trung_thu_55e80ff24b.gif
+179. Resource Loading (Image): GET /bb/cong_nghe_4ef17c6e03.gif
+180. Resource Loading (Image): GET /be/750x448_4bab8366ec.png
+181. Static Asset (JS): GET /vne/js/lib.vnevent.1.0.8.loader.js
+182. Static Asset (JS): GET /vne/js/lib.vnevent.1.0.8.main.js
+183. Resource Loading (Image): GET /db/Voucherrrrr_1393bae5c9.png
+184. Resource Loading (Image): GET /9a/750x448_1_27b46d4197.jpg
+185. Resource Loading (Image): GET /69/ict_c1239e5e5e.png
+186. Resource Loading (Image): GET /ce/ha_ab4292c611.png
+187. Resource Loading (Image): GET /static/anh-nen-home/quoc-khanh-2026.png
+188. Auth Flow (Vnpay Login): GET /auth/vnpay/login?data=OltZJE7ZaPSLmXQJ5%2FpwgCMm%2Fkvon8zK8FaYI4zd6HGZj%2B1z6iPdTo2fAXFQjYu0uZBNAu5xKRVr1O8ayHk17emcTGlFS68UMh68sxuqpvs2TfspUWFSZe56%2FAAZFMryS6MuYuOlmCWzObu2X6Hs9gV2ZUi6rpPln%2FsgJpzz5BjDuSI2EpvjceVJ9X2J6sfSMuUy5mbH%2BnGXp6XhTnWQVAKjSlUdssTJQ9dAovYQcqjqP6Nhuqf5AL0U86qc8%2F5XH40dwAELiLS7YeG2TzisZeBSZJw%2FOuaY7Z1ZXUlF8NXRmqzIa1fKuV0%3D&signature=058a75ee006a24c14e4ba253eef2952c
+189. Resource Loading (Image): GET /static/anh-nen-home/sinh-nhat-38-nam.png
+190. API POST (Settings): POST /api/settings
+191. Resource Loading (Image): GET /img/vnshop-chon-an-tam.png
+192. API GET (VBA Css): GET /api/channels/CH1004/subchannels/VBA/css
+193. API GET (Tenants): GET /api/tenants
+194. API GET (Subchannels VBA): GET /api/channels/CH1004/subchannels/VBA
+195. Auth Flow (Auth Login): GET /api/auth/login?data=OltZJE7ZaPSLmXQJ5%2FpwgCMm%2Fkvon8zK8FaYI4zd6HGZj%2B1z6iPdTo2fAXFQjYu0uZBNAu5xKRVr1O8ayHk17emcTGlFS68UMh68sxuqpvs2TfspUWFSZe56%2FAAZFMryS6MuYuOlmCWzObu2X6Hs9gV2ZUi6rpPln%2FsgJpzz5BjDuSI2EpvjceVJ9X2J6sfSMuUy5mbH%2BnGXp6XhTnWQVAKjSlUdssTJQ9dAovYQcqjqP6Nhuqf5AL0U86qc8%2F5XH40dwAELiLS7YeG2TzisZeBSZJw%2FOuaY7Z1ZXUlF8NXRmqzIa1fKuV0%3D&signature=058a75ee006a24c14e4ba253eef2952c&subChannelCode=VBA
+196. Resource Loading (SVG Icon): GET /icons/icon_close_search.svg
+197. Resource Loading (Image): GET /ts/ds/cd/cf/85/c19aa31b012ae8171d83b6292104769e.jpg
+198. Resource Loading (Image): GET /public/collections/718543644041592832/emojis/emoji_718543644041592832_718543791874064384.webp
+199. Resource Loading (Image): GET /static/icons_tthd/dich-vu-khac.png
+200. API POST (Messages): POST /v1/messages?beta=true
+201. Page Load (Landing Iphone 18 Series): GET /landing/iphone-18-series?_rsc=8ehqw
+202. Page Load (P Banh Trung Thu 2026): GET /p/banh-trung-thu-2026?_rsc=k62qk
+203. Page Load (P Icon Grocery): GET /p/icon-grocery?_rsc=cdibi
+204. Page Load (P Dinh Ti Books): GET /p/dinh-ti-books?_rsc=38zz1
+205. Page Load (Landing An Tam Mua Sam Mua Moi): GET /landing/an-tam-mua-sam-mua-moi?_rsc=eymu5
+206. Page Load (P Golf): GET /p/golf?_rsc=38zz1
+207. Page Load (Landing Nha Dep Dung Y): GET /landing/nha-dep-dung-y?_rsc=38zz1
+208. Page Load (Landing Cong Nghe Sale To): GET /landing/cong-nghe-sale-to?_rsc=38zz1
+209. Page Load (P Sieu Pham Cong Nghe): GET /p/sieu-pham-cong-nghe?_rsc=p2bp6
+210. Page Load (P Tien Nghi Moi Ngay): GET /p/tien-nghi-moi-ngay?_rsc=jq34y
+211. Resource Loading (Image): GET /24/2602_V002226_3x_d11c1a4926.png
+212. Resource Loading (Image): GET /46/Noi_chao_chen_dia_a1c8441b3d.png
+213. Resource Loading (Image): GET /37/12_4xx_d6cd1dc1ed.png
+214. Resource Loading (Image): GET /ff/Quat_cam_tay_mini_2_4x_dd43452fc7.png
+215. Manifest Loading: GET /img/site.webmanifest
+216. Static Asset (JS): GET /resources/js/vnpay.min.2026.v2.js
+217. API POST (Carts List Voucher): POST /api/carts/list-voucher
+218. Static Asset (Favicon): GET /img/favicon.ico
+219. Resource Loading (Image): GET /rs/150_150/avatar/prod/channel_611957074393309947_temp_631338397039550464.jpg
+220. Resource Loading (Image): GET /img/favicon-16x16.png
+221. Resource Loading (Image): GET /ts/ds/52/1f/fb/d7383270646dd44d9d81578160e4dcba.jpg
+222. Resource Loading (Image): GET /d2/6_59feed8d11.png
+223. Resource Loading (Image): GET /ott-backend-v2/20260924/cbd4e283-f49c-4375-a617-a887004e06f9.jpg
+224. Resource Loading (Image): GET /52/FA_25d947763d.png
+225. Resource Loading (Image): GET /static/logo-bank/logo6char/970428.png
+226. Resource Loading (Image): GET /ts/ds/a1/7d/cf/fbd871fbe027dc6a634c0f17bfcb9dff.jpg
+227. Resource Loading (Image): GET /static/card/test/napas.png
+228. Resource Loading (Image): GET /2026/0924/images/722730958990106624.png
+229. Page Load (Landing Sale Trung Thu Ngon Tron Vi): GET /landing/sale-trung-thu-ngon-tron-vi?_rsc=jq34y
+230. Page Load (P Phieu Mua Hang): GET /p/phieu-mua-hang?_rsc=fez19
+231. Static Asset (CSS): GET /resources/css/style.v2.css
+232. Resource Loading (Image): GET /ott-backend/20260829/09f831c1-c2f2-4c94-abb8-86e857753ed8.jpg
+233. API POST (MessageService GetMessage): POST /vntservice/messageService/api/v3/getMessage/908421
+234. Resource Loading (Image): GET /vnaimages/slideshow/20260923/17901367950151125x825-rq338-vi.jpg
+235. Resource Loading (Image): GET /static/logo-bank/logo6char/970430.png
+236. API POST (Ds Query): POST /api/ds/query?ds_type=influxdb&requestId=SQR100
+237. Resource Loading (Image): GET /vnaimages/adverties/20240819/1724051462772fb-900-x-900-k-text.jpg
+238. Resource Loading (Image): GET /vnaimages/adverties/20240819/1724051463036001_Banner-Sky-sofa-512x512.jpg
+239. Static Asset (JS): GET /_next/static/chunks/5507.7900e886a5f7cc62.js
+240. Resource Loading (Image): GET /vnaimages/adverties/20240819/1724050960246Banner-Skypass_2600x1000_notext.jpg
+241. Resource Loading (Image): GET /sdk-document-file/20240515/mienphi.png
+242. Resource Loading (Video): GET /ts/ds/9b/d0/9c/0d8806d8eea233e9c94f594d2a8f9a8e.mp4
+243. API POST (Flashsales Ongoing): POST /api/flashsales/ongoing?filter=%7B%22schannel%22%3A%22VBA%22%7D&schannel=VBA
+244. Resource Loading (Image): GET /c7/popup_8a55509287.png
+245. API POST (Area MB): POST /api/products/stock/area/MB
+246. Page Load (P Thoi Trang Golf): GET /p/thoi-trang-golf?_rsc=jq34y
+247. API POST (Carts Check Hidden Voucher): POST /api/carts/check-hidden-voucher
+248. Resource Loading (Image): GET /e6/750x448_21d3d03b48.png
+249. Resource Loading (Image): GET /vnaimages/feature-promotion/20240727/1722015161334HoChiMinh_600x900.jpg
+250. Resource Loading (Image): GET /public/emojis/da73ea59-7d4f-466b-ba5f-fd953966b3c8.png
+251. Resource Loading (Image): GET /vnaimages/adverties/20240819/1724051463815Evoucher_512x512.jpeg
+252. Resource Loading (Image): GET /resources/images/app-store-icons-apple-app-store.png
+253. Resource Loading (Image): GET /resources/images/Google-Play-Store-Button.png
+254. Resource Loading (Image): GET /live/uploads/20260721/20260721150310_1_JCB-Mothe-Hoantien-iPay-343x193-2x.jpg
+255. Resource Loading (Image): GET /2/608/332/ts/ds/cd/cf/85/749745c3dcd87814ed8b0266c2bea51d.jpg?v=3.1.18
+256. API POST (Area MN): POST /api/products/stock/area/MN
+257. Resource Loading (Image): GET /static/logo-bank/logo8char/99990008.png
+258. Form Submit (Otlp Metrics): POST /otlp/v1/metrics
+259. Resource Loading (Image): GET /sdk-document-file/20240515/thuphi.png
+260. Resource Loading (Image): GET /live/uploads/20260702/20260702133938_1_VietinBank-x-SSI-ProFit_KV-Main_OTT.jpg
+261. Resource Loading (Image): GET /vnaimages/upload/20260428/1777343700306-bp-footer-default.jpg
+262. Resource Loading (Font): GET /sdk-document-file/20260520/SF-Pro-Rounded-Heavy.otf
+263. Resource Loading (Image): GET /avatar-vba/20230428/0f6d9dad0fb84b988704629fbbbddf6f_240x240.png
+264. Resource Loading (Image): GET /dd/750x448_b3aa02b912.png
+265. API POST (Products Flashsale): POST /api/search/products/flashsale
+266. Resource Loading (Image): GET /rs/64_64/avatar/prod/583843971189506048_1785828937872.jpg
+267. Resource Loading (Image): GET /sdk-document-file/20240515/khongapdung.png
+268. Form Submit (MessageService Confirmnotify): POST /sposservice/messageService/confirmnotify/920023/
+269. Resource Loading (Image): GET /2/608/332/ts/ds/47/19/34/ab4d5359e79aa5204c3a8376f0c96747.png?v=3.1.18
+270. Static Asset (JS): GET /_next/static/chunks/2773-859c73e4b13cfed6.js
+271. Static Asset (JS): GET /_next/static/chunks/3744-52850f6f53ce2420.js
+272. Static Asset (JS): GET /_next/static/chunks/app/100_shop/[merchant]/[channel]/[subchannel]/[locale]/(navigation)/[[...slug]]/page-66eb0c33c74b582e.js
+273. Resource Loading (Image): GET /2/608/332/ts/ds/4f/4d/31/144a86224a6bf3efb175c6c2a56a8195.png?v=3.1.18
+274. Static Asset (JS): GET /_next/static/chunks/2032-8406e802b9d0840f.js
+275. Static Asset (JS): GET /_next/static/chunks/9053-9cf122e776ad6501.js
+276. Static Asset (JS): GET /_next/static/chunks/app/100_shop/[merchant]/[channel]/[subchannel]/[locale]/(navigation)/layout-98545c49b95c129d.js
+277. Static Asset (JS): GET /_next/static/chunks/9807-666532df7fe57ec3.js
+278. Resource Loading (Video): GET /ts/ds/31/90/22/0b6b864f47f7a63dc45776923cf76ac1.mp4
+279. Resource Loading (Image): GET /vnaimages/slideshow/20260915/17894434015251125x825-rq331-vi.jpg
+280. Resource Loading (Image): GET /33/750x448_3b373280ce.png
+281. Search Query (Next Image): GET /_next/image?url=%2Fimages%2Fsocial%2Fsocial-vcb.png&w=96&q=90
+282. Resource Loading (Image): GET /sdk-ses-file/20230616/1686889698321_332728069_1192581888040237_834519225254384818_n.jpg
+283. API POST (MessageService GetAllMessage): POST /vntservice/messageService/api/v3/getAllMessage/908421
+284. Resource Loading (Image): GET /vnaimages/slideshow/20260813/1786587956173VI_1125x825_rq312.jpg
+285. Resource Loading (Image): GET /vnaimages/adverties/20220914/16631397945411029x351.jpg
+286. Resource Loading (Image): GET /vnaimages/feature-promotion/20240727/1722015113254DaNang_600x900.jpg
+287. Resource Loading (Image): GET /vnaimages/adverties/20240917/1726540636961HanhLiTraTruoc-FB-VI(logo30nam).png
+288. Resource Loading (Image): GET /vnaimages/adverties/20240819/1724051463626FB900x900px.jpg
+289. Resource Loading (Image): GET /vnaimages/slideshow/20250603/17489128388861125x825(22).jpg
+290. Resource Loading (Image): GET /2/608/332/ts/ds/74/27/70/98893dea7db79107c34c34a4bef15739.jpeg?v=3.1.18
+291. Static Asset (JS): GET /_next/static/chunks/8664-eea84ab443908490.js
+292. Resource Loading (Image): GET /2/608/332/ts/ds/2b/ba/ff/ff5ad1cbfa9d1d256e51978017d98fc2.jpg?v=3.1.18
+293. Resource Loading (Image): GET /vnaimages/adverties/20240819/172405146343903_Lịch-Bay-Quốc-Tế_1125x825_VI.jpg
+294. Resource Loading (Image): GET /resources/logo/agribankplus.jpg
+295. Resource Loading (Image): GET /a8/FREESHIP_4x_d574e6e2a0_72bef5d5ff.png
+296. Resource Loading (Image): GET /2/608/332/ts/ds/03/d5/27/b0bbbd88b57f4a56ce7aa7838a583295.jpg?v=3.1.18
+297. Resource Loading (Image): GET /f1/Samsung_95d935e849.png
+298. Resource Loading (Image): GET /vnshop/24/small_unnamed_18b09cde02.jpg
+299. Resource Loading (Image): GET /sdk-document-file/20240717/vu_short.png
+300. Resource Loading (Image): GET /static/floating-icon/floating-icon-10.png
+301. Resource Loading (Image): GET /vnshop/99/small_unnamed_pn_0cee3ccfa0.png
+302. Resource Loading (Image): GET /icons/home-flash-sale.png
+303. Resource Loading (Image): GET /ts/ds/32/dc/a2/7871f1207e8c4c2747698b5aa6d15a56.png
+304. API POST (Area MB): POST /api/channels/CH1004/products/stock/area/MB
+305. Resource Loading (Image): GET /2/608/332/ts/ds/f8/cd/d1/90ec1871ce9a078e8678c516b0607a68.jpg?v=3.1.18
+306. Static Asset (CSS): GET /_next/static/css/3734d7a95577cf3f.css
+307. Resource Loading (Video): GET /ts/ds/dd/c6/b7/03c3c29a64dbebac66a0a1237c90b76f.mp4
+308. Resource Loading (Image): GET /ts/ds/53/4e/a2/15d2c21055e4eb7dc14cd6564003b560.png
+309. Resource Loading (Image): GET /ts/ds/f2/ca/47/7b361dd994ffdb3188f16f7e44ac2cd3.png
+310. Resource Loading (Image): GET /f4/m2_3x_626e480a85.png
+311. Resource Loading (Image): GET /27/3_1_ec1b49fe86.png
+312. Resource Loading (Image): GET /2/608/332/ts/ds/11/76/58/f3a03f7dc5f7c7447d0b57730587e124.jpg
+313. Page Load (Flash Sale): GET /flash-sale?_rsc=jq34y
+314. Resource Loading (Image): GET /76/ghe_tre_em_7bac31f321.png
+315. Resource Loading (Image): GET /ts/ds/15/60/05/d05597e22e0e77f5be12c460cd7026ab.jpg
+316. Resource Loading (Image): GET /25/13_4x_4666fdc119.png
+317. Resource Loading (Image): GET /a3/Quan_ao_3906831bdd.png
+318. Resource Loading (Image): GET /resources/logo/vietinbank.png
+319. Resource Loading (Image): GET /59/Sua_a83341feba.png
+320. Resource Loading (Image): GET /e8/TPCN_984c0fe755.png
+321. Resource Loading (Image): GET /f5/kcn_1_2x_94b508d421.png
+322. Resource Loading (Image): GET /c2/13_4x_066d5c6535.png
+323. Resource Loading (Image): GET /ee/CAR_1_4898522661.png
+324. Resource Loading (Image): GET /sdk-document-file/20260813/iconNearbyCinema-mascot.png
+325. Static Asset (CSS): GET /sdk-tauhoa/seatmap2/css/tailwind.min.css
+326. Static Asset (CSS): GET /sdk-tauhoa/seatmap2/css/theme.css
+327. Resource Loading (Image): GET /resources/bidv/assets/hero-image.png
+328. Resource Loading (Image): GET /ts/ds/80/44/52/f143ddd06c30a353f9830f2886fab35f.jpg?v=3.1.18
+329. Resource Loading (Image): GET /ts/ds/0a/98/bc/136e11c7857e6ce61ba0b390d5eea71c.png
+330. Resource Loading (Image): GET /ts/ds/21/a9/14/6ae14bc13caafb6920bcd956ca537180.png
+331. Resource Loading (Image): GET /ts/ds/16/98/bd/2c6d8faf44b9b5256b5871dda5fd8d42.png
+332. Resource Loading (Image): GET /ts/ds/1a/35/0e/0406957f09dc8899bc991ceb6560ffc0.png
+333. Resource Loading (Image): GET /ts/ds/ed/47/6e/934ee7857dc02b56f07151b12fbd412d.png
+334. Resource Loading (Image): GET /ts/ds/ff/42/7d/185f1c7f14fb13a21f18f508dd406b2e.png
+335. Resource Loading (Image): GET /ts/ds/40/b3/7a/4535f57adfd33dd9726e2bc5a3c821a8.png
+336. Resource Loading (Image): GET /49/750x448_3_ae52f55263.png
+337. API POST (Chat Completions): POST /v1/chat/completions
+338. Resource Loading (Image): GET /resources/bidv/assets/appstore-badge.png
+339. Resource Loading (Image): GET /resources/bidv/assets/googleplay-badge.png
+340. Resource Loading (Image): GET /static/icon-chuc-nang/favourite/ban-ngoai-te.png
+341. Resource Loading (SVG Icon): GET /resources/bidv/assets/bidv-logo.svg
+342. Resource Loading (Image): GET /live/uploads/20260825/20260825092453_1_VTB-Banner-uu-dai-600-600.jpg
+343. Resource Loading (SVG Icon): GET /resources/bidv/assets/qr-scan-icon.svg
+344. Resource Loading (Image): GET /static/icon-chuc-nang/favourite/bao-hiem-xa-hoi.png
+345. Resource Loading (Image): GET /static/icons_tthd/telco/vietnamobile-04.png
+346. Resource Loading (Font): GET /sdk-document-file/20250918/SF-Pro-Display-Regular.otf
+347. API POST (Area MN): POST /api/channels/CH1004/products/stock/area/MN
+348. Static Asset (JS): GET /resources/js/qr-creator.min.js
+349. Resource Loading (Image): GET /vnaimages/adverties/20240819/17240509606202_Datkhachsantructuyen_EN_1029x351(2).jpg
+350. Resource Loading (Image): GET /rs/154_154/avatar/prod/583843979360010240_1787553003038.jpg
+351. Resource Loading (Image): GET /b3/Popup_5_983f1e4a1b.png
+352. Resource Loading (Font): GET /sdk-document-file/20250918/SF-Pro-Display-Bold.otf
+353. Resource Loading (Image): GET /sdk-document-file/20240717/BL.png
+354. Page Load (Landing Agribank Day): GET /landing/agribank-day?_rsc=be0wt
+355. Resource Loading (Image): GET /rs/80_80/avatar/prod/583843912133705728_1786941796809.jpg
+356. Resource Loading (Image): GET /vnaimages/adverties/20240819/1724050960782VNA_Thuexetulai-Hero-VI(1).jpg
+357. Resource Loading (Image): GET /resources/vtb/favicon-32x32.png
+358. Resource Loading (Image): GET /static/logo-bank/logo6char/971100.png
+359. Resource Loading (Image): GET /ts/ds/6b/f2/fa/cc02b1d0f4a001ea21d761c7614884d7.png?v=3.1.18
+360. Static Asset (CSS): GET /resources/bidv/styles.css
+361. Resource Loading (Image): GET /ts/ds/b3/88/b6/4aa681550dd822934b542587de0bc75e.jpg?v=3.1.18
+362. Resource Loading (Image): GET /ts/ds/4a/92/c5/c2b24dde282f7b85fd6d640fc3112be7.jpg?v=3.1.18
+363. Resource Loading (Image): GET /6e/750x448_3_551385da6f.png
+364. Resource Loading (Image): GET /ts/ds/12/c5/75/d09af12e58cebe049ce432dcf109e26b.jpg?v=3.1.18
+365. Resource Loading (Image): GET /ts/ds/f9/65/0a/820ff0dd8178de627b64574b8a475fee.png?v=3.1.18
+366. Resource Loading (Image): GET /ts/ds/8c/60/7e/9cfb9b5c032a63acd87599a23871b2c7.png?v=3.1.18
+367. Resource Loading (Image): GET /ts/ds/87/a5/ca/c85260e784845d634bb8a4a8070238ab.png?v=3.1.18
+368. Resource Loading (Image): GET /ts/ds/0e/7e/87/d676bfd370c4ea190ebab36ce98cf8f9.jpg?v=3.1.18
+369. Static Asset (Favicon): GET /resources/vtb/favicon.ico
+370. Resource Loading (Image): GET /resources/vtb/favicon-16x16.png
+371. Resource Loading (Image): GET /ts/ds/c8/8d/2a/7bff570aac6a5b8da3e3978be0a10523.jpeg?v=3.1.18
+372. Resource Loading (Image): GET /ts/ds/f6/7b/fc/5657c5c2f5d83c534ae75b60e78394ee.jpg?v=3.1.18
+373. Resource Loading (Image): GET /79/small_1_61c972bd58.jpg
+374. Resource Loading (Image): GET /ts/ds/1e/97/8c/160468bc78e26f3f0cb04839e40494c1.jpg?v=3.1.18
+375. Resource Loading (Image): GET /vnaimages/slideshow/20260923/17901369271201125x825-rq338-en.jpg
+376. Resource Loading (Image): GET /live/uploads/20260622/20260622100328_1_iPay%20750x500.jpg
+377. Resource Loading (Image): GET /ef/750x448_ea20abc966.png
+378. Resource Loading (Image): GET /static/logo-bank/logo6char/970465.png
+379. Resource Loading (Image): GET /ts/ds/7c/9b/03/49acde67ad9e1d785512907723645e2e.jpg?v=3.1.18
+380. Resource Loading (Image): GET /ts/ds/7e/33/80/afa78d1e2adc450aba767ee78c0b545f.jpg?v=3.1.18
+381. Resource Loading (Image): GET /ott-backend/20260924/1a10e464-f9e8-49e1-8128-874422ed8783.jpg
+382. Resource Loading (Image): GET /2/608/332/ts/ds/36/d1/6f/98ed8fedb0a57abd4f33503ff2f3c324.jpg?v=3.1.18
+383. Resource Loading (Image): GET /2/608/332/ts/ds/d7/e7/f7/44b4ab809ab3e945f80730175c343f31.jpg?v=3.1.18
+384. Resource Loading (Image): GET /static/banner-home/MB/banner-20260723.jpg
+385. Resource Loading (Image): GET /ea/750x448_3_34d32ea2df.png
+386. Resource Loading (Image): GET /static/logo-bank/logo6char/963369.png
+387. Resource Loading (Image): GET /vnshop/8d/small_unnamed_9714885d89.jpg
+388. Resource Loading (Image): GET /25/small_2_3f93702f2c.jpg
+389. Resource Loading (Image): GET /2/608/332/ts/ds/b5/15/da/e6461a9460a6f010e98e8b8ccced9fc5.png?v=3.1.18
+390. Resource Loading (Image): GET /2/608/332/ts/ds/08/69/cb/58f468e8d2152485a927047e98d3fd94.jpg?v=3.1.18
+391. Resource Loading (Image): GET /static/logo-bank/logo6char/971061.png
+392. Resource Loading (Image): GET /2/608/332/ts/ds/97/f4/e2/6208aa4c430fde9ab130eae529fb6b87.jpeg?v=3.1.18
+393. API POST (Area MB): POST /api/channels/CH1001/products/stock/area/MB
+394. Resource Loading (Image): GET /avatar-other/20260919/33e1bda3ef7e4e939df4505b8e0d521f_240x240.png
+395. Resource Loading (Image): GET /static/logo-bank/logo6char/971032.png
+396. Resource Loading (Image): GET /ott-backend-v2/20250526/e5007b03-b0fd-4253-8f3b-cd6ffbb48aa4.jpg
+397. Resource Loading (Image): GET /ts/ds/f3/cc/dd/aed82da10b3e037fbc59ae02ec382599.jpg
+398. Resource Loading (Image): GET /ts/ds/79/9b/5a/51199a26e8d432eb201d2a48710a908a.jpg
+399. Resource Loading (Image): GET /2/608/332/ts/ds/dc/0a/54/a9a98a6b9930b4a31d6032eb09c15ec2.jpg?v=3.1.18
+400. Resource Loading (Image): GET /2/608/332/ts/ds/6e/ab/b4/0f6935c65156a20082bc6b7b4456389c.jpg?v=3.1.18
+401. Page Load (Landing Sieu Hoi Me Be 9): GET /landing/sieu-hoi-me-be-9?_rsc=jq34y
+402. Resource Loading (Image): GET /2/608/332/ts/ds/32/a7/13/0b8468e6fcef7d8ca9e6508f784dcd0b.jpg?v=3.1.18
+403. Page Load (Client Data Customer Meta Data): GET /client-data/1/customer-meta-data.json?agentResourceIdentifier=22790&ResourceID=22790&uniqueValue=5CD344F48C
+404. Resource Loading (Image): GET /2/608/332/ts/ds/27/6c/bd/aa89defbce6ab444204fe3a30d59910d.png?v=3.1.18
+405. Resource Loading (Image): GET /2/608/332/ts/ds/04/ae/18/9ee650dff5237d8bcfdb2f92aa049e1c.jpg?v=3.1.18
+406. API POST (Flashsales Ongoing): POST /api/flashsales/ongoing?filter=%7B%22schannel%22%3A%22908401%22%7D&schannel=908401
+407. Resource Loading (Image): GET /ts/ds/d0/09/6e/2c5c685d267f0fcc36069117252a27ef.jpg
+408. Resource Loading (Image): GET /static/logo-bank/logo6char/963368.png
+409. Resource Loading (Image): GET /2/608/332/ts/ds/a6/ec/ae/7c8e98a41b7fbc703ab52eea9b7eb714.png?v=3.1.18
+410. Resource Loading (Image): GET /2/608/332/ts/ds/90/33/4e/ac973dd6851b9b960cb1483b372d7bce.png?v=3.1.18
+411. Resource Loading (Image): GET /ts/ds/37/63/fc/11f43b4b3ff42855a1dfb81c1d5dc2e7.jpg?v=3.1.18
+412. Form Submit (LoginService Loginbt): POST /vntservice/loginService/loginbt/908421/
+413. Form Submit (UserService Get Receiving Status): POST /vntservice/userService/get-receiving-status/908421/
+414. Resource Loading (Image): GET /2/608/332/ts/ds/4e/b1/29/0679d07635a8976133962a4df29c9a8f.jpg?v=3.1.18
+415. Resource Loading (Image): GET /ott-backend/20260828/d8e458c5-1602-42a8-8e9f-897c1bd55155.jpg
+416. Resource Loading (Image): GET /vnshop/82/small_unnamed_jp_07e7925c7d.jpeg
+417. Resource Loading (Image): GET /vnaimages/adverties/20240917/1726540954494ảnh_Viber_2024-08-19_09-21-30-207.png
+418. Static Asset (Favicon): GET /resources/default/favicon.ico
+419. Resource Loading (Image): GET /vnaimages/bpconfig/20241223/1734918218005ADT-v5.jpg
+420. Resource Loading (Image): GET /ts/ds/9d/b8/1e/8ce13481fedd70d375afce988956d9cc.jpg
+421. Resource Loading (Video): GET /bidv/BOTTOM-NFC%20ANDROI-%20VIET_1.mp4
+422. API GET (Notifications Count Unread): GET /wms/api/v1/notifications/count-unread
+423. Resource Loading (Image): GET /resources/default/favicon-32x32.png
+424. Resource Loading (Image): GET /vnshop/09/small_unnamed_c46757c6d1.png
+425. Resource Loading (Image): GET /2/608/332/ts/ds/00/3c/3a/6aeeab0d9819388ea8df270b3a93c6d1.jpg?v=3.1.18
+426. Resource Loading (Image): GET /2/608/332/ts/ds/d5/b8/3f/60a400fddfecd87c5c1a3de7455c1332.jpg?v=3.1.18
+427. API GET (Task Management Tickets): GET /service-staff/task-module/api/v1/task-management/tickets?page=1&page_size=20&is_ticket_of_user=true
+428. Resource Loading (Image): GET /2/608/332/ts/ds/c6/4b/e2/8a994c3d70ba701715fab9f003555d75.jpg?v=3.1.18
+429. Resource Loading (Image): GET /static/logo-bank/logo6char/963326.png
+430. Resource Loading (Image): GET /2/608/332/ts/ds/9e/63/23/63bb08e92f9da1b050303d14e4637d77.png?v=3.1.18
+431. Resource Loading (Image): GET /rs/136_136/avatar/prod/583843878050791424_1786962025282.jpg
+432. Resource Loading (Image): GET /2/608/332/ts/ds/f4/09/0d/c9256b1d273a00209dd8d702095bff81.jpg?v=3.1.18
+433. Resource Loading (Image): GET /resources/default/favicon-16x16.png
+434. Resource Loading (Image): GET /vnaimages/adverties/20240819/1724052077708VNA_Thuexetulai(1).jpg
+435. Resource Loading (Image): GET /ts/ds/30/e6/2f/0533b7c7be57867e629e71052d1edd88.jpg
+436. Resource Loading (Image): GET /static/logo-bank/logo6char/971101.png
+437. Resource Loading (Image): GET /ts/ds/d8/b7/4e/313ff0caab3c8f518be523da266c0fe7.png
+438. Resource Loading (Image): GET /ts/ds/18/e2/99/123a76b29e748e0f1a3ed3e19dbf3e47.jpg
+439. Resource Loading (Image): GET /ts/ds/03/2b/2c/f33008ad163c5dae40aa6148b2cb9739.jpg
+440. Resource Loading (Image): GET /2/360/479/ts/ds/47/53/e4/1570b4a6e15652e74dffceb30432cda7.jpg?v=3.1.18
+441. Resource Loading (Image): GET /91/FREESHIP_4x_d574e6e2a0.png
+442. Resource Loading (Image): GET /ts/ds/8c/da/81/37caba656ceaacc4c2108bf58bd57476.jpg
+443. Resource Loading (Image): GET /ts/ds/fe/5d/f2/887fa7696d43ac9b689c6d80dc814323.jpg
+444. Resource Loading (Image): GET /static/logo-bank/logo6char/963669.png
+445. Resource Loading (Image): GET /vnaimages/slideshow/20260915/17894433550761125x825-rq331-en.jpg
+446. Resource Loading (Image): GET /2/608/332/ts/ds/87/0c/fd/ac809bc52b629f69b4ecf29ca87e5744.jpg?v=3.1.18
+447. Resource Loading (Image): GET /2/608/332/ts/ds/26/2b/84/102c7aac6f7d20a6f6ff34bda26dc551.png?v=3.1.18
+448. Resource Loading (Image): GET /live/uploads/20260504/20260504151639_1_UuDaiVuaNem-iPay343x193px.png
+449. Resource Loading (Image): GET /ts/ds/e9/c4/7b/ae56d4977c72cf207e99796fab55805d.jpeg
+450. Resource Loading (Image): GET /2/608/332/ts/ds/7c/a0/87/9fe766067ed17e19b43eb06e63278761.jpg?v=3.1.18
+451. Resource Loading (Image): GET /live/uploads/20260915/20260915125109_1_47.1.jpg
+452. Resource Loading (Image): GET /2/608/332/ts/ds/03/d6/c2/10e46b59100e7c1ac38974572e49008d.jpg?v=3.1.18
+453. Resource Loading (Image): GET /2/608/332/ts/ds/a6/18/28/9baa03dfc80b3b56b6617fcf87083f8c.png?v=3.1.18
+454. Resource Loading (Image): GET /2/608/332/ts/ds/00/eb/6e/650eb60f2c0dfb1b82260dbac73dd3b5.jpg?v=3.1.18
+455. Resource Loading (Image): GET /sdk-document-file/20240205/image_promo_detail.png
+456. Resource Loading (Image): GET /static/logo-bank/logo6char/971034.png
+457. Resource Loading (Image): GET /2/608/332/ts/ds/ac/8b/a2/5b20ddf36d1bd3eed86d5138b3cf5341.jpg?v=3.1.18
+458. Resource Loading (Image): GET /4e/Top_banner_homepage_750x448_c3d8191783.png
+459. Resource Loading (Image): GET /vnaimages/feature-promotion/20240727/1722015448416LONGBIENHN2_600x900.jpg
+460. Resource Loading (Image): GET /2/608/332/ts/ds/79/9b/5a/d4ac943c1890a8ff13800ad34f8a2393.jpg?v=3.1.18
+461. Resource Loading (Image): GET /2/608/332/ts/ds/77/ea/a8/f76f65d79ac1cf7fe14efba408a86bbb.jpg?v=3.1.18
+462. Resource Loading (Image): GET /d4/750x448_0710573efe.png
+463. Resource Loading (Image): GET /2/608/332/ts/ds/3a/71/92/264e67dc637e8d169d60d4efc282ead1.jpg?v=3.1.18
+464. Resource Loading (Image): GET /2/608/332/ts/ds/09/dd/8c/eb04cafacb1692660a6128a92d10de04.png?v=3.1.18
+465. Resource Loading (Image): GET /2/608/332/ts/ds/3f/96/c2/525229994815ccb506085d34feefca62.png?v=3.1.18
+466. Resource Loading (Image): GET /2/608/332/ts/ds/d0/09/6e/24e090ca92d3670405d9ea4f37a60665.jpg?v=3.1.18
+467. Resource Loading (Image): GET /2/608/332/ts/ds/9d/cd/5a/c592f127205814ee8ec1b5331f99f4ba.png?v=3.1.18
+468. Resource Loading (Image): GET /2/608/332/ts/ds/74/9c/17/063d5f6ed13221c32a1ecafea769dd0d.jpg?v=3.1.18
+469. Resource Loading (Image): GET /ts/ds/72/19/51/99c7e260510ab4479943c017102fd84b.png
+470. Resource Loading (Image): GET /2/608/332/ts/ds/61/d7/92/eb4aaee7e4d00287b127fb3a85271fab.jpg?v=3.1.18
+471. Resource Loading (Image): GET /sdk-document-file/20260813/iconPopcorn-mascot.png
+472. Resource Loading (Image): GET /2/608/332/ts/ds/17/94/d8/e81147e47c416a123e915d948ba97e99.jpeg?v=3.1.18
+473. Resource Loading (Image): GET /2/608/332/Upload/eventcover/2024/03/18/437B6C.jpg?v=3.1.18
+474. Resource Loading (Image): GET /2/608/332/ts/ds/41/e9/7a/c2459d26d0f64f61e158f82a0b110335.png?v=3.1.18
+475. Resource Loading (Image): GET /2/608/332/ts/ds/f8/16/13/704eb8f779bb52bfdeabb990a588755c.jpg?v=3.1.18
+476. Resource Loading (Image): GET /2/608/332/ts/ds/b3/fc/2c/2a96787e02e412d56b4021c838f3aa58.jpg?v=3.1.18
+477. Resource Loading (Image): GET /2/608/332/ts/ds/2c/2d/cd/5505efdde95ef20e3460a0b751edcc05.jpg?v=3.1.18
+478. Resource Loading (Image): GET /2/608/332/ts/ds/d1/4c/a9/9402f06f4920d114c5beb212279c18c9.jpg?v=3.1.18
+479. Resource Loading (Image): GET /2/608/332/ts/ds/f8/b9/66/b4bae6ec9cf07154f52ae4c722f7267b.jpg?v=3.1.18
+480. Resource Loading (Image): GET /2/608/332/ts/ds/b0/06/36/6f6090c74470990d860307949a19159d.png?v=3.1.18
+481. Resource Loading (Image): GET /2/608/332/ts/ds/63/0c/7c/126d217da8455e8a6604d63ddffde725.jpg?v=3.1.18
+482. Resource Loading (Image): GET /vnaimages/slideshow/20260813/17865880188171125x825_rq312_en.jpg
+483. Resource Loading (Image): GET /sdk-app/sdk-tauhoa/23092026/21x9%20(1).jpg
+484. Resource Loading (Image): GET /rs/204_205/avatar/prod/583843703014096896_1788749042079.jpg
+485. Resource Loading (Image): GET /live/uploads/20260730/20260730154728_1_UuDaiVietinBankVisa-Starbucks-Banner900x600px.jpg
+486. Resource Loading (Image): GET /2/608/332/ts/ds/9b/d3/8c/394c52ad690f782fee7712dfa1be6315.jpg?v=3.1.18
+487. Resource Loading (Image): GET /2/608/332/ts/ds/f3/cc/dd/82e5e492e362ba4abea28f0c9fe690c1.jpg?v=3.1.18
+488. Resource Loading (Image): GET /2/608/332/ts/ds/43/ea/80/0d9f3b91dc815025360a2661bac198b9.jpg?v=3.1.18
+489. Resource Loading (Image): GET /2/608/332/ts/ds/82/66/e4/c197c2255d40eb0940465707418f239c.png?v=3.1.18
+490. API GET (Annotations): GET /api/annotations?from=1789225440000&to=1789225499000&limit=100&matchAny=false&dashboardUID=liz0yRCZz
+491. Resource Loading (Image): GET /vnaimages/adverties/20240917/1726540954241HanhLiTraTruoc-FB-EN.jpg
+492. Resource Loading (Image): GET /vnaimages/adverties/20240819/1724054283596ảnh_Viber_2024-08-19_14-56-22-409.jpg
+493. API GET (Task Management Tickets): GET /service-staff/task-module/api/v1/task-management/tickets/01a0d11e-a940-7742-879b-2c2d3778f451
+494. Resource Loading (Image): GET /2/608/332/ts/ds/d7/5f/6b/ba5009848a3535f2408014f42dab4425.jpg?v=3.1.18
+495. Resource Loading (Image): GET /2/608/332/ts/ds/60/2e/8f/7745b34257e6a25406e016f98d3a9df9.png?v=3.1.18
+496. Resource Loading (Image): GET /2/608/332/ts/ds/9e/b9/cd/e37d8440a8ba59649e3cee440dc4b75d.png?v=3.1.18
+497. Resource Loading (Image): GET /2/608/332/ts/ds/b4/59/45/3048bdc5db4e2235b78c531348abcc51.jpg?v=3.1.18
+498. Static Asset (JS): GET /resources/js/vnpay.min.2025.v8.js
+499. API POST (Carts Update Price): POST /api/carts/update-price
+500. Resource Loading (Image): GET /2/608/332/ts/ds/b6/69/c8/41b6ee0ed16efb1ec69b8941da39d70c.jpg?v=3.1.18
+501. Resource Loading (Image): GET /2/608/332/ts/ds/b6/7d/6b/df1d44d30bf41ae140f6383dfce54c88.jpg?v=3.1.18
+502. Resource Loading (Image): GET /2/608/332/ts/ds/8c/ec/c5/b52759a38ec4b4c4799bc98e2759a735.jpg?v=3.1.18
+503. Resource Loading (Image): GET /sdk-tauhoa/seatmap2/images/seat_top3.png
+504. Resource Loading (Image): GET /2/608/332/ts/ds/46/ef/e0/7014ff02d501ef4080a218b57934c280.jpg?v=3.1.18
+505. Resource Loading (Image): GET /2/608/332/ts/ds/0c/c8/06/b741a7c6cffbc74dab6e9bb00b37b4b7.png?v=3.1.18
+506. API GET (Grafana Rules): GET /api/prometheus/grafana/api/v1/rules?dashboard_uid=nM-QgQ87zg
+507. Resource Loading (Image): GET /95/popup_ed269c2d57.png
+508. Resource Loading (SVG Icon): GET /icons/icon_top1.svg
+509. Form Submit (Service T Action1): POST /service-t/v2/action1
+510. Resource Loading (SVG Icon): GET /icons/icon_top2.svg
+511. Resource Loading (Image): GET /2/608/332/ts/ds/2d/0d/bc/d190e18092a859108a202f717f2e0dac.png?v=3.1.18
+512. Resource Loading (Image): GET /sdk-tauhoa/seatmap2/images/seat_top1.png
+513. Resource Loading (SVG Icon): GET /icons/icon_top3.svg
+514. Resource Loading (Image): GET /sdk-document-file/20260813/iconWarning-mascot.png
+515. Resource Loading (Image): GET /2/608/332/ts/ds/3e/bb/d4/2d72f27d8a1273bed60ea05f408cccda.jpg?v=3.1.18
+516. Resource Loading (Image): GET /2/608/332/ts/ds/df/ec/26/35bec5d69c0733a56eec669faa2a10c6.jpeg?v=3.1.18
+517. Resource Loading (Image): GET /2/608/332/ts/ds/b7/9d/e2/d2625c1385133c9fee4f6cba62f47b1f.jpeg?v=3.1.18
+518. Resource Loading (Image): GET /2/608/332/ts/ds/12/c5/75/d09af12e58cebe049ce432dcf109e26b.jpg?v=3.1.18
+519. Resource Loading (Image): GET /2/608/332/ts/ds/90/00/db/58cdba553a688fcef67cac436e12f9cd.jpg?v=3.1.18
+520. Resource Loading (Image): GET /2/608/332/ts/ds/74/4d/42/4977fe4293a78a571775ba939aac81e3.jpg?v=3.1.18
+521. Resource Loading (Image): GET /vnshop/fc/small_unnamed_375c06da3e.jpg
+522. Resource Loading (Image): GET /2/608/332/ts/ds/d2/62/f6/bee2171a7ea04782f698a7ad7ea667d4.jpeg?v=3.1.18
+523. Resource Loading (Image): GET /58/small_1_66d8410276.png
+524. Resource Loading (Image): GET /rs/115_115/avatar/prod/583843928625709056_1790046809999.jpg
+525. Resource Loading (Image): GET /live/uploads/20260422/20260422163454_1_343x193-SSI.png
+526. Resource Loading (Image): GET /static/logo-bank/logo6char/971097.png
+527. Resource Loading (Image): GET /2/614/350/ts/ds/1d/7b/ab/3a226dc0dc2f5dfcfe2440a3b4061286.jpeg?v=3.1.18
+528. Resource Loading (Image): GET /2/608/332/ts/ds/c9/ba/ca/99cab16cd8cd025f75e74a92a72bce14.png?v=3.1.18
+529. Resource Loading (Image): GET /2/608/332/ts/ds/1e/97/8c/160468bc78e26f3f0cb04839e40494c1.jpg?v=3.1.18
+530. Resource Loading (Image): GET /static/logo-bank/logo6char/963601.png
+531. Resource Loading (Image): GET /static/logo-bank/logo6char/971031.png
+532. Resource Loading (Image): GET /2/608/332/ts/ds/7a/66/27/7ed1c628aba7298a7f9f493ea89fcd3f.jpg?v=3.1.18
+533. Resource Loading (Image): GET /resources/bidv/favicon-32x32.png
+534. Form Submit (UserService Get Notification Sounds): POST /vntservice/userService/get-notification-sounds/908421/
+535. Resource Loading (Image): GET /2/608/332/ts/ds/3d/b9/11/3dd32b362f22f0adef9016334be3c646.jpg?v=3.1.18
+536. API POST (Envelope): POST /api/18/envelope/?sentry_version=7&sentry_key=05dbe6daec9214fee35385b9e0bc6cb9&sentry_client=sentry.javascript.browser%2F10.70.0
+537. Resource Loading (Image): GET /2/608/332/ts/ds/7f/3d/73/236e299fb427f4b308c0421a34c280eb.jpeg?v=3.1.18
+538. Resource Loading (Image): GET /ts/ds/54/98/29/79416e1c54525f00da6aff2e82ac73e0.png?v=3.1.18
+539. Form Submit (MessageService GetmsgAdv): POST /saleconnect/messageService/getmsgAdv/920025/
+540. Resource Loading (Image): GET /static/logo-bank/logo6char/963686.png
+541. Resource Loading (Image): GET /vnshop/f0/small_blob_ayokx_d15a7a18b1.webp
+542. Resource Loading (Image): GET /ott-backend/20260820/95a868d1-7d0e-42c7-8e24-489df7932974.jpg
+543. Resource Loading (Image): GET /rs/147_147/avatar/prod/583843870056448000_1788752543424.jpg
+544. Form Submit (Service T Tracking1): POST /service-t/v2/tracking1
+545. Resource Loading (Image): GET /2/608/332/ts/ds/21/0f/51/ee9416ba010b7d38e4cd475d53506a7f.jpg?v=3.1.18
+546. Resource Loading (Image): GET /2/608/332/ts/ds/c7/5b/e5/a2f0217df7df81125cd65ba319d89894.jpg?v=3.1.18
+547. Resource Loading (Image): GET /ts/ds/f6/7b/fc/5657c5c2f5d83c534ae75b60e78394ee.jpg
+548. Resource Loading (Image): GET /2/608/332/ts/ds/c1/c7/0c/61fdb21530b82bbca58991bbeed66286.jpg?v=3.1.18
+549. Resource Loading (Image): GET /content/thumbs/20250212/jvx4mfu5kceruhifgtvsa_imagebike.png
+550. Resource Loading (Image): GET /content/thumbs/20250212/ku7xglpsk0iu1rhcqud1qw_imagecar.png
+551. Resource Loading (Image): GET /2/608/332/ts/ds/02/47/a9/d71c016d0b5597450df0a2bd023ed6d1.jpg?v=3.1.18
+552. Resource Loading (Image): GET /02/small_4099_C_8e4e0ca148.jpg
+553. Resource Loading (Image): GET /2e/750x448_3_b7783e9f47.png
+554. API POST (Promotions): POST /api/promotions?areaType=MB
+555. Resource Loading (Font): GET /sdk-document-file/20250623/PlusJakartaSans-Light.ttf
+556. Form Submit (UserService Get Receiving Status): POST /vntservice/userService/get-receiving-status/908421
+557. Resource Loading (Image): GET /2/360/479/ts/ds/3c/a0/7d/c76f84a10a0ee8260e37f4fc31255f16.jpg?v=3.1.18
+558. Resource Loading (Image): GET /2/360/479/ts/ds/eb/64/e6/5420b1e13816eb1285325f91ab58c1ab.jpg?v=3.1.18
+559. Resource Loading (Image): GET /2/360/479/ts/ds/82/3d/e3/90691b423e3383e8a541717d6f23f055.jpg?v=3.1.18
+560. Resource Loading (Font): GET /sdk-document-file/20250918/SF-Pro-Display-Medium.otf
+561. Resource Loading (Image): GET /2/360/479/ts/ds/27/92/d4/85057e96b48ff86e2f355e9f61e05f9a.png?v=3.1.18
+562. Resource Loading (Image): GET /2/360/479/ts/ds/fd/40/5e/994420f22c162fab28c1519ed97a6918.jpg?v=3.1.18
+563. Resource Loading (Image): GET /2/608/332/ts/ds/e5/78/72/12f19808551a699da12c6fbefa2ab80b.jpeg?v=3.1.18
+564. Resource Loading (Image): GET /2/360/479/ts/ds/70/7f/6b/a2ea21f14b597de7ce1d7ad6cd82ad94.jpg?v=3.1.18
+565. Static Asset (JS): GET /sdk-tauhoa/seatmap2/js/tabs.js
+566. Manifest Loading: GET /resources/bidv/site.webmanifest
+567. Resource Loading (Image): GET /2/608/332/ts/ds/03/21/08/2aff26681043246ebef537f075e2f861.png
+568. Resource Loading (Image): GET /2/360/479/ts/ds/ee/e2/40/d06d4d102d4afd0b5e64d294b26aebba.jpg?v=3.1.18
+569. Resource Loading (Image): GET /vnshop/24/small_1_iphone_1_dd279e28aa.jpeg
+570. Resource Loading (Image): GET /2/360/479/ts/ds/e3/4e/81/ec314ae021500a56689739330fbf5511.png?v=3.1.18
+571. Resource Loading (Image): GET /72/small_neptune_mua_2_tang_1_02893b3940.png
+572. Resource Loading (Image): GET /2/360/479/ts/ds/ef/4e/c5/4c0b96d3d7d5bf998e368cb17c503af1.jpg?v=3.1.18
+573. Resource Loading (Image): GET /2/360/479/ts/ds/64/ec/f7/1774645017a670715ea14aba00cf7130.jpg?v=3.1.18
+574. Resource Loading (Image): GET /2/608/332/ts/ds/1a/d4/33/2b59b93b684b6860234ad8144c64f4dc.jpg?v=3.1.18
+575. Resource Loading (Image): GET /2/608/332/ts/ds/43/96/0f/b8ea14538303256388949a54cdf972c8.jpg?v=3.1.18
+576. Resource Loading (Image): GET /2/614/350/ts/ds/a1/7d/cf/fbd871fbe027dc6a634c0f17bfcb9dff.jpg?v=3.1.18
+577. Resource Loading (Image): GET /46/small_7603_C_4a3c90c01c.jpg
+578. Resource Loading (Image): GET /2/360/479/ts/ds/2c/c9/b2/b7f21e393337c16dedf7e5635a893ebe.jpg?v=3.1.18
+579. Resource Loading (Image): GET /2/608/332/ts/ds/a5/ec/20/2227532d41d2bbfd7d58ca28f9690c55.jpg?v=3.1.18
+580. Resource Loading (Image): GET /2/360/479/ts/ds/92/d6/49/4989c80c20eb33cbabe3d97ca9bff3e2.jpg?v=3.1.18
+581. Resource Loading (Image): GET /98/Truck_e8e8613937.png
+582. Resource Loading (Image): GET /2/360/479/ts/ds/48/8a/3f/718488b1ea091e90931c26de3686cd77.jpg?v=3.1.18
+583. Resource Loading (Image): GET /e2/Hand_Coins_779352e452.png
+584. Resource Loading (Image): GET /ea/Calendar_Check_ca0ab57e69.png
+585. Resource Loading (Image): GET /2/608/332/ts/ds/a9/52/19/d958f1b6a43d7a299454b499aa547815.jpeg?v=3.1.18
+586. Resource Loading (Image): GET /ca/Check_Square_00f1d88b87.png
+587. Resource Loading (Image): GET /sdk-app/sdk-tauhoa/24112025/Tầu%20Sông%20Lam.jpg
+588. Resource Loading (Image): GET /2/608/332/ts/ds/c6/a5/98/a9b547d423e7a3600859d1b8de8bc581.jpeg?v=3.1.18
+589. Resource Loading (Image): GET /sdk-app/sdk-tauhoa/24112025/HP%203.jpg
+590. Resource Loading (Image): GET /sdk-app/sdk-tauhoa/24112025/tao-cong-dong-ve-tau-hue-da-nang.jpg
+591. Resource Loading (Image): GET /2/608/332/ts/ds/99/3e/6b/a4effd22a89b16897e1ccf5035e89f3b.jpg?v=3.1.18
+592. Resource Loading (Image): GET /sdk-app/sdk-tauhoa/24112025/JSE%205.jpg
+593. Resource Loading (Image): GET /2/614/350/ts/ds/98/98/44/f731988808200a08e9997ccc9995e2ca.jpeg
+594. Resource Loading (Image): GET /2/360/479/ts/ds/67/68/cd/3657ac80eed561e8e344e8f70dc1f71d.jpg?v=3.1.18
+595. Static Asset (Favicon): GET /resources/bidv/favicon.ico
+596. Resource Loading (Image): GET /2/608/332/ts/ds/7c/69/8c/c619768752d3a3842e5e183ad1f9f8fc.png?v=3.1.18
+597. Resource Loading (Image): GET /2/608/332/ts/ds/7c/92/3c/6d18f9a599ebe54634290f7a6666f768.jpg?v=3.1.18
+598. Page Load (Officevnpay Meta Data): GET /client-data/1/domains/officevnpay/meta-data.xml?agentResourceIdentifier=22579&ResourceID=22579&uniqueValue=PF54VFJ4
+599. Resource Loading (Image): GET /2/608/332/ts/ds/1e/3c/17/a7c9fd8e43e8e6ec48244a08fbad973a.png
+600. Form Submit (MessageService Confirm Socket): POST /vntservice/messageService/confirm_socket/908421
+601. Resource Loading (Image): GET /2/360/479/ts/ds/66/55/4f/d686d28cc2af5c8142db1fb3a1fb120d.jpg?v=3.1.18
+602. Resource Loading (Image): GET /content/thumbs/20250211/czn2myvlweclciyymyr8jq_property_1_gsmxanh.png
+603. Resource Loading (SVG Icon): GET /sdk-tauhoa/seatmap2/images/title-bg-toa.svg
+604. Page Load (Landing Sieu Sale Gia Dung Nha Cua): GET /landing/sieu-sale-gia-dung-nha-cua?_rsc=jq34y
+605. Resource Loading (Image): GET /2/608/332/ts/ds/14/bc/08/2341eda0a89b568ca57aa3b6ed9238aa.png?v=3.1.18
+606. Resource Loading (Image): GET /vnshop/24/unnamed_18b09cde02.jpg
+607. Resource Loading (Image): GET /2/360/479/ts/ds/9c/d4/25/90048b40bfa13492abd74cec3a446c9c.jpg?v=3.1.18
+608. Resource Loading (Image): GET /f7/kidplaza2_1_e3adfa395c.png
+609. Resource Loading (SVG Icon): GET /icons/social/zalo.svg
+610. Resource Loading (Image): GET /2/614/350/ts/ds/52/1f/fb/d7383270646dd44d9d81578160e4dcba.jpg?v=3.1.18
+611. Resource Loading (Image): GET /2/608/332/ts/ds/e9/01/34/d164af4974782962ed258bbde1b6ed1a.png?v=3.1.18
+612. Resource Loading (Image): GET /2/608/332/ts/ds/a6/0a/4a/60e9e35f58d00a4df2f987fe5f02803c.jpg?v=3.1.18
+613. Static Asset (Favicon): GET /resources/bidv/assets/favicon.ico
+614. Resource Loading (Image): GET /7c/6_2x_fc66cb16ab.png
+615. Resource Loading (Image): GET /resources/bidv/favicon-16x16.png
+616. Resource Loading (Image): GET /2/608/332/ts/ds/c7/bb/97/31169d5ce867b4e51c0b145fc0246d8f.jpeg?v=3.1.18
+617. Form Submit (MessageService GetpeddingmsgV2): POST /vntservice/messageService/getpeddingmsgV2/908421
+618. Form Submit (MessageService GetmsgAdv): POST /vntservice/messageService/getmsgAdv/908421
+619. Resource Loading (Image): GET /2/608/332/ts/ds/0d/82/a1/646272648e17497eb768d1a8d2e72e86.jpg?v=3.1.18
+620. Resource Loading (Image): GET /4b/8_2x_c16c43e5fd.png
+621. Resource Loading (SVG Icon): GET /icons/social/facebook.svg
+622. Resource Loading (Image): GET /67/1_0615da5dd3.jpg
+623. Resource Loading (Image): GET /2/608/332/ts/ds/9b/85/b2/9362cb5a33bebeb4b290577b583446dc.jpeg?v=3.1.18
+624. Resource Loading (Image): GET /2/608/332/ts/ds/f6/b6/76/01232b9ce231c571c27e8cac954388ef.jpg?v=3.1.18
+625. Resource Loading (Image): GET /2/608/332/ts/ds/f6/7b/fc/5657c5c2f5d83c534ae75b60e78394ee.jpg?v=3.1.18
+626. Resource Loading (Image): GET /2/608/332/ts/ds/fb/27/28/a0e414de53dfc3d59f24376a866a63a5.jpg?v=3.1.18
+627. Resource Loading (Image): GET /avatar/prod/channel_586672603079974912_temp_698876581735579648.jpg
+628. Resource Loading (Image): GET /2/608/332/ts/ds/0b/c5/62/33be571d0d5a64c80e3a7ed5ca57be56.jpg?v=3.1.18
+629. Resource Loading (Image): GET /2/608/332/ts/ds/b0/59/2d/a3216a093f8a4c6a8b76f57af8613a26.jpg?v=3.1.18
+630. API POST (MessageService GetMessageByGroup): POST /vntservice/messageService/api/v2/getMessageByGroup/908421
+631. Resource Loading (Image): GET /static/card/new/success.png
+632. Static Asset (CSS): GET /_next/static/css/e0bdd27e8d525d6a.css
+633. API POST (Products Suggestions): POST /api/search/products/suggestions
+634. Resource Loading (Image): GET /2/608/332/ts/ds/1e/0e/6c/17120c77942492317b052325a84df269.jpg?v=3.1.18
+635. Resource Loading (Image): GET /2/608/332/ts/ds/78/55/da/1565a5f71a9f0fc008f9516352c72d72.jpg?v=3.1.18
+636. Resource Loading (Image): GET /9e/13_281d4041af.png
+637. Resource Loading (Image): GET /2/608/332/ts/ds/69/f3/7b/17e948c69272343854bfce0d528982bb.jpg?v=3.1.18
+638. Page Load (1280 1707 Images): GET /rs/1280_1707/2026/0918/images/718543380405395456.heic
+639. Resource Loading (Image): GET /2/608/332/ts/ds/be/22/f0/cb84924df000c7241a9e2d8be0debf42.jpg?v=3.1.18
+640. Resource Loading (Image): GET /2/608/332/ts/ds/1f/83/60/0174bf7aad600f9bdd86f5733592e4c6.jpeg?v=3.1.18
+641. Resource Loading (Image): GET /2/608/332/ts/ds/4f/4d/31/144a86224a6bf3efb175c6c2a56a8195.png
+642. Resource Loading (Image): GET /2/614/350/ts/ds/cd/cf/85/c19aa31b012ae8171d83b6292104769e.jpg
+643. Resource Loading (Image): GET /2/608/332/ts/ds/9e/fd/64/83ae3732cca54873d55305fbe2a73d85.jpg?v=3.1.18
+644. Resource Loading (Image): GET /22/anh_6c6ff2f41a.png
+645. Resource Loading (Image): GET /live/uploads/20260915/20260915123515_1_45.1.jpg
+646. Resource Loading (Image): GET /sdk-tauhoa/seatmap2/images/seat_bed3.png
+647. Static Asset (CSS): GET /payment-prd/v6.1.0_1/public/css/base.css
+648. Static Asset (JS): GET /payment-prd/v6.1.0_1/public/js/base.js
+649. Static Asset (JS): GET /payment-prd/v6.1.0_1/public/js/call-back-app.js
+650. Static Asset (JS): GET /payment-prd/v6.1.0_1/public/js/count-down.js
+651. Static Asset (JS): GET /payment-prd/v6.1.0_1/public/js/loading.js
+652. Resource Loading (Image): GET /2/608/332/ts/ds/5e/3d/d6/b870df236f265bcfb9107db965e63820.jpg?v=3.1.18
+653. Resource Loading (Image): GET /rs/96_96/avatar/prod/583843972204527616_1788435222002.jpg
+654. Resource Loading (Image): GET /vnshop/ed/small_blob_cye7l_aea9d02098.webp
+655. Resource Loading (Image): GET /2/608/332/ts/ds/f7/5f/b1/8d0c9407cf51fbb44514704b477ae071.jpg?v=3.1.18
+656. Resource Loading (Image): GET /2/608/332/ts/ds/20/be/19/ac61d5ef75c9af4070832e1a021da017.jpeg?v=3.1.18
+657. Resource Loading (Image): GET /2/608/332/ts/ds/b1/74/ac/22dc559b56bbec77079390a8d9f89ec8.jpg?v=3.1.18
+658. Page Load (Landing Galaxy Watch): GET /landing/galaxy-watch?_rsc=jq34y
+659. Resource Loading (Image): GET /2/608/332/ts/ds/9e/6b/5c/b82bb87288a7eabdd9a00d4600a6d20d.jpg?v=3.1.18
+660. Resource Loading (Image): GET /vnaimages/upload/20260428/1777343700972-bp-footer-silver.jpg
+661. Page Load (Profile Orders): GET /profile/orders?tab=WAIT_PAYMENT&_rsc=1u15q
+662. Form Submit (Chat Completions): POST /chat/completions
+663. Resource Loading (Image): GET /2/608/332/ts/ds/90/5b/9c/9fa0af20c655a892db19176c1c9ef7ba.jpg?v=3.1.18
+664. Resource Loading (Image): GET /9e/904x376_6135424186.png
+665. Resource Loading (Image): GET /vnaimages/bpconfig/20250115/1736913216899FFP-Silver-v3.jpg
+666. Resource Loading (Image): GET /2/608/332/ts/ds/4f/0e/a3/73a6191a8df03fd30944a330093d8c6b.png?v=3.1.18
+667. Resource Loading (Image): GET /2/608/332/ts/ds/99/a0/94/147f090047eb487b6294d2ec9a64b5bf.jpg?v=3.1.18
+668. Resource Loading (Font): GET /sdk-document-file/20251229/PGSans-ExtraBold.ttf
+669. API POST (Area MN): POST /api/channels/CH1001/products/stock/area/MN
+670. Resource Loading (Image): GET /2/608/332/ts/ds/c8/14/ee/c7309f2991beab5310911603aca35c4c.jpg?v=3.1.18
+671. Resource Loading (Image): GET /static/banner-home/MB/banner-20260429-02.png
+672. Resource Loading (Image): GET /rs/50_50/avatar/prod/583843866818445312_1787733732066.jpg
+673. Resource Loading (Image): GET /content/thumbs/20250211/60pjokcxd0yur64cxsa3g_taxi_chung_4_cho_rong.png
+674. Resource Loading (Image): GET /ott-backend/20260922/43f0eab2-ecd1-4ca6-8a2b-f745aaa73b8f.jpg
+675. Resource Loading (Image): GET /sdk-tauhoa/seatmap2/images/seat_bed1.png
+676. API POST (Area MB): POST /api/channels/CH1005/products/stock/area/MB
+677. Static Asset (CSS): GET /_next/static/chunks/0e7ac20d02acdf11.css
+678. Resource Loading (Image): GET /live/uploads/20260505/20260505160935_1_eSIM_KV_80x80.jpg
+679. Resource Loading (Image): GET /2/608/332/ts/ds/d5/de/ef/2d0fdcb95a34f44fe154e1bdaf93928b.jpg?v=3.1.18
+680. Resource Loading (Image): GET /vnshop/8d/small_1_bo_cha_7f13c6e520.jpeg
+681. Resource Loading (Image): GET /2/608/332/ts/ds/35/04/0c/436637b1830db808050b953a727559c7.png?v=3.1.18
+682. Resource Loading (Image): GET /content/thumbs/20231026/yl0i1ursv02fq7ll81kwzg_5chochuachon.png
+683. Resource Loading (Image): GET /vnshop/c7/small_1_den_tran_b397f842a7.jpeg
+684. Resource Loading (Image): GET /sdk-tauhoa/seatmap2/images/seat_bottom3.png
+685. Resource Loading (Image): GET /content/vntaxi-icon/40px_hangkhac@3x.png
+686. Resource Loading (Image): GET /live/uploads/20260505/20260505150736_1_Vietlott-80x80.png
+687. Resource Loading (Image): GET /img/placeholder/placeholder-image-thumbnail.png
+688. Resource Loading (Image): GET /vnshop/2c/small_1_bim_quan_b5f4fb7f4e.jpeg
+689. Resource Loading (Image): GET /content/thumbs/20250211/fx1kiwga0kwlrpbf78ywa_property_1_gsmbike.png
+690. Manifest Loading: GET /resources/default/site.webmanifest
+691. Resource Loading (Image): GET /live/uploads/20260403/20260403145233_1_UuDaiVuaNem-iPay750x500px-2026.jpg
+692. Resource Loading (Image): GET /vnshop/36/1_null_c0fb457df2.jpeg
+693. API POST (Flashsales Ongoing): POST /api/flashsales/ongoing?filter=%7B%22schannel%22%3A%22970418%22%7D&schannel=970418
+694. Resource Loading (Image): GET /vnacoreapp/info1.png
+695. Resource Loading (Image): GET /vnshop/57/small_blob_bvpls_2d896feb07.webp
+696. Resource Loading (Image): GET /2/608/332/ts/ds/dc/0a/54/a9a98a6b9930b4a31d6032eb09c15ec2.jpg
+697. Resource Loading (Image): GET /vnshop/39/unnamed_28c7d8a805.png
+698. Resource Loading (Image): GET /vnshop/6f/small_3_phan_ma_2bf4d6851f.jpeg
+699. Page Load (HTML): GET /payment-prd/v6.1.0_1/njMDNaVcZqQynda3-create-payment.html?PPID=IX6FDGUBOGJJ3M7GKJQG6OXO5JQIOW9V&PNR_CODE=FFR48L&PAID_AMOUNT=50420.0&CURRENCY=JPY&MOP_ID=creditcard&PAY_TYPE=10&LANG_ID=JA&MOP_NAME=label_mop_creditcard&REQ_PAYMENT_ID=2774092275107072
+700. Resource Loading (Image): GET /ts/ds/b7/b6/56/7ff669e3d1c17fd02ea34690309b0dda.png
+701. Resource Loading (Image): GET /sdk-tauhoa/seatmap2/images/seat_bottom1.png
+702. Resource Loading (Image): GET /icons/voucher/voucher_01.png
+703. Resource Loading (Image): GET /content/thumbs/20250211/rquzrlaxtessakdzjxcd8g_taxi_chung_4_cho.png
+704. Resource Loading (Image): GET /vnshop/7d/small_2_beplain_22b177068b.png
+705. Resource Loading (Image): GET /ts/ds/d8/4e/65/59c6dbcd35a864a7b3509fc29620862e.jpeg
+706. Resource Loading (Image): GET /vnshop/30/small_blob_kpu9s_c0f25bdd6c.webp
+707. Static Asset (Video Playlist): GET /vnshop-pilot/8d/i_Phone_18_Pro_The_ultimate_performance_and_camera_of_any_i_Phone_with_exceptional_battery_life_9464af77d2.mp4/media_1080p.m3u8
+708. Form Submit (LoginService Loginbt): POST /vntservice/loginService/loginbt/908421
+709. Resource Loading (Image): GET /35/8_copy_2_2x_1ed79a7da6.png
+710. Resource Loading (Image): GET /rs/128_128/avatar/prod/583843573871476736_1788512657986.jpg
+711. Resource Loading (Image): GET /6b/Logo_Moi_SHOP_DUNK_0b67fc389f.png
+712. Resource Loading (Image): GET /ts/ds/21/a9/0d/66d54c33c3d6d7943c4d230e08270111.png?v=3.1.18
+713. Resource Loading (Image): GET /ts/ds/2f/69/fc/8feace9a35636ee2747b9bca70793567.png?v=3.1.18
+714. Resource Loading (Image): GET /ts/ds/79/f8/17/cb00b342d8ddc5c6f26bd3f5a96c4cef.png?v=3.1.18
+715. Resource Loading (Image): GET /ts/ds/85/3d/8c/93f3b44431ba64bdacfb8ba88c7abe02.png?v=3.1.18
+716. Resource Loading (Image): GET /ts/ds/50/94/d2/084294ec6044106db63ce88b17c68f2c.png?v=3.1.18
+717. Resource Loading (Image): GET /ts/ds/f2/81/ea/20632f7b42a1008f06a131ffc0e980c0.png?v=3.1.18
+718. Resource Loading (Image): GET /ts/ds/59/eb/f6/11ee276c12b68af613dc1e57df9eb613.png?v=3.1.18
+719. Resource Loading (Image): GET /ts/ds/fe/03/6b/936edd943ce151b506eb635755ffa043.png?v=3.1.18
+720. Resource Loading (Image): GET /vnshop/3a/2_may_lam_093af9aeef.jpeg
+721. Resource Loading (Image): GET /vnshop/43/small_blob_zyggz_7dc77eb367.webp
+722. Page Load (Landing Song Chuan Smart Cung Samsung): GET /landing/song-chuan-smart-cung-samsung?_rsc=2vloa
+723. Resource Loading (Image): GET /ts/ds/21/03/80/29d8298ecb502867c425cf3e9f90d808.jpeg
+724. Resource Loading (Image): GET /vnshop/97/1_may_anh_686b4458cc.jpeg
+725. Resource Loading (Image): GET /vnshop/fd/small_1_bo_coi_c_6eadbbf51e.png
+726. Resource Loading (Image): GET /2/608/332/ts/ds/97/f4/e2/6208aa4c430fde9ab130eae529fb6b87.jpeg
+727. Static Asset (JS): GET /_next/static/chunks/56994-a6b2473a840c1164.js
+728. Resource Loading (Image): GET /sdk-document-file/20250905/bg.png
+729. Static Asset (JS): GET /_next/static/chunks/25675-cf44d9c64bc0ef11.js
+730. Static Asset (JS): GET /_next/static/chunks/pages/_app-d644fe42d2eb678d.js
+731. Static Asset (JS): GET /_next/static/chunks/26231-38981cd9bf911057.js
+732. Page Load (List Warehouses): GET /bo/merchants/vnshop/list/warehouses?filter=%7B%22limit%22%3A10%2C%22order%22%3A%5B%22id%20DESC%22%5D%2C%22offset%22%3A0%2C%22where%22%3A%7B%7D%7D
+733. Static Asset (JS): GET /_next/static/chunks/main-0f531f1e4dbfa50e.js
+734. Static Asset (JS): GET /_next/static/chunks/webpack-c375a500a611af79.js
+735. Resource Loading (Image): GET /evoucher-product/2026/4/1/2039253807201304576_Banner%20voucher%20may%20bay_loyalty%20vcb_150929.jpg
+736. Static Asset (JS): GET /_next/static/chunks/83062-25341129f1a0002f.js
+737. API POST (Carts Check Voucher): POST /api/carts/check-voucher
+738. Static Asset (JS): GET /_next/static/chunks/91033-cf80eab149cd5a82.js
+739. Static Asset (JS): GET /_next/static/chunks/framework-75746eeb80cbf23f.js
+740. Static Asset (JS): GET /payment-prd/v6.1.0_1/public/js/njMDNaVcZqQynda3gWe2jhsnwTb7WODG.js
+741. Resource Loading (Image): GET /payment-prd/v6.1.0_1/public/images/jcb.png
+742. Resource Loading (Image): GET /payment-prd/v6.1.0_1/public/images/visa.png
+743. Resource Loading (Image): GET /payment-prd/v6.1.0_1/public/images/american_express.png
+744. Resource Loading (Image): GET /payment-prd/v6.1.0_1/public/images/mastercard.png
+745. Resource Loading (Image): GET /payment-prd/v6.1.0_1/public/images/pmuatp.png
+746. Resource Loading (Image): GET /content/thumbs/20240408/fkcnyzljv0cntyoyozdduw_bebiketracking.png
+747. Resource Loading (Image): GET /d0/samsung_0518e07961.png
+748. Static Asset (JS): GET /_next/static/chunks/96752-6b0879aca1b76cde.js
+749. Resource Loading (Image): GET /16/small_3_a33e3d5e89.jpg
+750. Form Submit (Bank Service): POST /bank-service/1022
+751. Resource Loading (Image): GET /28/16_4x_f7e20ceceb.png
+752. Form Submit (Saleorderpackages Status): POST /wh/merchants/ghtk/saleorderpackages/status?hash=43ad7cd874516ddec6f48eea67773eb7
+753. Resource Loading (Image): GET /19/MB_ba319b2cea.png
+754. Resource Loading (Image): GET /2/608/332/ts/ds/f8/cd/d1/90ec1871ce9a078e8678c516b0607a68.jpg
+755. API GET (Tickets Waiting Staff): GET /service-staff/task-module/api/v1/task-management/tickets/waiting-staff?page=1&page_size=20
+756. Static Asset (JS): GET /_next/static/SH7H2p4XVv5u5Z9H1YeDe/_buildManifest.js
+757. Resource Loading (Image): GET /2/608/332/ts/ds/c4/f6/8e/fb7dff8a33b488d8d685a53958fae8eb.jpg?v=3.1.18
+758. Resource Loading (Image): GET /vnshop/2f/small_8_nature_r_afadbe0666.png
+759. Static Asset (JS): GET /_next/static/SH7H2p4XVv5u5Z9H1YeDe/_ssgManifest.js
+760. Resource Loading (Image): GET /36/HB_d8860f853b.png
+761. Resource Loading (Image): GET /sdk-document-file/20260818/card_voucher.png
+762. Resource Loading (Image): GET /vnshop/a6/upload_178_472f8aa754.webp
+763. Resource Loading (Image): GET /3b/13_4x_c113942c56.png
+764. Resource Loading (Image): GET /icons/voucher/voucher_05.png
+765. Resource Loading (Image): GET /content/thumbs/20231026/abdlv0vpy0sxgvasx0fz9q_7chochuachon.png
+766. Resource Loading (Image): GET /ad/750x448_e02d1fce0c.png
+767. Resource Loading (Image): GET /0d/trung_thu_1_2x_dfade8d10a.png
+768. Resource Loading (Image): GET /7a/Thiet_bi_cham_soc_suc_khoe_738521fc1f.jpg
+769. Resource Loading (Image): GET /bb/Sach2_a43bafcb7e.png
+770. Resource Loading (Image): GET /3e/snack_507152695a.png
+771. Resource Loading (Image): GET /content/thumbs/20260413/0qnkdwhfw06bpeoqiojeiw_new_xanhsm.png
+772. Resource Loading (Image): GET /2026/0923/videos/722143955542114304.mp4/thumbnail.jpg
+773. API GET (Pages): GET /api/pages?filter=%7B%22limit%22%3A1%2C%22where%22%3A%7B%22model%22%3A%22categories%22%2C%22slug%22%3A%22__default%22%7D%7D
+774. Resource Loading (Image): GET /vnaimages/gameconfig/20240403/VD7j5dbSSVhWMPnf.png
+775. Resource Loading (Image): GET /7f/11_4x_b5c452cdde.png
+776. Resource Loading (Image): GET /vnshop/43/1_tu_say_q_2b666eaa1d.jpeg
+777. Resource Loading (Image): GET /vnshop/fd/1_gay_sm11_1b6f4437ac.jpeg
+778. Resource Loading (Image): GET /vnshop/e6/blob_plfca_038cb48bff.webp
+779. Page Load (5c): GET /5c/1_a62cbaa33e.jfif
+780. Resource Loading (Image): GET /vnshop/12/2_banh_nuo_233b6e6f74.jpeg
+781. Resource Loading (Image): GET /ea/1_d67aa8b4ec.jpeg
+782. Resource Loading (Image): GET /vnshop/ce/1_null_585b0b4320.jpeg
+783. API POST (Messages): POST /v1/messages
+784. Resource Loading (Image): GET /d7/Quat_2_4x_15daf566d6.png
+785. Static Asset (JS): GET /_next/static/chunks/84333-c0ca69c4822309c1.js
+786. Resource Loading (Image): GET /2/614/350/ts/ds/a1/7d/cf/fbd871fbe027dc6a634c0f17bfcb9dff.jpg
+787. API GET (Blocks): GET /api/blocks?filter=%7B%22where%22%3A%7B%22subchannel%22%3A%22908401%22%2C%22channel%22%3A%22CH1001%22%2C%22pages.slug%22%3A%22index%22%2C%22status%22%3A%2240ACT%22%7D%2C%22order%22%3A%5B%22position+asc%22%5D%7D&fs=1790176817019
+788. Resource Loading (Image): GET /5b/Quan_ao_a87bb59ea3.png
+789. API GET (Promotions Combos): GET /api/promotions/combos?areaType=MB&sku=2609V000433
+790. Resource Loading (Image): GET /61/Thiet_bi_chieu_sang_49ba5a5c4a.png
+791. API POST (Flashsales Ongoing): POST /api/flashsales/ongoing?filter=%7B%22schannel%22%3A%22VNS-WEB%22%7D&schannel=VNS-WEB
+792. Resource Loading (Image): GET /content/thumbs/20250211/w6t8h9jeiua2jff6rzre0q_taxi_chung_7_cho.png
+793. Resource Loading (Image): GET /static/ket-qua-gd/20260303-01.png
+794. Resource Loading (Image): GET /6f/small_Combo_hoa_cam_tra_xanh_512d681a45.png
+795. Static Asset (JS): GET /_next/static/chunks/43316.acc595190fd4d094.js
+796. Static Asset (JS): GET /_next/static/chunks/8667.4a133dc7e69a514e.js
+797. Resource Loading (Image): GET /vnshop/df/small_unnamed_pn_6eb510a929.png
+798. Resource Loading (Image): GET /content/thumbs/20250211/6ev5yer6qkivngjar7wjwa_property_1_becar.png
+799. Resource Loading (Image): GET /sdk-ses-file/20230616/1686890212449_193475538_4237279159668301_497207925610082617_n.png
+800. Page Load (Landing Panasonic Mo Loi Song Xanh): GET /landing/panasonic-mo-loi-song-xanh?_rsc=2vloa
+801. Resource Loading (Image): GET /2/608/332/ts/ds/08/69/cb/58f468e8d2152485a927047e98d3fd94.jpg
+802. Resource Loading (Image): GET /2/614/350/ts/ds/52/1f/fb/d7383270646dd44d9d81578160e4dcba.jpg
+803. Resource Loading (Image): GET /83/small_Chat_GPT_Image_17_04_16_12_thg_8_2026_82e7cd3a24.png
+804. Static Asset (JS): GET /_next/static/chunks/93472.13a54a03af9b7872.js
+805. Homepage Access: GET /?_rsc=2mbkf
+806. Static Asset (JS): GET /_next/static/chunks/21687-8a85c3cd60d498b7.js
+807. Resource Loading (Image): GET /2/614/350/ts/ds/1d/7b/ab/3a226dc0dc2f5dfcfe2440a3b4061286.jpeg
+808. Resource Loading (Font): GET /_next/static/media/Inter-VariableFont.7385e8d9.ttf
+809. Resource Loading (Image): GET /vnshop/87/small_1_bim_quan_c860eb2555.jpeg
+810. Static Asset (Favicon): GET /favicon.ico?favicon.f65ba275.ico
+811. Resource Loading (Image): GET /live/uploads/20260915/20260915122034_1_44.1.jpg
+812. Resource Loading (Image): GET /49/2602_V002226_2_3x_368cfbc3dd.png
+813. Resource Loading (Image): GET /96/332x498_3453451976.png
+814. Resource Loading (Image): GET /content/thumbs/20250211/eoha3rkkimp1efcprung_bike.png
+815. Resource Loading (Image): GET /static/card/new/plussuccess.png
+816. Resource Loading (Image): GET /vnshop/f9/small_1_ti_vi_sa_b0768bd034.jpeg
+817. Resource Loading (Image): GET /vnshop/f4/small_1_tu_say_q_3b5880a8a8.jpeg
+818. Resource Loading (Image): GET /2/608/332/ts/ds/9e/63/23/63bb08e92f9da1b050303d14e4637d77.png
+819. Resource Loading (Image): GET /sdk-document-file/20221107/chubb.png
+820. Resource Loading (Image): GET /vnshop/61/small_1_dau_goi_2f37c4acbb.jpeg
+821. Static Asset (JS): GET /_next/static/chunks/41664-200d5d631cd6c206.js
+822. Resource Loading (Image): GET /vnaimages/bpconfig/20241223/1734918307424Hanoi-v5.jpg
+823. Static Asset (JS): GET /_next/static/chunks/92942-4547f8ae16a0c773.js
+824. Resource Loading (Image): GET /24/Diamon_1_2x_0f4d9b480f.png
+825. Resource Loading (Image): GET /public/collections/696620640886022144/thumbnail_696620640886022144.webp
+826. Static Asset (JS): GET /_next/static/chunks/77602-19f2d10d589f76d8.js
+827. Static Asset (JS): GET /_next/static/chunks/85899-bb1bc4680eeaeca5.js
+828. Static Asset (JS): GET /_next/static/chunks/pages/[slug]-b7cad56c92f88eb7.js
+829. Static Asset (JS): GET /_next/static/chunks/5996-d05a577fe27fa25a.js
+830. Static Asset (JS): GET /_next/static/chunks/64179-8dfa573a941b4455.js
+831. API GET (Notification Items Unread Count): GET /service-staff/notification-module/api/v1/notification-items/unread-count
+832. Resource Loading (Image): GET /2/608/332/ts/ds/27/6c/bd/aa89defbce6ab444204fe3a30d59910d.png
+833. Resource Loading (Image): GET /ts/ds/1b/08/04/6c27d205124873b30f8c6f03ecdc3221.jpeg
+834. Resource Loading (Image): GET /ts/ds/2e/42/ed/6a94925937ca5992121bae8e4a370fcc.jpeg
+835. Resource Loading (Image): GET /vnshop/40/small_1_den_tran_8d4b0d84db.jpeg
+836. Resource Loading (Image): GET /d2/small_1_L_full_cream_Export_Milk_FRONT_Copy_9c429e15e4.jpg
+837. Static Asset (JS): GET /_next/static/chunks/20847.bb79ff0c238a6796.js
+838. Resource Loading (Image): GET /vnshop/75/small_1_dtdd_sam_68a02fd31c.jpeg
+839. Static Asset (JS): GET /_next/static/chunks/89635-5885e6064c4287a7.js
+840. Static Asset (JS): GET /_next/static/chunks/97956.3bbb932444746aeb.js
+841. Resource Loading (Image): GET /vnshop/45/small_2_bo_noi_i_9d33a804eb.png
+842. Resource Loading (SVG Icon): GET /icons/layout/map-user.svg
+843. Resource Loading (SVG Icon): GET /assets/images/logo-icon/logo-primary.svg
+844. Resource Loading (Image): GET /vnshop/c0/unnamed_c2b0dedb27.png
+845. Resource Loading (Image): GET /vnshop/d8/small_1_ao_thun_42ebbe3b53.jpeg
+846. Resource Loading (Image): GET /vnshop/fb/small_1_ao_polo_7da93907c8.jpeg
+847. Resource Loading (Image): GET /img/icon_vnshop.png
+848. Static Asset (JS): GET /_next/static/chunks/75713.2da90170eb515fd5.js
+849. Static Asset (JS): GET /_next/static/chunks/68508-f60e008b1432a43d.js
+850. Resource Loading (Image): GET /vnshop/ef/small_1_may_loc_c528be3c55.jpeg
+851. Resource Loading (Image): GET /2/608/332/ts/ds/0c/c8/06/b741a7c6cffbc74dab6e9bb00b37b4b7.png
+852. Resource Loading (Image): GET /ts/ds/d2/c3/1a/1ee9297c08ba85110d8e9a9ec5d0082e.png
+853. Resource Loading (Image): GET /ts/ds/3c/a1/b2/987e29ae6647213e91b7a0425226bbd4.png
+854. Resource Loading (Image): GET /ts/ds/d0/2b/96/2c1e5b087a23a594ca9d5eece0af6515.png
+855. API POST (Promotions): POST /api/promotions?schannel=VNS-WEB&areaType=MB
+856. Resource Loading (Image): GET /ts/ds/00/f1/dc/cd7a95fdadbb6d68cd46891fc8da1176.png
+857. Resource Loading (Image): GET /vnshop/b7/small_1_binh_giu_7bf562380b.png
+858. Static Asset (JS): GET /_next/static/chunks/pages/index-6319c7dcfcf12efe.js
+859. Resource Loading (Image): GET /ts/ds/8e/22/c4/ee01cddbb35914fd8ac0803152986ac1.png
+860. Resource Loading (Image): GET /a7/mb1_4x_d977513333.png
+861. Resource Loading (Image): GET /61/small_IMG_0476_47a22765f0.png
+862. Resource Loading (Image): GET /ts/ds/cd/cf/85/749745c3dcd87814ed8b0266c2bea51d.jpg?v=3.1.18
+863. Resource Loading (Image): GET /2/614/350/ts/ds/3c/ee/64/6b743828f63a48ddd0224a8ba17b2b15.jpg?v=3.1.18
+864. Resource Loading (Image): GET /vnshop/8e/small_2_quat_die_a68602bb51.png
+865. Resource Loading (Image): GET /vnshop/bc/small_1_may_uon_a82baa8015.png
+866. Resource Loading (Image): GET /vnshop/9b/small_2_phan_lan_1f20864af8.jpeg
+867. Resource Loading (Image): GET /vnshop/10/small_1_sm_tho_t_c7d1a8e5b5.jpeg
+868. Resource Loading (Image): GET /c7/small_pink_5bea45f274.jpg
+869. Resource Loading (Image): GET /vnshop/f7/small_1_vot_pick_9cba692cda.jpeg
+870. Resource Loading (Image): GET /1f/small_hong_sen_e14d3b6c7f.webp
+871. Resource Loading (Image): GET /2/608/332/ts/ds/d5/b8/3f/60a400fddfecd87c5c1a3de7455c1332.jpg
+872. Resource Loading (Image): GET /rs/1280_1707/2026/0923/images/722184991748415488.jpg
+873. API POST (Carts Change Area Type): POST /api/carts/change-area-type
+874. Resource Loading (Image): GET /a2/4_2_ccdfda8626.png
+875. Resource Loading (Image): GET /vnshop/45/small_1_ta_quan_2e60a4b319.jpeg
+876. API POST (Products Facets): POST /api/search/products/facets
+877. Resource Loading (Image): GET /vnshop/05/small_1_xit_khoa_ce9a4af680.jpeg
+878. Resource Loading (Image): GET /62/9_4x_14104dd97f.png
+879. Resource Loading (Image): GET /vnshop/5a/1_may_trie_3a0c5ee8e9.png
+880. Resource Loading (Image): GET /2/608/332/ts/ds/26/d3/ae/664ec2f5f4b99ea2e98c550d826381eb.jpg?v=3.1.18
+881. Resource Loading (Image): GET /vnshop/3c/small_1_combo_3_9c3b06ed38.jpeg
+882. Resource Loading (Image): GET /5b/GRO_97da2f4a0d.png
+883. Resource Loading (Image): GET /89/resize_750x448_c300ad3bb0.png
+884. Resource Loading (Image): GET /09/small_Gemini_Generated_Image_fwiriqfwiriqfwir_0e0ea495b4.png
+885. Resource Loading (Image): GET /rs/58_58/avatar/prod/583843630477803520_1788685519368.jpg
+886. Resource Loading (Image): GET /ts/ds/6d/61/2d/f08014e23d085efeb6dd70d97aa3f25f.jpeg
+887. Resource Loading (Image): GET /vnshop/cc/small_1_combo_5_f2f36ec8c4.jpeg
+888. Static Asset (JS): GET /_next/static/chunks/75363.f07cb37cb63a2a22.js
+889. Resource Loading (Image): GET /2/608/332/ts/ds/2b/ba/ff/ff5ad1cbfa9d1d256e51978017d98fc2.jpg
+890. Static Asset (JS): GET /_next/static/chunks/18884.c3702181ffba2d09.js
+891. Resource Loading (Image): GET /vnaimages/upload/20240113/1705137387283-1704858515909GGT.png
+892. Resource Loading (Image): GET /2/608/332/ts/ds/4d/e6/15/93ecf10bf52bad316b758da69d633227.jpg?v=3.1.18
+893. Resource Loading (Image): GET /2/608/332/ts/ds/ef/b2/85/bb4dde049960902ea5411712997100a7.jpg?v=3.1.18
+894. Page Load (Landing Qua Tang Suc Khoe): GET /landing/qua-tang-suc-khoe?_rsc=jhebv
+895. Resource Loading (Image): GET /2/608/332/ts/ds/f7/5f/b1/8d0c9407cf51fbb44514704b477ae071.jpg
+896. Resource Loading (Image): GET /2026/0924/images/722893453012795392.webp
+897. Resource Loading (Image): GET /live/uploads/20260421/20260421145740_1_Banner16.9.jpg
+898. Resource Loading (Image): GET /e9/small_8_TS_26_S015_9c92beb4fe.jpg
+899. Resource Loading (Image): GET /ts/ds/2d/0d/bc/d190e18092a859108a202f717f2e0dac.png?v=3.1.18
+900. Resource Loading (Font): GET /_next/static/media/icomoon.532271cd.ttf
+901. Static Asset (Video Playlist): GET /vnshop-pilot/8d/i_Phone_18_Pro_The_ultimate_performance_and_camera_of_any_i_Phone_with_exceptional_battery_life_9464af77d2.mp4/media_720p.m3u8
+902. Resource Loading (Image): GET /2/608/332/ts/ds/4e/b1/29/0679d07635a8976133962a4df29c9a8f.jpg
+903. API GET (Public Url): GET /api/public-url
+904. Resource Loading (Image): GET /2/608/332/ts/ds/f3/a1/12/66ae46ba6ab5a2bb59910d710ebd5a05.jpg?v=3.1.18
+905. Resource Loading (Image): GET /vnshop/f6/small_1_chan_vay_bc2754f683.jpeg
+906. Resource Loading (Image): GET /content/thumbs/20240306/dromvhhjhuk4l9iiowwyla_icon_app.png
+907. Resource Loading (Image): GET /vnshop/53/small_2_chao_ran_a701805cf2.png
+908. Resource Loading (Image): GET /2/608/332/ts/ds/a6/ec/ae/7c8e98a41b7fbc703ab52eea9b7eb714.png
+909. Resource Loading (Image): GET /2026/0918/images/718500642939101184.jpg
+910. Resource Loading (Image): GET /vnaimages/lotusmile/new/20220905/166237055108596x96_icon_addon_seat.png
+911. Resource Loading (Image): GET /vnshop/79/small_1_banh_tru_8baec1a877.png
+912. Resource Loading (Image): GET /10/750_x_448_1_cd11908c89.png
+913. Resource Loading (Image): GET /vnaimages/upload/20240617/1718585368171-1701340362405-smapaymentoptionscards.png
+914. Resource Loading (Image): GET /2/608/332/ts/ds/e8/2e/0c/0035229520d3bbc1a91ce7ad860f9ab5.jpg?v=3.1.18
+915. API POST (Vouchers Coupons): POST /api/vouchers/coupons
+916. Resource Loading (Image): GET /content/thumbs/20250211/ohljxc2kxuaoo1bg2sbog_property_1_vnpaytaxi.png
+917. Resource Loading (Image): GET /2/608/332/ts/ds/04/ae/18/9ee650dff5237d8bcfdb2f92aa049e1c.jpg
+918. Resource Loading (Image): GET /ts/ds/1e/97/8c/160468bc78e26f3f0cb04839e40494c1.jpg
+919. Page Load (Videos): GET /2026/0924/videos/722860670408056832.mov
+920. Resource Loading (Image): GET /2/608/332/ts/ds/69/e7/a5/e1a831340bd32cdc9db7e7129630c387.jpg?v=3.1.18
+921. Resource Loading (Image): GET /2/608/332/ts/ds/f7/30/1b/046efac79ee7b5f3daf0cff8cbf9f2fa.jpeg?v=3.1.18
+922. Resource Loading (Image): GET /sposcms/cd3dd289e4ba466c849b959c6419daed.png
+923. Homepage Access: GET /?b=908401&data=+CpjgLKBvcnFFA%2F3n4nMMv92%2FjbJEJaLJjCG2cn4XvjJ844Lu+doxG65Jz8wJk5naiy1hB7XdrLaGRdeAGJIEyLN%2FzV7WENkFI7Xoa214G7zR2S9ZSBvXTT270ntV0C2+UNFerbswl+SVrgEeU58o9oEtUlGQYROW7lv17LceYgXgUxk9jeTJnxPlGJbl6kCPcMr%2F7JjtYuHke2AgEcPRqqMg7K+5sRxDGZ8WpP8YixEn%2Fukw%2F4MnPJDIm5fId7A3UuZ9X0dt66VLZZsGwNFENUss1tLIyxo9KPxiuqhJu%2FSMPDOBDnYTZl+iHn40s57Vf62irtVPnsD5KPcz3+ySw8h4lspWBOqKzKd1UiTzKuylqGPdQIIcwiQOvhpD95Yy%2Fx11KY7JQt+4G6ZqaWndmqTFvWoT3I0vH4jNLYvBDz97E%2FBROLp9H1+Qf4PoC9pvFOOHqRnj3pebhtz9mTT%2F%2FDPBqTDayMlcND9UFgMEG2HMR5UstJaRDCe2txuq95lfkgpvLi0LqBF8TGRWw55Wc%2FvkVLIExgFM+yttv8xfQtCoYPIpkyyZ43R6Co9gJ6MuVwRCMETFTp1Sjo7OXuCii2hO%2F96stEHBeeBcsheB3Rija%2FOIpMYzIWM1GtXy53MVJz5ZZqG+Akr44Ph0x9llYLfjsqL6bcAPxgX9QvIPnchRuEAS8bYR4OkNhO+LbQxlRsi6iBhYQjqJmv0qrLwGll91nDoGP6g3TrJMUqTpjZo8gUBJDpOdpnWVpIA1ZQ+mH76qcRF0hSt1IToRJQbPTqcercu+KmTQ3mdqxsQ47HNIorichSpbTB1PXM4ho3fOK+q7LcHp4AbY0NBNeovI3p4tz+IWjWjMKhNY9sTBs93BT%2F10aHlrSNi7rZM0BcZf3yQmcUpLqx8c19ute3zjXUUHcIGP1X+411NQtT0ql0%3D&lang=vi&timestamp=1789748671502
+924. Page Load (Client Data Ns Status Details): GET /client-data/ns-status-details.xml?agentResourceIdentifier=15603&ResourceID=15603&uniqueValue=JB0C4N3
+925. Resource Loading (Image): GET /sposcms/d4ce71ca9a054dd9b0b5be2f3d3b3a9d.jpg
+926. HEAD Request (Root): HEAD /
+927. Search Query (Search): GET /search?router=productListing&query=%D0%B7+01.09.1985+%D0%BF%D0%BE+19.07.1990%0D%0A%D1%81%D0%BA%D1%96%D0%BB%D1%8C%D0%BA%D0%B8+%D1%80%D0%BE%D0%BA%D1%96%D0%B2+%D0%BC%D1%96%D1%81%D1%8F%D1%86%D1%96%D0%B2+%D0%B4%D0%BD%D1%96%D0%B2+%3F
+928. Homepage Access: GET /?data=2nYTPXwtHw9M7arEuyrBJm4b%2FqMnx9o88WqmTw7WHfq2ovoFZdQUi417SiF0%2FvfaeDsmyG6irX%2FYOulqV3MhEIaQXnNBy68dmQy34XO1QwVdVrCDWyAuQTSdLO9D4vY6zCb0JX3lwgvcwg8TJ%2BF0k7YgEOGOLtpkW%2FqS0kfAlxgLuFwrqNIJAEY0jM2BuwdgMKHV7fuzniDNiS94HPa5161Rm%2FBE1ms5fTw8FRXzKdxF8StY0K0XQZKt6yHKMpuFrbheyMMnXw3qcg6he1sEdRMrEkiPOVejYpEQiI4F8sVgcxQUIkwAZJpidoJjhG%2F72JqW95MPA4FlZh3bHzpCGRCt0TPiSlpgAz%2BQEaeMa18P5rBi9tHeBey%2BHKxULX4sMjAX4m01mngESQCzPmQClQJrAkSAiTDG%2BsDVWn91tN%2Botd9UBg4JPs%2Bquy2v%2BDfZwFQREtJbbp8KDuTSM%2FVXUkMmYZCD5l69yUgQ9vthN3fVCQFDuv1F6incmRXHZI%2BwwdND5c%2FVqOoI35pN8LEdvRfP5VseLtoKl2E5nBRar9zmteRB02VAxHDVgBl9GirIPTa2KfOPgLYtOTlQ9pQ6PL3AQEoU%2B2lPHwEwhwDnkBBr94cTwd1b9UBU4LXZdlNNTax9pi%2BhZ5n4wpeCR3HB989%2BytDIxZYHT7gP4VHdC0NO7Uis53piTSN%2BGtSmo%2BuGrHZN6OkDD6sWJJijfMpH%2F1K8NmloefuJsQTwtOmlrKkL6ioVQbU2oCyw%2B7XVbwH3ZF3VLQQU0Zg4YdjtiXw9p%2BtN%2FoX64MVTMK7f2yFTquyFv0tle44pHP7jh34QiC8KZl15SplW3yWqeFBtkYsQxwjWeaYQl4aAdzAFLArzMzsQQoKV3n0dqWgc%2BfM1sxaM8E7VeLv%2Ff9aTbSOV%2F%2FbifH4t%2FF3rVPgnZPpQcVv0hyXDFx338APK2%2FBpxJG32raV76R7o8bW5SEr5vDpQiQ5MZZsUHXkUOfsPQsSVM2wKPNs8m5cvFoqjAiDcQPvzZYjDwtEkg7EyqGe1JdS%2FnYyk1xLtHj1bjuo4f8C%2F%2BP3msuGR%2FsWZ6u4Da5zWmAovo2tfrc0M%2FkOaF8PsBK4KqQl%2FoRPEUdI94MuqEw0pI%2FToVhCWYbdfk1KowJdUPbmSvXyZmsbznGEpsr3djxwIRtZtQ%3D%3D&lang=vi&b=908401&sdkVersion=1.5.127&rawData=
+929. API GET (Sale Sale Orders): GET /v1/api/sale/sale-orders?filter=%7B%22limit%22%3A100%2C%22order%22%3A%5B%22modifiedAt+DESC%22%5D%2C%22where%22%3A%7B%22metadata.merchantId%22%3A%2282a87a8d-b2d5-4048-a187-fef9e912020d%22%2C%22processingAt%22%3A%7B%22between%22%3A%5B%222026-09-14T17%3A00%3A00.000Z%22%2C%222026-09-15T16%3A59%3A59.999Z%22%5D%7D%2C%22orderNumber%22%3A%7B%22like%22%3A%22%253CV51AY8%25%22%7D%7D%2C%22include%22%3A%5B%7B%22relation%22%3A%22saleChannel%22%2C%22scope%22%3A%7B%22fields%22%3A%5B%22name%22%5D%2C%22include%22%3A%5B%7B%22relation%22%3A%22merchant%22%2C%22scope%22%3A%7B%22fields%22%3A%5B%22name%22%5D%7D%7D%5D%7D%7D%2C%7B%22relation%22%3A%22creator%22%2C%22scope%22%3A%7B%22include%22%3A%5B%7B%22relation%22%3A%22profile%22%7D%2C%7B%22relation%22%3A%22identifiers%22%7D%5D%7D%7D%2C%7B%22relation%22%3A%22modifier%22%2C%22scope%22%3A%7B%22include%22%3A%5B%7B%22relation%22%3A%22profile%22%7D%2C%7B%22relation%22%3A%22identifiers%22%7D%5D%7D%7D%2C%7B%22relation%22%3A%22items%22%2C%22scope%22%3A%7B%22where%22%3A%7B%22leadItemId%22%3Anull%7D%2C%22include%22%3A%5B%7B%22relation%22%3A%22children%22%7D%5D%7D%7D%5D%7D
+930. API GET (Models): GET /v1/models
+931. Auth Flow (Login): GET /login?returnUrl=%2Flogin%3FreturnUrl%3D%252Fp%252Fcong-nghe-dien-tu-duoi-500k
+932. HEAD Request (Agent DcTroubleshoot): HEAD /agent/dcTroubleshoot.exe?agentResourceIdentifier=15603&ResourceID=15603&uniqueValue=JB0C4N3
+933. Auth Flow (Login): GET /login?navigateToUrl=%2Faccount%2520
+934. API HEAD (Hello): HEAD /api/hello
+935. Auth Flow (Login): GET /login?returnUrl=%2Fsearch%3Fq%3Dkh%25E1%25BA%25A9u%2Btrang&_rsc=tuk1f
+936. Auth Flow (Login): POST /login?returnUrl=%2Fsearch%3Fq%3Dkh%25E1%25BA%25A9u%2Btrang
+937. API GET (Sale Customers): GET /v1/api/sale/customers?filter=%7B%22limit%22%3A100%2C%22order%22%3A%5B%22createdAt+DESC%22%5D%2C%22where%22%3A%7B%22merchantId%22%3A%22e8b1e552-c2cd-44ec-a3e4-3c1be52bccbc%22%2C%22or%22%3A%5B%7B%22phone%22%3A%7B%22ilike%22%3A%22%25708822361%25%22%7D%7D%2C%7B%22name%22%3A%7B%22ilike%22%3A%22%250708822361%25%22%7D%7D%2C%7B%22email%22%3A%7B%22ilike%22%3A%22%250708822361%25%22%7D%7D%5D%7D%7D
+938. Auth Flow (Vnpay Login): GET /auth/vnpay/login?data=OltZJE7ZaPSLmXQJ5%2FpwgCMm%2FkvimsHP8VuaJobd6HGZj%2B1z6iPdIfjuEzYSyoyl5cJcUKNgKENrw5hP0GQ04N2ecmIUQYYfJTachDyZtcIBTM1XdmQuHeVnpDQqKIzSRpN%2BdP7L3harZJuDbL%2BZwAxGRH%2Bzr%2BHAq9QYTJWUjj72kQpLH5rQRNFYzV2%2B%2FPO%2FAvxHmHzFyk%2BdgJjYegnUZ3%2F%2BaWglr%2Fmue9FdwopzQtTuMZ1BrtLsAIsQ%2BYaA2tJeHbY7wzYq%2FNK8atrNaVmXScRAb7ITDeCu5OZ2I19c4LykovQ%3D&signature=c10d4e8b39349dd7f619abbfe3dbebe928a05a7e21e75c8580fccde1c38df098
+939. Auth Flow (Login): GET /login?redirect_url=%2Fstaff%2Fgroup
+940. Static Asset (Favicon): GET /favicon.ico
+941. Form Submit (ClientCSRSigningServlet): POST /ClientCSRSigningServlet
+942. Search Query (Search): GET /search?q=b%C3%A0n+l%C3%A0+h%C6%A1i+n%C6%B0%E1%BB%9Bc
+943. Resource Loading (Image): GET /ts/ds/a7/2f/b3/5e44e9c1f2149a66bdc48a35cb3e5bb3.png
+944. Page Load (Profile Orders): GET /profile/orders?tab=WAIT_PAYMENT&_rsc=3t7s5
+945. Page Load (X Teleport Auth): GET /x-teleport-auth?state=013f70c12764f8769782982da255a5fd_30e5543f9be5c36ecd08c531df11a2f5&subject=bf8d2b29526b994f2d32276bfb6481398b3d94f6f62215a66697a09e89f0246f&path=%2Fd%2FnM-QgQ87zg%2Fvnshop-overview%3ForgId%3D4%26from%3Dnow-30m%26to%3Dnow%26timezone%3DAsia%252FHo_Chi_Minh%26var-service_name%3D%24__all%26var-response%3D%24__all%26var-processtime%3D3000%26var-uri%3D%24__all%26var-requestid%3D%26var-user%3D%26var-IP%3D%26var-code%3D%26refresh%3D30s
+946. Homepage Access: GET /?data=jIl2xOPG1ElOuXJjcFFPxVcD1CC%2Bm4fAZ8jkRRbsqrQpxkJCoxrPhmcXKQnR7pIHD4CHsjYbvi%2BQwFkwOq9MBhARa1Mfz1RIHkq9AmYZZP2NmUbSS%2FTM%2BiEcDrPCcCkYvoQkWvm3A%2FO9jk6iVxZBXQnFVgm56i2YeAHTJ2IsMc2hy3S5fSWPQ7UTBwDkkLL1m5xmWceuPb0BR2ZaEAcj7gyrAFZSIUwe0GF3JM94a%2FDiUS9LlKpDN3tgZX4kH1nOObSLk7fiPbRYG32iCsLzHzyzmxwWvB9uajW2pzPGLOUqvhMAm4zNc1JwjDedm%2BMVlIZBq6X5SyWF4BY82I86FFQbo0KFu0stQU%2F%2Fzn3mZTV085RvnDnnM0gDt5dmu64diHDa9Aoko009ESA2Zw%2FldzubA0d3h7c0XqDj56LBdH7Nzugj8d%2FWQjHYjB1e0hyLZK%2FAvIHS%2Fm705UVgiWIHdSozaOxSM8AELNsSarPGNxAC%2FywZ7DsOVDquHsGuQywhlexWQvuRpyg%2F%2F8yxK0kAsRGDv7zgXK8ifB9vzLcDfmNquJMtLFpIoIkswK5MshZvW6EWRJu17u%2FaoNe2%2F2tomdeic%2FLK%2Fjt0G9uG7zPUNKobJuTHrqqyxDRZ3xkpUboQZtLCXhLx0%2FZkQptm%2BT0tZd6PzLVdtdWVErjsPhSEH%2FCqvAcKBCxeetYL%2BHA5LvUrxJJiSQbywXm4PI7NvlYUNak1H6R1FdycYq6ySgO3taDjU2kazC1B4h3Z2Naie56mzvhmhez2Nhn1puVbTVzSV9rXQCVBT2yDgRru4Dhmms6ip6oyYkNFCiCN2Q1kQkeObBg6Cn8nVeft8WLopRWYNv5ie8ye0CtqIScqyPDHvF%2BCu8Zqk2tTU2%2B1FCVmSZ8U2UGYkRp0Jx9DeSKOu3el%2BdPyzVl8hULkRx3QZerckViq%2BLV2UoZ12coC9%2BjBd4Hh&lang=vi&b=970433-6001&timestamp=1790204355542
+947. Resource Loading (Font): GET /_next/static/media/3787d9a87cc64466-s.p.ttf
+948. Auth Flow (Vnpay Login): GET /auth/vnpay/login?data=OltZJE7ZaPSLmXQJ%2Fvx%2FjDw3ohahk8TN+VaRJIzJvSHZ1botuHXQKumzSGBNgJrstI8KX7EmcRs4nYNIyEBv4uXLezweJN5JTE%2FTuCGxuelGAc51d0BxbcRH3UkxKoz3TNdFeNuq7SWzObu0S4zNrwdYTwa4vra5n9Y8b5ioyRnoul52EpuOYPN0%2Fmee6cSPJYMu52XA2DKQpKahWhPhDgKdVRUVn%2FHNXNti+vVYafHjI4J3rMfcEpdKxaKcqq5WBrMn5wN8jLajFdPuUmbEWNptXdYLAvql1flJA0BB0oSTko%2FnS1j4tS8uiwbf4u6vHQLskW5g08CLBCciEutPwVBFI7PdKnUX&signature=c0b66438086dcdf0b82a9bed33ca9ef5e29c6544e2f505ebfbaff519cbb3125c
+949. Page Load (HTML): GET /chatlink.html
+950. Page Load (Eapp 1014 172): GET /eapp_1014_172
+951. Page Load (HTML): GET /jx.html
+952. Page Load (HTML): GET /h5/index.html
+953. Search Query (Search): GET /search?q=kem+ch%E1%BB%91ng+n%E1%BA%AFng+maru
+954. Page Load (Search): GET /search?suggestion=H%E1%BB%99p+4+B%C3%A1nh+1+Tr%C3%A0+Trung+Thu+B%E1%BA%A3o+Ng%E1%BB%8Dc+Cao+C%E1%BA%A5p+Ng%E1%BB%8Dc+Minh+Nguy%E1%BB%87t+H%E1%BB%99i
+955. Resource Loading (Image): GET /swagger/favicon.png
+956. Page Load (Static): GET /static/
+957. Page Load (Solid File Pdf): GET /icons/solid/file-pdf/
+958. Page Load (ChatIndex): GET /chatIndex
+959. Page Load (Client): GET /client/
+960. Static Asset (JS): GET /_next/static/chunks/5179-9c1bb4b841816787.js
+961. Page Load (Auth): GET /auth.json
+962. Page Load (1): GET /1.php
+963. Page Load (222): GET /222.php
+964. Page Load (BDKR28WP): GET /BDKR28WP.php
+965. Page Load (CAE 2 5): GET /CAE-2.5.php
+966. Page Load (A): GET /a.php
+967. Page Load (B8): GET /b8.php
+968. Page Load (Chosen): GET /chosen.php
+969. Page Load (File): GET /file.php
+970. Page Load (Goods): GET /goods.php
+971. Page Load (Great): GET /great.php
+972. Page Load (Images): GET /images.php
+973. Page Load (Mac): GET /mac.php
+974. Page Load (Media): GET /media.php
+975. Page Load (Min): GET /min.php
+976. Page Load (Ops): GET /ops.php
+977. Page Load (Simple): GET /simple.php
+978. Page Load (This Is A New Hello World): GET /this_is_a_new_hello_world.php
+979. Page Load (Acme Challenge): GET /.well-known/acme-challenge/tOcN4iYGajNUwFe___wt44s10lgjVoSYuLAYrWd5mbU
+980. Page Load (Products Iphone 18 Pro 256gb Bac Mjrq4x A ID138934): GET /products/iphone-18-pro-256gb-bac-mjrq4x-a-ID138934
+981. API GET (Configurations Count): GET /v1/api/commerce/configurations/count?where=%7B%22code%22%3A%7B%22ilike%22%3A%22%25CATEGORY_TEMPLATES%25%22%7D%7D
+982. API GET (Commerce Configurations): GET /v1/api/commerce/configurations?filter=%7B%22limit%22%3A50%2C%22where%22%3A%7B%22code%22%3A%7B%22ilike%22%3A%22%25CATEGORY_TEMPLATES%25%22%7D%7D%2C%22offset%22%3A0%2C%22order%22%3A%5B%22createdAt+DESC%22%5D%7D
+983. Page Load (Av): GET /av.php
+984. Page Load (Myglu): GET /myglu.php
+985. Page Load (Aaa9): GET /aaa9
+986. Page Load (Aab9): GET /aab9
+987. Page Load (Getcmd): GET /getcmd
+988. Page Load (Mobile): GET /mobile
+989. Page Load (Store Cart): GET /wp-json/wc/store/v1/cart
+990. Page Load (Store Checkout): GET /wp-json/wc/store/v1/checkout
+991. File Download (TXT): GET /sitemap.txt
+992. Page Load (Logs Laravel): GET /storage/logs/laravel.log
+993. Page Load (Acme Challenge): GET /.well-known/acme-challenge/3iV6sDt33a-qb0ivjmuGpUnIlH7dMfCLVLgmMLXqhAc
+994. Form Submit (FunctionRouter): POST /functionRouter
+995. GraphQL GET: GET /graphql
+996. Page Load (Products Dau Dau Nanh Simply 1l ID101000): GET /products/dau-dau-nanh-simply-1l-ID101000
+997. Search Query (Search): GET /search?from=search&q=B%C3%A1nh+Trung+Thu&suggestion=B%C3%A1nh+Trung+Thu+S%E1%BB%AFa+D%E1%BB%ABa+Ho%C3%A0ng+Kim+Tr%E1%BB%A9ng+Mu%E1%BB%91i-B%C3%A1nh+Cao+C%E1%BA%A5p+1+Tr%E1%BB%A9ng+150g
+998. Static Asset (JS): GET /static/console-utm-webui/js/preinit.js
+999. Static Asset (Favicon): GET /static/customization/favicon.ico
+1000. Resource Loading (Image): GET /static/dist/assets/icons/icon.png
+1001. Page Load (Static Emq): GET /static/emq.ico
+1002. Static Asset (Favicon): GET /static/images/favicon.ico
+1003. Resource Loading (Image): GET /static/img/icons/favicon-32x32.png
+1004. Static Asset (Favicon): GET /static/login/favicon.ico
+1005. Page Load (Cart): GET /cart
+1006. Resource Loading (Image): GET /favicon.png
+1007. Page Load (Landing Iphone 18 Series): GET /landing/iphone-18-series
+1008. Page Load (Products Xit Khoang Vichy Duong Am Cho Da Eau Thermal Mineralizing Water 300ml ID101673): GET /products/xit-khoang-vichy-duong-am-cho-da-eau-thermal-mineralizing-water-300ml-ID101673
+1009. Page Load (Landing Sale To Mua Mua): GET /landing/sale-to-mua-mua
+1010. Page Load (Debugbar Open): GET /_debugbar/open
+1011. Page Load (14laxcm7kj9mqitsdsfq): GET /14laxcm7kj9mqitsdsfq
+1012. Page Load (Account Payload): GET /account/_payload.json
+1013. Page Load (Amplify Outputs): GET /amplify_outputs.json
+1014. Static Asset (JS): GET /aws-exports.js
+1015. Page Load (Console): GET /console
+1016. Page Load (Dashboard Payload): GET /dashboard/_payload.json
+1017. Page Load (Docs): GET /docs
+1018. Page Load (Enhancecp): GET /enhancecp
+1019. Page Load (Openapi): GET /openapi.json
+1020. Page Load (Redoc): GET /redoc
+1021. Page Load (Ytcc3ctsqg0j8ydlgvag): GET /ytcc3ctsqg0j8ydlgvag
+1022. Page Load (Root): GET /z9x8c7v6b5-debug-trigger-dyn65eb44034864.sunny.edgevnpay.vn
+1023. Page Load (01): GET /01.php
+1024. Page Load (1): GET /1.php?p=
+1025. Page Load (App Dashboards): GET /app/dashboards
+1026. Page Load (Category List Lv3 Do An Vat Snack Ngu Coc): GET /category-list-lv3/do-an-vat-snack-ngu-coc?suggestion=%C4%90%E1%BB%93+%C4%82n+v%E1%BA%B7t
+1027. Page Load (Products Sua Abbott Ensure Gold Strengthpro Huong Vani Phuc Hoi Va Tang Cuong Suc Khoe 800g ID106144): GET /products/sua-abbott-ensure-gold-strengthpro-huong-vani-phuc-hoi-va-tang-cuong-suc-khoe-800g-ID106144?gtm_latency=1
+1028. Page Load (Search): GET /search?suggestion=T%E1%BB%A7+s%E1%BA%A5y+gi%C3%A0y+d%C3%A9p+kh%E1%BB%AD+khu%E1%BA%A9n+Fujihome+SD68+68L
+1029. Page Load (Root): GET /ao-bomber-2-lop-dgcs-wajkbc06m--s231102194
+1030. Page Load (Root): GET /ao-golf-nam-puma532163-02--s221000159
+1031. Page Load (Root): GET /ao-jacket-3-lop-dang-lung-dgcs-wajkbb14m--s230902125
+1032. Page Load (Root): GET /ao-khoac-nu-heradg-dang-dai-thiet-dang-mang-to-co-be-ve-kem-dai-eo-tui-op-hai-ben-suon-va-day-buoc-tay-wambb6007--s231001781
+1033. Page Load (Root): GET /ao-khoac-phao-nu-dang-lo-heradg-mu-lien-tui-op-noi-kem-dai-roi-nhoi-bong-3-lop-cong-nghe-nano-cao-cap-sieu-nhe-sieu-am--s231000265
+1034. Resource Loading (Image): GET /apple-touch-icon-precomposed.png
+1035. Resource Loading (Image): GET /apple-touch-icon.png
+1036. Page Load (Openid Configuration): GET /.well-known/openid-configuration
+1037. File Download (TXT): GET /.well-known/security.txt
+1038. File Download (TXT): GET /ads.txt
+1039. Page Load (Static Chunks): GET /_next/static/chunks/
+1040. Page Load (Root): GET /am-sieu-toc-thuy-tinh-1-7l-nagakawa-nag0318--s220920224
+1041. Page Load (Root): GET /ao-bomber-2-lop-dgcs-wajkbc06m--s231102203
+1042. Resource Loading (Image): GET /images/blog/what-is-javascript-array-pop-method_hu_390b2c7a890232bd.webp
+1043. Page Load (Qho1qlbsq4xu3u5abc1o): GET /qho1qlbsq4xu3u5abc1o
+1044. Page Load (Root): GET /z9x8c7v6b5-debug-trigger-stc1adb07240380.cloud.edgevnpay.vn
+1045. Page Load (Checkout): GET /checkout/
+1046. Page Load (Landing Bep Du Day Vo Yeu Ngay): GET /landing/bep-du-day-vo-yeu-ngay
+1047. Page Load (Landing Lo Nuong Tiross 641k): GET /landing/lo-nuong-tiross-641k
+1048. Page Load (Landing Nang Niu Nua The Gioi): GET /landing/nang-niu-nua-the-gioi
+1049. Page Load (Landing Nuoc Hoa Chinh Hang Tu 499k): GET /landing/nuoc-hoa-chinh-hang-tu-499k
+1050. Search Query (Search): GET /search?suggestion=T%E1%BB%A7+s%E1%BA%A5y+gi%C3%A0y+d%C3%A9p+kh%E1%BB%AD+khu%E1%BA%A9n+Fujihome+SD68+68L&q=b%C3%B4ng+t%E1%BA%A9y+trang+silcot
+1051. Page Load (Root): GET /ao-khoac-da-dang-dai-heradg-thiet-ke-phu-vai-kem-dai-roi-wkhbb3007--s231001743
+1052. Page Load (Root): GET /ao-khoac-phao-nu-dang-dai-heradg-tui-op-kem-mu-thao-toi-3-lop-chong-gio-tran-bong-nano-giu-am-cao-cap-wjkbb2023--s231000284
+1053. Page Load (Root): GET /ao-polo-tay-raglan-phoi-mau-fitted-10f21pol022r1-routine--s240801386
+1054. Page Load (Landing Ngan Deal Cong Nghe): GET /landing/ngan-deal-cong-nghe
+1055. Page Load (Category List Lv3 Catepage Bach Hoa Thuc Pham Kho): GET /category-list-lv3/catepage-bach-hoa-thuc-pham-kho
+1056. Search Query (Search): GET /search?from=search&q=iPhone+18&suggestion=T%E1%BB%A7+s%E1%BA%A5y+gi%C3%A0y+d%C3%A9p+kh%E1%BB%AD+khu%E1%BA%A9n+Fujihome+SD68+68L
+1057. Page Load (Ignition Execute Solution): GET /_ignition/execute-solution
+1058. Page Load (Linking Phone): GET /cart/linking/phone
+1059. Page Load (P Sua Rua Mat Ceravedau Xa Pantene): GET /p/sua-rua-mat-ceravedau-xa-pantene
+1060. Page Load (Products Samsung Galaxy S24 Ultra 5g 12gb 256gb ID120351): GET /products/samsung-galaxy-s24-ultra-5g-12gb-256gb-ID120351
+1061. Page Load (Products Samsung Galaxy Z Fold7 5g 12gb 256gb ID118874): GET /products/samsung-galaxy-z-fold7-5g-12gb-256gb-ID118874
+1062. Page Load (Data): GET /data.sql
+1063. Page Load (Index): GET /index.php~
+1064. Page Load (Mysql): GET /mysql.sql
+1065. Page Load (Worldcup2026): GET /worldcup2026.sql
+1066. GraphQL POST: POST /v1/graphql
+1067. Form Submit (Root): POST /
+1068. GraphQL POST: POST /api/graphql
+1069. API POST (Validate Code): POST /api/v1/validate/code
+1070. GraphQL POST: POST /graphql
+1071. Form Submit (Wp Json Batch): POST /wp-json/batch/v1
+1072. API POST (Csp Report): POST /api/csp-report

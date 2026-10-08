@@ -1,0 +1,30 @@
+services:
+  trainer:
+    build: .
+    ports:
+      - "${AUTO_ML_PORT:-8080}:8080"
+    environment:
+      TRAINING_AGENT_MODE: ${TRAINING_AGENT_MODE:-llm}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CODEX_MODEL: ${CODEX_MODEL:-}
+      CODEX_TIMEOUT_SECONDS: ${CODEX_TIMEOUT_SECONDS:-180}
+      LLM_API_URL: ${LLM_API_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_REQUIRED: ${LLM_REQUIRED:-0}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-90}
+      LLM_RETRIES: ${LLM_RETRIES:-2}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-2048}
+      VLLM_BASE_URL: ${VLLM_BASE_URL:-}
+      VLLM_API_KEY: ${VLLM_API_KEY:-}
+      VLLM_MODEL: ${VLLM_MODEL:-}
+      AWS_REGION: ${AWS_REGION:-ap-southeast-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+    volumes:
+      - ./data:/app/data:ro
+      - auto-ml-output:/app/output
+    restart: unless-stopped
+
+volumes:
+  auto-ml-output:

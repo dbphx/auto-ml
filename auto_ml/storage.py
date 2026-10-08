@@ -50,6 +50,31 @@ def download_dataset(uri, destination=None):
     return root
 
 
+def resolve_input_file(value):
+    """Return a local path for one input file, downloading a single S3 object if needed."""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("input file path must be a non-empty string")
+    value = value.strip()
+    if not is_s3_uri(value):
+        path = Path(value).expanduser()
+        if not path.is_file():
+            raise FileNotFoundError(f"input file not found: {path}")
+        return path
+
+    bucket, key = _split_s3(value)
+    if not key:
+        raise ValueError(f"S3 input must point to an object: {value}")
+    suffix = Path(key).suffix or ".txt"
+    fd, local_path = tempfile.mkstemp(prefix="auto-ml-input-", suffix=suffix)
+    os.close(fd)
+    try:
+        _s3_client().download_file(bucket, key, local_path)
+    except Exception:
+        Path(local_path).unlink(missing_ok=True)
+        raise
+    return Path(local_path)
+
+
 def upload_directory(local_dir, destination_uri):
     """Upload all files under local_dir; returns uploaded count."""
     bucket, prefix = _split_s3(destination_uri)
@@ -64,4 +89,3 @@ def upload_directory(local_dir, destination_uri):
         client.upload_file(str(path), bucket, key)
         count += 1
     return {"status": "uploaded", "uri": destination_uri.rstrip("/") + "/", "files": count}
-
