@@ -2,7 +2,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 
 def is_s3_uri(value):
@@ -38,7 +38,7 @@ def _split_s3(uri):
     parsed = urlparse(uri)
     if parsed.scheme != "s3" or not parsed.netloc:
         raise ValueError(f"invalid S3 URI: {uri}")
-    return parsed.netloc, parsed.path.lstrip("/")
+    return parsed.netloc, unquote(parsed.path.lstrip("/"))
 
 
 def download_dataset(uri, destination=None, s3_settings=None):

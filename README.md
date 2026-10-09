@@ -64,7 +64,7 @@ Mặc định dataset là cặp `data/normal.txt` và `data/attack.txt`; output 
 
 Dataset có thể là S3 prefix chứa `normal.txt` và `attack.txt`. Nếu S3 không truy cập được, job tự fallback về local `data`.
 
-Trong giao diện, mở **S3** để nhập và lưu access key, secret key, region và endpoint tùy chọn. Credential được lưu trong volume output tại `s3_settings.json` với quyền file `0600`; API chỉ trả trạng thái và access key đã che, không trả secret. Khi tạo job, chọn nguồn **S3**, chọn bucket rồi duyệt tới prefix có cả `normal.txt` và `attack.txt`. Job chọn S3 sẽ báo lỗi nếu không truy cập được thay vì âm thầm dùng dataset local.
+Trong giao diện, mở **S3** để nhập và lưu access key, secret key, region và endpoint tùy chọn. Credential được lưu trong volume output tại `s3_settings.json` với quyền file `0600`; API chỉ trả trạng thái và access key đã che, không trả secret. Khi tạo job, chọn nguồn **S3**, chọn bucket rồi duyệt tới prefix có `normal.txt` và `attack.txt`, hoặc gán hai object bất kỳ lần lượt làm Normal và Attack. Nội dung hai file vẫn cần theo định dạng category text của trainer. Có thể chọn thêm prefix S3 để lưu artifacts; mỗi job tạo một thư mục con theo `job_id`. Job chọn S3 làm input sẽ báo lỗi nếu không truy cập được thay vì âm thầm dùng dataset local.
 
 ## Trigger một job
 
