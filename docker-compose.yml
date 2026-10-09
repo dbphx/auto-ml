@@ -5,6 +5,7 @@ services:
     ports:
       - "${AUTO_ML_PORT:-8080}:8080"
     environment:
+      AUTO_ML_WORKERS: ${AUTO_ML_WORKERS:-4}
       TRAINING_AGENT_MODE: ${TRAINING_AGENT_MODE:-llm}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       CODEX_MODEL: ${CODEX_MODEL:-}

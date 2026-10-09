@@ -1,5 +1,7 @@
 import threading
 import uuid
+import os
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 
@@ -8,6 +10,11 @@ from .trainer import train_job
 app = Flask(__name__)
 JOBS = {}
 JOBS_LOCK = threading.Lock()
+try:
+    MAX_WORKERS = max(1, int(os.getenv("AUTO_ML_WORKERS", "4")))
+except ValueError:
+    MAX_WORKERS = 4
+JOB_EXECUTOR = ThreadPoolExecutor(max_workers=MAX_WORKERS, thread_name_prefix="auto-ml-job")
 
 
 def _now():
@@ -126,7 +133,7 @@ def create_job():
         JOBS[job_id] = {"job_id": job_id, "status": "queued", "created_at": timestamp,
                         "updated_at": timestamp, "process": {"status": "queued"},
                         "events": [{"timestamp": timestamp, "status": "queued"}]}
-    threading.Thread(target=_run, args=(job_id, config), daemon=True).start()
+    JOB_EXECUTOR.submit(_run, job_id, config)
     return jsonify(JOBS[job_id]), 202
 
 
