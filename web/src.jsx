@@ -161,7 +161,7 @@ function App() {
         ...(inputSource === 's3' ? { allow_local_fallback: false } : {}), 'output-path': '/app/output',
         ...(outputSource === 's3' ? { output_s3: outputS3Uri } : {}),
         ...(mode === 'codex' ? { llm: llmSource } : {}),
-        max_trials: Number(form.maxTrials), target_accuracy: Number(form.target),
+        max_trials: Number(form.maxTrials), category_target_accuracy: Number(form.target),
       }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Không tạo được job');
@@ -232,7 +232,7 @@ function App() {
         {trialPoints.length > 0 && <TrialChart trials={trialPoints} />}
         {result?.best && <section className="result-card"><div className="result-heading"><h3>Kết quả tốt nhất</h3><span className={`target-pill ${result.target_met ? 'passed' : 'missed'}`}>{result.target_met ? 'Đạt mục tiêu' : 'Chưa đạt mục tiêu'}</span></div>
           <div className="result-model">{result.best.model}</div><div className="metric-grid">{Object.entries(result.best.metrics || {}).map(([key, value]) => <div className="metric" key={key}><span>{key}</span><strong>{typeof value === 'number' ? value.toFixed(4) : value}</strong></div>)}</div>
-          <div className="result-meta"><span>Chọn theo</span><strong>{result.selection?.metric || '—'} · {result.selection?.score?.toFixed?.(4) ?? '—'}</strong><span>Validation đạt mục tiêu</span><strong>{result.validation_target_met ? 'Có' : 'Không'}</strong></div>
+          <div className="result-meta"><span>Chọn theo</span><strong>{result.selection?.metric || '—'} · {result.selection?.score?.toFixed?.(4) ?? '—'}</strong><span>Category test đạt mục tiêu</span><strong>{result.target_met ? 'Có' : 'Không'}</strong></div>
           {result.best.params && <details className="params"><summary>Hyperparameter tốt nhất</summary><pre>{JSON.stringify(result.best.params, null, 2)}</pre></details>}
           {result.category_tests && <div className="category-results"><h4>Category test</h4>{Object.entries(result.category_tests).map(([name, value]) => <div key={name}><strong>{name}</strong><span>{value.status === 'completed' ? `${value.passed}/${value.total} · ${(value.accuracy * 100).toFixed(1)}%` : value.status || '—'}</span></div>)}</div>}
           {result.artifacts && <div className="artifact-path">Artifacts: <code>{result.artifacts}</code></div>}
@@ -264,7 +264,7 @@ function App() {
             {s3Browse && <><div className="s3-current"><span>📁 {s3Bucket}/{s3Browse.prefix}</span><span>Chọn prefix đích cho artifacts</span></div><div className="s3-items">{s3Browse.folders.map(folder => <button type="button" className="s3-item folder" key={folder} onClick={() => browseS3(s3Bucket, folder)}><span>📁</span>{folder.slice(s3Browse.prefix.length)}</button>)}{!s3Browse.folders.length && <div className="s3-no-items">Không có thư mục con.</div>}</div><button type="button" className="s3-use-folder s3-output-use" onClick={() => setOutputS3Uri(`s3://${s3Bucket}/${s3Browse.prefix.split('/').filter(Boolean).map(encodeURIComponent).join('/')}`)}>Dùng thư mục này làm output</button></>}
           </>}
         </div>}<div className="s3-selected">{outputS3Uri ? <>Kết quả lưu tại <code>{outputS3Uri}/&lt;job_id&gt;</code></> : <span>Chưa chọn thư mục output.</span>}</div></>}
-        <div className="form-row top-gap"><Field label="Số trial tối đa" name="maxTrials" type="number" min="1" max="100" value={form.maxTrials} onChange={updateForm} /><Field label="Accuracy mục tiêu" name="target" type="number" min="0" max="1" step="0.01" value={form.target} onChange={updateForm} /></div>
+        <div className="form-row top-gap"><Field label="Số trial tối đa" name="maxTrials" type="number" min="1" max="100" value={form.maxTrials} onChange={updateForm} /><Field label="Ngưỡng category test" name="target" type="number" min="0" max="1" step="0.01" value={form.target} onChange={updateForm} /></div>
         <div className="form-actions"><button type="button" className="secondary" onClick={() => setDialog(false)}>Hủy</button><button disabled={busy || (inputSource === 's3' && !s3Uri && !(s3Files.normal && s3Files.attack))}>{busy ? 'Đang gửi…' : 'Bắt đầu training'}</button></div>
       </form></section></div>}
     {s3SettingsOpen && <div className="overlay s3-settings-overlay" onMouseDown={event => event.target === event.currentTarget && setS3SettingsOpen(false)}><section className="dialog s3-settings-dialog"><div className="modal-head"><div><h2>Cấu hình S3</h2><span className="s3-settings-sub">Credential được lưu trên máy chủ, không hiển thị lại.</span></div><button className="close" onClick={() => setS3SettingsOpen(false)}>×</button></div><form className="form" onSubmit={saveS3Settings}>

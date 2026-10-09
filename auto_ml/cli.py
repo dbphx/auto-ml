@@ -35,10 +35,8 @@ def main():
                         help="LLM response token budget (default: LLM_MAX_TOKENS or 2048)")
     parser.add_argument("--task", default="auto", choices=["auto", "classification", "regression"])
     parser.add_argument("--target", default="label")
-    parser.add_argument("--target-accuracy", type=float, default=None,
-                        help="optional validation accuracy target; omitted disables this gate")
     parser.add_argument("--category-target-accuracy", type=float, default=0.90,
-                        help="minimum category test accuracy for each model")
+                        help="minimum accuracy on the category test set")
     parser.add_argument("--max-trials", type=int, default=10)
     parser.add_argument("--max-rounds", type=int, default=1,
                         help="retry tuning rounds until category target is met")
@@ -48,7 +46,6 @@ def main():
                         "output_s3": args.output_s3, "task": args.task, "target": args.target,
                         "agent_mode": args.agent_mode,
                         "require_llm": args.require_llm,
-                        "target_metrics": {},
                         "category_target_accuracy": args.category_target_accuracy,
                         "max_trials": args.max_trials, "max_rounds": args.max_rounds}
     if args.normal_path:
@@ -65,8 +62,6 @@ def main():
         config["codex_model"] = args.codex_model
     if args.codex_timeout_seconds is not None:
         config["codex_timeout_seconds"] = args.codex_timeout_seconds
-    if args.target_accuracy is not None:
-        config["target_metrics"] = {"accuracy": args.target_accuracy}
     if args.require_llm:
         os.environ["LLM_REQUIRED"] = "1"
     def log_update(update):
@@ -75,7 +70,7 @@ def main():
             print(
                 f"[{update['model']}] CATEGORY: {update.get('passed', 0)}/{update.get('total', 0)} "
                 f"passed ({update.get('accuracy', 0.0) * 100:.2f}%) "
-                f"target={update.get('target_accuracy', args.category_target_accuracy) * 100:.2f}% {state}"
+                f"target={update.get('category_target_accuracy', args.category_target_accuracy) * 100:.2f}% {state}"
             )
         elif update.get("status") == "retrying":
             print(f"[RETRY] round {update['round']}/{update['max_rounds']}: {update['message']}")

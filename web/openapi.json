@@ -27,7 +27,7 @@
                 "input-path": { "normal": "/app/data/normal.txt", "attack": "/app/data/attack.txt" },
                 "output-path": "/app/output",
                 "max_trials": 10,
-                "target_accuracy": 0.9
+                "category_target_accuracy": 0.9
               }
             }
           }
@@ -191,8 +191,7 @@
           "output-path": { "type": "string" },
           "max_trials": { "type": "integer", "minimum": 1, "default": 10 },
           "max_rounds": { "type": "integer", "minimum": 1, "default": 1 },
-          "target_accuracy": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.9 },
-          "category_target_accuracy": { "type": "number", "minimum": 0, "maximum": 1 }
+          "category_target_accuracy": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.9, "description": "Ngưỡng accuracy của category test" }
         }
       },
       "JobSummary": {

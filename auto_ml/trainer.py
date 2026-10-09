@@ -40,10 +40,6 @@ def _metrics(task, y_true, prediction):
             "recall": float(__import__("sklearn.metrics", fromlist=["recall_score"]).recall_score(y_true, prediction, zero_division=0))}
 
 
-def _meets_targets(metrics, targets):
-    return all(float(metrics.get(key, -np.inf)) >= float(value) for key, value in targets.items())
-
-
 def _load_data(path, target):
     path = Path(path)
     if path.is_dir():
@@ -139,8 +135,7 @@ def train_job(config, progress=None):
     models = [m for m in models if m in {"random_forest", "linear"}]
     if not models:
         raise ValueError("models must contain random_forest and/or linear")
-    target_accuracy = float(config.get("target_accuracy", config.get("category_target_accuracy", 0.90)))
-    targets = config.get("target_metrics") or ({"accuracy": target_accuracy} if task == "classification" else {"r2": 0.8})
+    category_target_accuracy = float(config.get("category_target_accuracy", 0.90))
     max_trials = max(1, min(int(config.get("max_trials", 10)), 100))
     test_size = float(config.get("test_size", 0.2))
     agent_mode = config.get("agent_mode", os.getenv("TRAINING_AGENT_MODE", "llm")).lower()
@@ -161,7 +156,7 @@ def train_job(config, progress=None):
     x_train = fe.transform(prepared_train)
     x_valid = fe.transform(prepared_valid)
     summary = {"rows": len(frame), "features": feature_columns, "task": task,
-               "category_target_accuracy": float(config.get("category_target_accuracy", target_accuracy)),
+               "category_target_accuracy": category_target_accuracy,
                "classes": sorted(map(str, y.unique())) if task == "classification" else None}
     feedback = config.get("tuning_feedback")
     if agent_mode == "codex":
@@ -169,7 +164,7 @@ def train_job(config, progress=None):
         plan = {"search_space": {name: bounded[name] for name in models},
                 "reason": "Codex CLI tunes each model after every completed trial"}
     else:
-        plan = build_plan(summary, targets, models, feedback=feedback,
+        plan = build_plan(summary, models, feedback=feedback,
                           require_llm=bool(config.get("require_llm", False)),
                           timeout_seconds=config.get("llm_timeout_seconds"),
                           retries=config.get("llm_retries"),
@@ -185,7 +180,7 @@ def train_job(config, progress=None):
     best = None
     best_by_model = {}
     trial_log = []
-    score_key = next(iter(targets), "f1" if task == "classification" else "r2")
+    score_key = "accuracy" if task == "classification" else "r2"
     for model_name in models:
         space = plan["search_space"].get(model_name, {})
         sampler_seed = seed + (0 if model_name == "random_forest" else 1000)
@@ -217,7 +212,7 @@ def train_job(config, progress=None):
             current_model_best = best_by_model.get(model_name)
             if current_model_best is None or score.get(score_key, -np.inf) > current_model_best["metrics"].get(score_key, -np.inf):
                 best_by_model[model_name] = {"model": model_name, "params": params, "metrics": score}
-            if best is None or _meets_targets(score, targets) and not _meets_targets(best["metrics"], targets) or score.get(score_key, -np.inf) > best["metrics"].get(score_key, -np.inf):
+            if best is None or score.get(score_key, -np.inf) > best["metrics"].get(score_key, -np.inf):
                 best = {"model": model_name, "params": params, "metrics": score, "estimator": estimator}
             emit({"status": "running", "trial": len(trial_log), "model": model_name, "metrics": score})
             if agent_mode == "codex" and trial_index + 1 < len(sampled_params):
@@ -226,7 +221,6 @@ def train_job(config, progress=None):
                       "message": "Codex is reviewing trial metrics and selecting the next parameters"})
                 recommendation = build_codex_params(
                     model_name, plan["search_space"], model_trials, task=task,
-                    target_metrics=targets,
                     timeout_seconds=config.get("codex_timeout_seconds"),
                     model=config.get("llm_model") or config.get("codex_model"),
                     llm_source=config.get("llm_source", "auto"))
@@ -261,7 +255,7 @@ def train_job(config, progress=None):
             artifacts,
             ML_ROOT / "data",
             config.get("threshold", 0.55),
-            float(config.get("category_target_accuracy", target_accuracy)),
+            category_target_accuracy,
         )
         for model_name, result in category_reports.items():
             if result.get("status") != "completed":
@@ -273,7 +267,7 @@ def train_job(config, progress=None):
                 "passed": result["passed"],
                 "total": result["total"],
                 "accuracy": result["accuracy"],
-                "target_accuracy": result["target_accuracy"],
+                "category_target_accuracy": result["category_target_accuracy"],
                 "target_met": result["target_met"],
             })
         available_category_scores = {
@@ -299,12 +293,11 @@ def train_job(config, progress=None):
                      "score": float(best["metrics"].get(score_key, 0.0))}
     report = {"job_id": job_id, "round": round_number, "created_at": _now(), "dataset_path": data_path,
               "agent_mode": agent_mode,
-              "task": task, "target": target, "targets": targets, "plan": plan,
+              "task": task, "target": target, "plan": plan,
               "selection": selection,
               "best": {k: v for k, v in best.items() if k != "estimator"},
               "model_artifacts": model_artifacts, "category_tests": category_reports,
-              "validation_target_met": _meets_targets(best["metrics"], targets),
-              "target_met": bool(selected_category.get("target_met", False)) if selected_category else _meets_targets(best["metrics"], targets),
+              "target_met": bool(selected_category.get("target_met", False)) if selected_category else (False if task == "classification" else None),
               "trials": trial_log,
               "artifacts": str(output_root / job_id)}
     if task == "classification" and not report["target_met"] and round_number < max_rounds:
@@ -321,14 +314,13 @@ def train_job(config, progress=None):
         next_config["random_state"] = seed + 1
         next_config["tuning_feedback"] = {
             "round": round_number,
-            "validation_target_met": report["validation_target_met"],
             "best_trial": report["best"],
             "top_trials_by_model": top_trials_by_model,
             "category_tests": {
-                name: {key: result.get(key) for key in ("status", "passed", "total", "accuracy", "target_accuracy", "target_met")}
+                name: {key: result.get(key) for key in ("status", "passed", "total", "accuracy", "category_target_accuracy", "target_met")}
                 for name, result in category_reports.items()
             },
-            "category_target_accuracy": float(config.get("category_target_accuracy", 0.90)),
+            "category_target_accuracy": category_target_accuracy,
         }
         shutil.rmtree(temp_root, ignore_errors=True)
         return train_job(next_config, progress)

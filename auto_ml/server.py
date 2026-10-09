@@ -305,8 +305,9 @@ def create_job():
     if request.path == "/hook":
         config.setdefault("max_trials", 10)
         config.setdefault("max_rounds", 1)
-        config.setdefault("target_accuracy", 0.90)
-        config.setdefault("category_target_accuracy", config["target_accuracy"])
+        config.setdefault("category_target_accuracy", 0.90)
+        config.pop("target_accuracy", None)
+        config.pop("target_metrics", None)
     if normal_path:
         if not isinstance(normal_path, str) or not isinstance(attack_path, str):
             return jsonify({"error": "normal-path and attack-path must be strings"}), 400
@@ -401,7 +402,7 @@ def get_task_process(job_id):
         if result and job.get("report"):
             report = job["report"]
             result["result"] = {key: report.get(key) for key in
-                                ("best", "selection", "target_met", "validation_target_met", "targets",
+                                ("best", "selection", "target_met",
                                  "trials", "category_tests", "artifacts", "task")}
     return (jsonify(result), 200) if result else (jsonify({"error": "task not found"}), 404)
 

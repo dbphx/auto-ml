@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 
-def run_category_tests(artifacts_dir, data_dir, threshold=0.55, target_accuracy=0.90):
+def run_category_tests(artifacts_dir, data_dir, threshold=0.55, category_target_accuracy=0.90):
     """Run RAW + URL-encoded category tests against this job's artifacts."""
     ml_src = Path(data_dir).parent / "src"
     if str(ml_src) not in sys.path:
@@ -44,8 +44,8 @@ def run_category_tests(artifacts_dir, data_dir, threshold=0.55, target_accuracy=
                                  "correct": correct})
         report = {"status": "completed", "passed": passed, "total": total,
                   "accuracy": passed / total if total else 0.0,
-                  "target_accuracy": target_accuracy,
-                  "target_met": passed / total >= target_accuracy if total else False,
+                  "category_target_accuracy": category_target_accuracy,
+                  "target_met": passed / total >= category_target_accuracy if total else False,
                   "results": rows}
         (model_dir / "category_results.json").write_text(json.dumps(report, indent=2))
         reports[model_name] = {k: v for k, v in report.items() if k != "results"}

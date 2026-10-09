@@ -43,7 +43,7 @@ curl -X POST http://localhost:8080/hook \
   -d '{"mode":"codex","input-path":{"normal":"/app/data/normal.txt","attack":"/app/data/attack.txt"},"output-path":"/app/output"}'
 ```
 
-`mode` chọn `llm` (planner hiện tại) hoặc `codex` (Codex CLI tự tune). Trong mode `codex`, `llm` có thể chọn `external` hoặc `internal`; nếu bỏ qua thì mặc định là `internal`, dùng endpoint/auth mặc định của Codex CLI. Chế độ `external` dùng URL/key từ `VLLM_*` hoặc `LLM_*` trong env. Model luôn lấy từ `.env`: `VLLM_MODEL`/`LLM_MODEL` cho external, hoặc `CODEX_MODEL` cho internal (nếu bỏ trống thì Codex CLI dùng model mặc định). Hook mặc định chạy tối đa 10 trials cho từng model trong một round và chọn trial có validation accuracy cao nhất. Validation đạt 90% không làm dừng search; `target_met` cuối cùng được quyết định bởi category test với ngưỡng 90%. Có thể ghi đè `target_accuracy`, `max_trials`, `category_target_accuracy` trong JSON. `input-path` nhận đường dẫn tới thư mục/CSV, một mảng `[normal-path, attack-path]`, hoặc object `{ "normal": "...", "attack": "..." }`. Các trường `normal-path` và `attack-path` riêng lẻ vẫn được hỗ trợ. `output-path` là thư mục gốc artifacts; mỗi job tạo thư mục con theo `job_id`. URL và API key luôn lấy từ môi trường container. Hook trả HTTP `202` cùng `job_id`; dùng `GET /jobs/<job_id>` để xem trạng thái.
+`mode` chọn `llm` (planner hiện tại) hoặc `codex` (Codex CLI tự tune). Trong mode `codex`, `llm` có thể chọn `external` hoặc `internal`; nếu bỏ qua thì mặc định là `internal`, dùng endpoint/auth mặc định của Codex CLI. Chế độ `external` dùng URL/key từ `VLLM_*` hoặc `LLM_*` trong env. Model luôn lấy từ `.env`: `VLLM_MODEL`/`LLM_MODEL` cho external, hoặc `CODEX_MODEL` cho internal (nếu bỏ trống thì Codex CLI dùng model mặc định). Hook mặc định chạy tối đa 10 trials cho từng model trong một round và chọn trial có validation accuracy cao nhất. `category_target_accuracy` là ngưỡng duy nhất để đánh giá category test; có thể ghi đè cùng `max_trials` trong JSON. `input-path` nhận đường dẫn tới thư mục/CSV, một mảng `[normal-path, attack-path]`, hoặc object `{ "normal": "...", "attack": "..." }`. Các trường `normal-path` và `attack-path` riêng lẻ vẫn được hỗ trợ. `output-path` là thư mục gốc artifacts; mỗi job tạo thư mục con theo `job_id`. URL và API key luôn lấy từ môi trường container. Hook trả HTTP `202` cùng `job_id`; dùng `GET /jobs/<job_id>` để xem trạng thái.
 
 Quản lý các task bằng API:
 
@@ -73,7 +73,7 @@ curl -X POST http://127.0.0.1:8080/jobs \
   -H 'Content-Type: application/json' \
   -d '{
     "dataset_path": "data",
-    "target_metrics": {"accuracy": 0.98, "f1": 0.97},
+    "category_target_accuracy": 0.9,
     "max_trials": 12,
     "models": ["random_forest", "linear"]
   }'
@@ -141,7 +141,7 @@ Trong lúc train, các model/trial được ghi vào thư mục tạm. Khi hoàn
 - `category_results.json` (khi có category test)
 - `report.json`
 
-Sau khi category test chạy xong, trainer chọn model có `category_tests.<model>.accuracy` cao nhất. `target_met` kiểm tra ngưỡng trên model thắng cuộc; `validation_target_met` vẫn báo riêng kết quả validation của model đó. Ngưỡng category đổi bằng `--category-target-accuracy`.
+Sau khi category test chạy xong, trainer chọn model có `category_tests.<model>.accuracy` cao nhất. `target_met` kiểm tra `category_target_accuracy` trên model thắng cuộc. Ngưỡng đổi bằng `--category-target-accuracy`.
 
 LLM là lớp lập kế hoạch tùy chọn. Có thể dùng `LLM_API_URL`, `LLM_API_KEY`, `LLM_MODEL` hoặc các biến VLLM tương ứng:
 

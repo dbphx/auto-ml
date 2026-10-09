@@ -132,7 +132,7 @@ def _parse_plan_response(data):
 
 
 def build_codex_params(model_name, bounded_space, trials, task="classification",
-                       target_metrics=None, timeout_seconds=None, model=None,
+                       timeout_seconds=None, model=None,
                        llm_source="auto"):
     """Ask Codex CLI for one bounded next trial, based only on observed metrics."""
     executable = shutil.which(os.getenv("CODEX_CLI", "codex"))
@@ -160,8 +160,7 @@ def build_codex_params(model_name, bounded_space, trials, task="classification",
         "Choose exactly one next parameter combination for the named model. Use only values "
         "from bounded_space; do not run commands, access files, or modify anything. "
         "Use prior trials to avoid repeats and improve the requested metric. Return JSON matching the schema.\n"
-        + json.dumps({"task": task, "target_metrics": target_metrics or {},
-                     "model": model_name, "bounded_space": parameters,
+        + json.dumps({"task": task, "model": model_name, "bounded_space": parameters,
                      "previous_trials": trials[-30:]}, default=str)
     )
     with tempfile.TemporaryDirectory(prefix="auto-ml-codex-") as temp_dir:
@@ -248,7 +247,7 @@ def build_codex_params(model_name, bounded_space, trials, task="classification",
     return {"params": safe, "reason": str(parsed.get("reason", "Codex tuning"))[:1000]}
 
 
-def build_plan(dataset_summary, target_metrics, models, feedback=None, require_llm=False,
+def build_plan(dataset_summary, models, feedback=None, require_llm=False,
                timeout_seconds=None, retries=None, max_tokens=None, model_override=None):
     """Ask an optional OpenAI-compatible endpoint for a bounded tuning plan."""
     load_dotenv()
@@ -277,7 +276,7 @@ def build_plan(dataset_summary, target_metrics, models, feedback=None, require_l
             "Act as an iterative ML tuning agent. Choose values only from bounded_space, focusing "
             "on models below category_target_accuracy. Return one compact JSON object only, with "
             "exactly search_space and reason. Keep reason under 30 words; do not include analysis or code.\n" +
-            json.dumps({"dataset": dataset_summary, "targets": target_metrics,
+            json.dumps({"dataset": dataset_summary,
                         "models": models, "bounded_space": {m: defaults[m] for m in models},
                         "previous_round_feedback": feedback}, default=str)
         ),
