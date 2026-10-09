@@ -1,15 +1,19 @@
 import threading
 import uuid
 import os
+import json
+import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
-from flask import Flask, jsonify, request
+from pathlib import Path
+from flask import Flask, jsonify, request, send_from_directory
 
 from .trainer import train_job
 
 app = Flask(__name__)
 JOBS = {}
 JOBS_LOCK = threading.Lock()
+JOBS_DB_PATH = Path(os.getenv("AUTO_ML_DB_PATH", str(Path(os.getenv("OUTPUT_DIR", "output")) / "jobs.sqlite3")))
 try:
     MAX_WORKERS = max(1, int(os.getenv("AUTO_ML_WORKERS", "4")))
 except ValueError:
@@ -17,8 +21,52 @@ except ValueError:
 JOB_EXECUTOR = ThreadPoolExecutor(max_workers=MAX_WORKERS, thread_name_prefix="auto-ml-job")
 
 
+@app.get("/")
+def management():
+    return send_from_directory(app.static_folder, "index.html")
+
+
 def _now():
     return datetime.now(timezone.utc).isoformat()
+
+
+def _connect_db():
+    return sqlite3.connect(JOBS_DB_PATH, timeout=30)
+
+
+def _save_job(job):
+    with _connect_db() as connection:
+        connection.execute(
+            "INSERT INTO jobs (job_id, created_at, updated_at, payload) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(job_id) DO UPDATE SET created_at=excluded.created_at, "
+            "updated_at=excluded.updated_at, payload=excluded.payload",
+            (job["job_id"], job.get("created_at", ""), job.get("updated_at", ""),
+             json.dumps(job, ensure_ascii=False, default=str)),
+        )
+
+
+def _load_jobs():
+    JOBS_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with _connect_db() as connection:
+        connection.execute("PRAGMA journal_mode=WAL")
+        connection.execute("CREATE TABLE IF NOT EXISTS jobs (job_id TEXT PRIMARY KEY, created_at TEXT, updated_at TEXT, payload TEXT NOT NULL)")
+        rows = connection.execute("SELECT payload FROM jobs").fetchall()
+    for (payload,) in rows:
+        job = json.loads(payload)
+        if job.get("status") in {"queued", "running", "retrying", "agent_tuning", "agent_recommendation", "category_tests"}:
+            timestamp = _now()
+            message = "Server restarted before this job finished"
+            failure = {"status": "failed", "error": message}
+            job.update(failure, updated_at=timestamp, finished_at=timestamp,
+                       process={"status": "failed", "message": message})
+            job.setdefault("events", []).append({"timestamp": timestamp, **failure})
+            job["events"] = job["events"][-500:]
+        JOBS[job["job_id"]] = job
+    for job in JOBS.values():
+        _save_job(job)
+
+
+_load_jobs()
 
 
 def _run(job_id, config):
@@ -27,6 +75,8 @@ def _run(job_id, config):
             with JOBS_LOCK:
                 job = JOBS[job_id]
                 job.update(update)
+                if update.get("status") in {"agent_tuning", "agent_recommendation", "category_tests"}:
+                    job["status"] = "running"
                 job["updated_at"] = _now()
                 event = {"timestamp": job["updated_at"], **update}
                 if "report" in event:
@@ -40,6 +90,7 @@ def _run(job_id, config):
                                        if key in update}
                 if update.get("status") in {"completed", "failed"}:
                     job["finished_at"] = job["updated_at"]
+                _save_job(job)
 
         report = train_job(config, update_job)
         update_job({"status": "completed", "report": report})
@@ -51,6 +102,7 @@ def _run(job_id, config):
             job.update(failure, updated_at=timestamp, finished_at=timestamp,
                        process={"status": "failed", "message": str(exc)})
             job["events"].append({"timestamp": timestamp, **failure})
+            _save_job(job)
 
 
 def _request_value(payload, *keys):
@@ -133,6 +185,7 @@ def create_job():
         JOBS[job_id] = {"job_id": job_id, "status": "queued", "created_at": timestamp,
                         "updated_at": timestamp, "process": {"status": "queued"},
                         "events": [{"timestamp": timestamp, "status": "queued"}]}
+        _save_job(JOBS[job_id])
     JOB_EXECUTOR.submit(_run, job_id, config)
     return jsonify(JOBS[job_id]), 202
 
@@ -170,6 +223,11 @@ def get_task_process(job_id):
         job = JOBS.get(job_id)
         result = {"job_id": job_id, "status": job["status"], "process": job.get("process"),
                   "events": list(job.get("events", []))} if job else None
+        if result and job.get("report"):
+            report = job["report"]
+            result["result"] = {key: report.get(key) for key in
+                                ("best", "selection", "target_met", "validation_target_met", "targets",
+                                 "trials", "category_tests", "artifacts", "task")}
     return (jsonify(result), 200) if result else (jsonify({"error": "task not found"}), 404)
 
 

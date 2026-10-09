@@ -27,6 +27,8 @@ docker compose up --build -d
 
 Compose mở server tại `http://localhost:8080`, mount `./data` read-only vào `/app/data` và lưu kết quả trong volume `auto-ml-output`. Chế độ Codex nội bộ dùng phiên ChatGPT CLI đã đăng nhập trên host qua `~/.codex/auth.json`; Compose đồng bộ file auth vào volume riêng trong container. Copy `.env.example` thành `.env` để cấu hình LLM hoặc AWS. Image đã cài Codex CLI.
 
+Mở `http://localhost:8080/` để vào trang management React: xem danh sách/trạng thái job, tiến trình và lịch sử cập nhật, hoặc tạo job training mới. React gọi trực tiếp API Flask; trang tự làm mới mỗi 3 giây. Job và lịch sử được lưu trong SQLite tại `/app/output/jobs.sqlite3` trên volume bền vững `auto-ml-output`, nên vẫn còn sau khi container khởi động lại. Job đang chạy dở lúc server dừng được đánh dấu lỗi với thông báo gián đoạn.
+
 Server chạy tối đa 4 job training đồng thời theo mặc định; job vượt giới hạn ở trạng thái `queued` đến lượt. Có thể đổi giới hạn bằng `AUTO_ML_WORKERS` trong `.env`.
 
 Gửi hook để khởi chạy một job (đường dẫn là đường dẫn **bên trong container**):

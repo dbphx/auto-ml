@@ -2,6 +2,14 @@ FROM node:22-slim AS codex-cli
 
 RUN npm install --global @openai/codex@0.130.0
 
+FROM node:22-slim AS web-builder
+WORKDIR /web
+COPY web/package.json ./package.json
+COPY web/package-lock.json ./package-lock.json
+RUN npm ci --no-audit --no-fund
+COPY web/ ./
+RUN npm run build
+
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -18,6 +26,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN ln -sf /usr/local/lib/node_modules/@openai/codex/bin/codex.js /usr/local/bin/codex
 
 COPY auto_ml ./auto_ml
+COPY --from=web-builder /auto_ml/static ./auto_ml/static
 COPY src ./src
 COPY data ./data
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint
