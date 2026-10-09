@@ -29,6 +29,10 @@ Compose mở server tại `http://localhost:8080`, mount `./data` read-only vào
 
 Mở `http://localhost:8080/` để vào trang management React: xem danh sách/trạng thái job, tiến trình và lịch sử cập nhật, hoặc tạo job training mới. React gọi trực tiếp API Flask; trang tự làm mới mỗi 3 giây. Job và lịch sử được lưu trong SQLite tại `/app/output/jobs.sqlite3` trên volume bền vững `auto-ml-output`, nên vẫn còn sau khi container khởi động lại. Job đang chạy dở lúc server dừng được đánh dấu lỗi với thông báo gián đoạn.
 
+Tài liệu Swagger cho các endpoint có tại `http://localhost:8080/api`; OpenAPI 3.1.0 JSON để import vào công cụ khác tại `/openapi.json`.
+
+Trong management, có thể xóa từng job hoặc xóa toàn bộ lịch sử đã kết thúc. Chỉ job `completed` hoặc `failed` được xóa; job đang chờ/chạy sẽ được giữ lại.
+
 Server chạy tối đa 4 job training đồng thời theo mặc định; job vượt giới hạn ở trạng thái `queued` đến lượt. Có thể đổi giới hạn bằng `AUTO_ML_WORKERS` trong `.env`.
 
 Gửi hook để khởi chạy một job (đường dẫn là đường dẫn **bên trong container**):
@@ -59,6 +63,8 @@ Trạng thái gồm `queued`, `running`, `retrying`, `completed` hoặc `failed`
 Mặc định dataset là cặp `data/normal.txt` và `data/attack.txt`; output nằm ở `output/`.
 
 Dataset có thể là S3 prefix chứa `normal.txt` và `attack.txt`. Nếu S3 không truy cập được, job tự fallback về local `data`.
+
+Trong giao diện, mở **S3** để nhập và lưu access key, secret key, region và endpoint tùy chọn. Credential được lưu trong volume output tại `s3_settings.json` với quyền file `0600`; API chỉ trả trạng thái và access key đã che, không trả secret. Khi tạo job, chọn nguồn **S3**, chọn bucket rồi duyệt tới prefix có cả `normal.txt` và `attack.txt`. Job chọn S3 sẽ báo lỗi nếu không truy cập được thay vì âm thầm dùng dataset local.
 
 ## Trigger một job
 
@@ -164,7 +170,7 @@ Có hai mode:
 - `llm` (mặc định): giữ planner hiện tại, gọi endpoint OpenAI-compatible để lập kế hoạch cho từng round; nếu category test chưa đạt, gửi feedback để lập kế hoạch round kế tiếp.
 - `codex`: gọi Codex CLI sau mỗi trial để xem metrics và chọn hyperparameter cho trial kế tiếp. Codex chỉ trả lời trong search space cho phép; trainer xác thực lại từng giá trị. Codex chạy trong sandbox read-only và không sửa code, dataset hoặc model artifacts. Cần cài và xác thực Codex CLI trên máy/container chạy trainer.
 
-Trong mode `codex`, mặc định dùng Codex provider/auth/model nội bộ. Chọn `"llm":"external"` để dùng URL/key/model từ `VLLM_*` (hoặc `LLM_*`); endpoint cần hỗ trợ `POST /v1/responses`. Endpoint chỉ hỗ trợ `/v1/chat/completions` dùng được với mode `llm`, nhưng không dùng trực tiếp được với Codex CLI. Codex CLI hiện yêu cầu custom provider dùng Responses API và `wire_api = "responses"` ([tài liệu cấu hình](https://developers.openai.com/codex/config-reference/)).
+Trong mode `codex`, mặc định dùng Codex provider/auth/model nội bộ. Chọn `"llm":"external"` để dùng URL/key/model từ `VLLM_*` (hoặc `LLM_*`); endpoint cần hỗ trợ `POST /v1/responses`. Endpoint chỉ hỗ trợ `/v1/chat/completions` dùng được với mode `llm`, nhưng không dùng trực tiếp được với Codex CLI. Codex CLI hiện yêu cầu custom provider dùng Responses API và `wire_api = "responses"` ([tài liệu cấu hình](https://developers.openai.com/codex/config-reference/)). MiniMax có hướng dẫn dùng Codex qua Responses API; cấu hình mẫu và model được tài liệu MiniMax nêu ở [.env.example](.env.example) ([hướng dẫn MiniMax Codex](https://platform.minimax.io/docs/m-plan/codex)).
 
 Chọn mode trong CLI:
 

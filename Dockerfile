@@ -1,6 +1,6 @@
 FROM node:22-slim AS codex-cli
 
-RUN npm install --global @openai/codex@0.130.0
+RUN npm install --global @openai/codex@0.146.0
 
 FROM node:22-slim AS web-builder
 WORKDIR /web
@@ -27,6 +27,8 @@ RUN ln -sf /usr/local/lib/node_modules/@openai/codex/bin/codex.js /usr/local/bin
 
 COPY auto_ml ./auto_ml
 COPY --from=web-builder /auto_ml/static ./auto_ml/static
+COPY web/api.html ./auto_ml/static/api.html
+COPY web/openapi.json ./auto_ml/static/openapi.json
 COPY src ./src
 COPY data ./data
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint

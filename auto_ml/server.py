@@ -3,17 +3,22 @@ import uuid
 import os
 import json
 import sqlite3
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 from flask import Flask, jsonify, request, send_from_directory
 
 from .trainer import train_job
+from .storage import _s3_client, is_s3_uri
 
 app = Flask(__name__)
 JOBS = {}
 JOBS_LOCK = threading.Lock()
 JOBS_DB_PATH = Path(os.getenv("AUTO_ML_DB_PATH", str(Path(os.getenv("OUTPUT_DIR", "output")) / "jobs.sqlite3")))
+S3_SETTINGS_PATH = JOBS_DB_PATH.parent / "s3_settings.json"
+S3_SETTINGS_LOCK = threading.Lock()
 try:
     MAX_WORKERS = max(1, int(os.getenv("AUTO_ML_WORKERS", "4")))
 except ValueError:
@@ -24,6 +29,97 @@ JOB_EXECUTOR = ThreadPoolExecutor(max_workers=MAX_WORKERS, thread_name_prefix="a
 @app.get("/")
 def management():
     return send_from_directory(app.static_folder, "index.html")
+
+
+@app.get("/api")
+def api_docs():
+    return send_from_directory(app.static_folder, "api.html")
+
+
+@app.get("/openapi.json")
+def openapi_spec():
+    return send_from_directory(app.static_folder, "openapi.json")
+
+
+@app.get("/settings/s3")
+def get_s3_settings():
+    return jsonify(_public_s3_settings())
+
+
+@app.put("/settings/s3")
+def save_s3_settings():
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"error": "request body must be a JSON object"}), 400
+    with S3_SETTINGS_LOCK:
+        saved = _read_saved_s3_settings()
+        for key in ("region", "endpoint_url"):
+            if key in payload and isinstance(payload[key], str):
+                saved[key] = payload[key].strip()
+        for key in ("access_key_id", "secret_access_key", "session_token"):
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip():
+                saved[key] = value.strip()
+        if payload.get("clear_credentials"):
+            for key in ("access_key_id", "secret_access_key", "session_token"):
+                saved.pop(key, None)
+        settings = {
+            **saved,
+            "region": saved.get("region") or os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION") or "",
+            "endpoint_url": saved.get("endpoint_url") or os.getenv("AWS_ENDPOINT_URL") or os.getenv("S3_ENDPOINT_URL") or "",
+            "access_key_id": saved.get("access_key_id") or os.getenv("AWS_ACCESS_KEY_ID") or "",
+            "secret_access_key": saved.get("secret_access_key") or os.getenv("AWS_SECRET_ACCESS_KEY") or "",
+            "session_token": saved.get("session_token") or os.getenv("AWS_SESSION_TOKEN") or "",
+        }
+        endpoint = settings.get("endpoint_url", "")
+        if endpoint and urlparse(endpoint).scheme not in {"http", "https"}:
+            return jsonify({"error": "endpoint_url must start with http:// or https://"}), 400
+        if bool(settings.get("access_key_id")) != bool(settings.get("secret_access_key")):
+            return jsonify({"error": "access_key_id and secret_access_key must be provided together"}), 400
+        _write_s3_settings(saved)
+    return jsonify(_public_s3_settings(settings))
+
+
+@app.get("/s3/buckets")
+def list_s3_buckets():
+    settings = _read_s3_settings()
+    if not settings.get("access_key_id") or not settings.get("secret_access_key"):
+        return jsonify({"error": "Save S3 access and secret keys first"}), 400
+    try:
+        response = _s3_client(settings).list_buckets()
+        buckets = sorted(bucket["Name"] for bucket in response.get("Buckets", []))
+        return jsonify({"buckets": buckets})
+    except Exception as exc:
+        return jsonify({"error": f"Could not list S3 buckets: {exc}"}), 502
+
+
+@app.get("/s3/browse")
+def browse_s3():
+    bucket = request.args.get("bucket", "").strip()
+    prefix = request.args.get("prefix", "").strip().lstrip("/")
+    if not bucket:
+        return jsonify({"error": "bucket is required"}), 400
+    if prefix and not prefix.endswith("/"):
+        prefix += "/"
+    settings = _read_s3_settings()
+    if not settings.get("access_key_id") or not settings.get("secret_access_key"):
+        return jsonify({"error": "Save S3 access and secret keys first"}), 400
+    try:
+        response = _s3_client(settings).list_objects_v2(
+            Bucket=bucket, Prefix=prefix, Delimiter="/", MaxKeys=1000)
+        folders = [item["Prefix"] for item in response.get("CommonPrefixes", [])]
+        files = [item["Key"][len(prefix):] for item in response.get("Contents", [])
+                 if item.get("Key") != prefix]
+        return jsonify({
+            "bucket": bucket,
+            "prefix": prefix,
+            "parent": prefix.rstrip("/").rsplit("/", 1)[0] + "/" if "/" in prefix.rstrip("/") else "",
+            "folders": folders,
+            "files": files,
+            "has_dataset": {"normal.txt", "attack.txt"}.issubset(set(files)),
+        })
+    except Exception as exc:
+        return jsonify({"error": f"Could not browse S3 bucket: {exc}"}), 502
 
 
 def _now():
@@ -67,6 +163,54 @@ def _load_jobs():
 
 
 _load_jobs()
+
+
+def _read_saved_s3_settings():
+    if S3_SETTINGS_PATH.exists():
+        try:
+            saved = json.loads(S3_SETTINGS_PATH.read_text(encoding="utf-8"))
+            return saved if isinstance(saved, dict) else {}
+        except (OSError, json.JSONDecodeError):
+            return {}
+    return {}
+
+
+def _read_s3_settings():
+    settings = _read_saved_s3_settings()
+    return {
+        "region": settings.get("region") or os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION") or "",
+        "endpoint_url": settings.get("endpoint_url") or os.getenv("AWS_ENDPOINT_URL") or os.getenv("S3_ENDPOINT_URL") or "",
+        "access_key_id": settings.get("access_key_id") or os.getenv("AWS_ACCESS_KEY_ID") or "",
+        "secret_access_key": settings.get("secret_access_key") or os.getenv("AWS_SECRET_ACCESS_KEY") or "",
+        "session_token": settings.get("session_token") or os.getenv("AWS_SESSION_TOKEN") or "",
+    }
+
+
+def _write_s3_settings(settings):
+    S3_SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=".s3-settings-", dir=S3_SETTINGS_PATH.parent)
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as output:
+            json.dump(settings, output)
+            output.flush()
+            os.fsync(output.fileno())
+        os.replace(temporary, S3_SETTINGS_PATH)
+        os.chmod(S3_SETTINGS_PATH, 0o600)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def _public_s3_settings(settings=None):
+    settings = settings or _read_s3_settings()
+    access_key = settings.get("access_key_id", "")
+    return {
+        "region": settings.get("region", ""),
+        "endpoint_url": settings.get("endpoint_url", ""),
+        "has_credentials": bool(access_key and settings.get("secret_access_key")),
+        "access_key_hint": f"••••{access_key[-4:]}" if access_key else "",
+    }
 
 
 def _run(job_id, config):
@@ -168,6 +312,9 @@ def create_job():
             return jsonify({"error": "normal-path and attack-path must be strings"}), 400
         config["normal_path"] = normal_path
         config["attack_path"] = attack_path
+    if (is_s3_uri(config.get("dataset_path")) or is_s3_uri(normal_path)
+            or is_s3_uri(attack_path) or is_s3_uri(config.get("output_s3"))):
+        config["s3_config"] = _read_s3_settings()
     if output_path is not None:
         if not isinstance(output_path, str) or not output_path:
             return jsonify({"error": "output-path must be a non-empty path string"}), 400
@@ -208,6 +355,34 @@ def list_tasks():
                   ("job_id", "status", "created_at", "updated_at", "finished_at", "process", "error")
                   if key in job} for job in jobs]
     return jsonify({"tasks": summaries, "count": len(summaries)})
+
+
+@app.delete("/tasks")
+def clear_task_history():
+    with JOBS_LOCK:
+        finished_ids = [job_id for job_id, job in JOBS.items()
+                        if job.get("status") in {"completed", "failed"}]
+        if finished_ids:
+            placeholders = ",".join("?" for _ in finished_ids)
+            with _connect_db() as connection:
+                connection.execute(f"DELETE FROM jobs WHERE job_id IN ({placeholders})", finished_ids)
+            for job_id in finished_ids:
+                JOBS.pop(job_id, None)
+    return jsonify({"deleted": len(finished_ids), "message": "Finished job history cleared"})
+
+
+@app.delete("/tasks/<job_id>")
+def delete_task(job_id):
+    with JOBS_LOCK:
+        job = JOBS.get(job_id)
+        if job is None:
+            return jsonify({"error": "task not found"}), 404
+        if job.get("status") not in {"completed", "failed"}:
+            return jsonify({"error": "only completed or failed jobs can be deleted"}), 409
+        with _connect_db() as connection:
+            connection.execute("DELETE FROM jobs WHERE job_id = ?", (job_id,))
+        JOBS.pop(job_id, None)
+    return jsonify({"deleted": 1, "job_id": job_id})
 
 
 @app.get("/tasks/<job_id>")

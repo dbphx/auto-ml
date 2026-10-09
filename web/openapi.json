@@ -1,0 +1,222 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Auto ML Training API",
+    "version": "1.0.0",
+    "description": "Khởi chạy training, theo dõi trạng thái, xem tiến trình và kết quả model."
+  },
+  "servers": [{ "url": "/", "description": "Server hiện tại" }],
+  "tags": [
+    { "name": "Training", "description": "Tạo và truy vấn training jobs" },
+    { "name": "S3", "description": "Lưu cấu hình S3 và duyệt dataset" },
+    { "name": "System", "description": "Health check" }
+  ],
+  "paths": {
+    "/hook": {
+      "post": {
+        "tags": ["Training"],
+        "summary": "Tạo training job",
+        "description": "Tạo job bất đồng bộ. Trả về job_id để theo dõi.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TrainRequest" },
+              "example": {
+                "mode": "llm",
+                "input-path": { "normal": "/app/data/normal.txt", "attack": "/app/data/attack.txt" },
+                "output-path": "/app/output",
+                "max_trials": 10,
+                "target_accuracy": 0.9
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": { "description": "Job đã được nhận", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/jobs": {
+      "post": {
+        "tags": ["Training"],
+        "summary": "Alias tạo training job",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TrainRequest" } } } },
+        "responses": {
+          "202": { "description": "Job đã được nhận", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "tags": ["Training"],
+        "summary": "Liệt kê jobs",
+        "parameters": [{ "name": "status", "in": "query", "required": false, "description": "Lọc theo trạng thái", "schema": { "type": "string", "enum": ["queued", "running", "retrying", "completed", "failed"] } }],
+        "responses": {
+          "200": {
+            "description": "Danh sách jobs",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "count": { "type": "integer" }, "tasks": { "type": "array", "items": { "$ref": "#/components/schemas/JobSummary" } } } } } }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Training"],
+        "summary": "Xóa lịch sử jobs đã kết thúc",
+        "description": "Xóa các job completed/failed khỏi SQLite và bộ nhớ. Job queued/running được giữ lại.",
+        "responses": {
+          "200": {
+            "description": "Số job đã xóa",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "deleted": { "type": "integer" }, "message": { "type": "string" } } } } }
+          }
+        }
+      }
+    },
+    "/tasks/{job_id}": {
+      "get": {
+        "tags": ["Training"],
+        "summary": "Lấy job và report đầy đủ",
+        "parameters": [{ "$ref": "#/components/parameters/JobId" }],
+        "responses": {
+          "200": { "description": "Job", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } } },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Training"],
+        "summary": "Xóa một job đã kết thúc",
+        "description": "Chỉ xóa job completed/failed. Job queued/running trả về 409.",
+        "parameters": [{ "$ref": "#/components/parameters/JobId" }],
+        "responses": {
+          "200": { "description": "Job đã xóa", "content": { "application/json": { "schema": { "type": "object", "properties": { "deleted": { "type": "integer" }, "job_id": { "type": "string" } } } } } },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
+    "/tasks/{job_id}/process": {
+      "get": {
+        "tags": ["Training"],
+        "summary": "Lấy tiến trình, events và kết quả",
+        "parameters": [{ "$ref": "#/components/parameters/JobId" }],
+        "responses": {
+          "200": { "description": "Tiến trình và report rút gọn", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobProcess" } } } },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/jobs/{job_id}": {
+      "get": {
+        "tags": ["Training"],
+        "summary": "Alias lấy job",
+        "parameters": [{ "$ref": "#/components/parameters/JobId" }],
+        "responses": {
+          "200": { "description": "Job", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } } },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/settings/s3": {
+      "get": {
+        "tags": ["S3"],
+        "summary": "Lấy trạng thái cấu hình S3 đã lưu",
+        "description": "Không trả access key hoặc secret key; chỉ trả trạng thái và access key đã che một phần.",
+        "responses": { "200": { "description": "Cấu hình S3 an toàn", "content": { "application/json": { "schema": { "type": "object", "properties": { "region": { "type": "string" }, "endpoint_url": { "type": "string" }, "has_credentials": { "type": "boolean" }, "access_key_hint": { "type": "string" } } } } } } }
+      },
+      "put": {
+        "tags": ["S3"],
+        "summary": "Lưu credential S3",
+        "description": "Credential được lưu bền vững trên máy chủ; secret không được trả lại qua API.",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "access_key_id": { "type": "string" }, "secret_access_key": { "type": "string", "format": "password" }, "session_token": { "type": "string", "format": "password" }, "region": { "type": "string" }, "endpoint_url": { "type": "string", "format": "uri" } } } } } },
+        "responses": { "200": { "description": "Đã lưu cấu hình" }, "400": { "$ref": "#/components/responses/BadRequest" } }
+      }
+    },
+    "/s3/buckets": {
+      "get": {
+        "tags": ["S3"],
+        "summary": "Liệt kê bucket",
+        "responses": { "200": { "description": "Danh sách bucket", "content": { "application/json": { "schema": { "type": "object", "properties": { "buckets": { "type": "array", "items": { "type": "string" } } } } } } }, "400": { "$ref": "#/components/responses/BadRequest" } }
+      }
+    },
+    "/s3/browse": {
+      "get": {
+        "tags": ["S3"],
+        "summary": "Duyệt thư mục và object trong bucket",
+        "parameters": [
+          { "name": "bucket", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "prefix", "in": "query", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Thư mục, files và trạng thái dataset", "content": { "application/json": { "schema": { "type": "object", "properties": { "bucket": { "type": "string" }, "prefix": { "type": "string" }, "parent": { "type": "string" }, "folders": { "type": "array", "items": { "type": "string" } }, "files": { "type": "array", "items": { "type": "string" } }, "has_dataset": { "type": "boolean" } } } } } }, "400": { "$ref": "#/components/responses/BadRequest" } }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service hoạt động",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string", "example": "ok" } } } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "JobId": { "name": "job_id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "ID trả về khi tạo job" }
+    },
+    "responses": {
+      "BadRequest": { "description": "Request không hợp lệ", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "NotFound": { "description": "Không tìm thấy job", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "Conflict": { "description": "Job chưa kết thúc nên không thể xóa", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+    },
+    "schemas": {
+      "TrainRequest": {
+        "type": "object",
+        "required": ["mode", "input-path"],
+        "properties": {
+          "mode": { "type": "string", "enum": ["llm", "codex"], "description": "Agent mode" },
+          "llm": { "type": "string", "enum": ["internal", "external"], "description": "Nguồn model khi dùng codex mode" },
+          "input-path": {
+            "oneOf": [
+              { "type": "string", "description": "Dataset path" },
+              { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 2, "description": "[normal-path, attack-path]" },
+              { "type": "object", "required": ["normal", "attack"], "properties": { "normal": { "type": "string" }, "attack": { "type": "string" } } }
+            ]
+          },
+          "normal-path": { "type": "string" },
+          "attack-path": { "type": "string" },
+          "output-path": { "type": "string" },
+          "max_trials": { "type": "integer", "minimum": 1, "default": 10 },
+          "max_rounds": { "type": "integer", "minimum": 1, "default": 1 },
+          "target_accuracy": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.9 },
+          "category_target_accuracy": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      },
+      "JobSummary": {
+        "type": "object",
+        "properties": {
+          "job_id": { "type": "string" },
+          "status": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "process": { "type": "object" },
+          "error": { "type": "string" }
+        }
+      },
+      "Job": {
+        "allOf": [
+          { "$ref": "#/components/schemas/JobSummary" },
+          { "type": "object", "properties": { "finished_at": { "type": "string", "format": "date-time" }, "events": { "type": "array", "items": { "type": "object" } }, "report": { "type": "object", "description": "Training report sau khi hoàn tất" } } }
+        ]
+      },
+      "JobProcess": {
+        "type": "object",
+        "properties": { "job_id": { "type": "string" }, "status": { "type": "string" }, "process": { "type": "object" }, "events": { "type": "array", "items": { "type": "object" } }, "result": { "type": "object", "description": "Best model, metrics, trials, category tests và artifacts sau khi hoàn tất" } }
+      },
+      "Error": { "type": "object", "properties": { "error": { "type": "string" } } }
+    }
+  }
+}

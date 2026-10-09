@@ -79,8 +79,8 @@ def _resolve_dataset(config):
     if explicit_normal and explicit_attack:
         normal_file = attack_file = None
         try:
-            normal_file = resolve_input_file(explicit_normal)
-            attack_file = resolve_input_file(explicit_attack)
+            normal_file = resolve_input_file(explicit_normal, config.get("s3_config"))
+            attack_file = resolve_input_file(explicit_attack, config.get("s3_config"))
             frame, _ = _load_text_pair(normal_file, attack_file)
             return frame, f"{explicit_normal},{explicit_attack}"
         finally:
@@ -90,7 +90,7 @@ def _resolve_dataset(config):
                 attack_file.unlink(missing_ok=True)
     if is_s3_uri(dataset):
         try:
-            downloaded = download_dataset(dataset)
+            downloaded = download_dataset(dataset, s3_settings=config.get("s3_config"))
             return _load_text_pair(downloaded / "normal.txt", downloaded / "attack.txt")
         except Exception as exc:
             if not config.get("allow_local_fallback", True):
@@ -349,7 +349,8 @@ def train_job(config, progress=None):
     output_s3 = config.get("output_s3")
     if output_s3:
         try:
-            report["s3_upload"] = upload_directory(final_artifacts, output_s3.rstrip("/") + "/" + job_id)
+            report["s3_upload"] = upload_directory(
+                final_artifacts, output_s3.rstrip("/") + "/" + job_id, config.get("s3_config"))
         except Exception as exc:
             report["s3_upload"] = {"status": "failed", "error": str(exc), "local_fallback": str(final_artifacts)}
             print(f"S3 upload unavailable ({exc}); keeping local output at {final_artifacts}")
@@ -357,7 +358,8 @@ def train_job(config, progress=None):
     # Upload report once more because s3_upload status is part of report.json.
     if output_s3 and report.get("s3_upload", {}).get("status") == "uploaded":
         try:
-            upload_directory(final_artifacts, output_s3.rstrip("/") + "/" + job_id)
+            upload_directory(final_artifacts, output_s3.rstrip("/") + "/" + job_id,
+                             config.get("s3_config"))
         except Exception:
             pass
     emit({"status": "completed", **report["best"], "selection": report["selection"],

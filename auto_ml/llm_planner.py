@@ -71,6 +71,23 @@ def _safe_space(candidate, task="classification"):
     return result
 
 
+def _parse_codex_response(answer, parameter_names):
+    """Extract a JSON object from Codex text, allowing fences or trailing prose."""
+    decoder = json.JSONDecoder()
+    for index, char in enumerate(answer):
+        if char != "{":
+            continue
+        try:
+            candidate, _ = decoder.raw_decode(answer[index:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(candidate, dict) and (
+            "params" in candidate or set(candidate) == set(parameter_names)
+        ):
+            return candidate
+    raise ValueError("response contains no parameter JSON object")
+
+
 def _parse_plan_response(data):
     choices = data.get("choices") if isinstance(data, dict) else None
     if not choices or not isinstance(choices[0], dict):
@@ -194,8 +211,30 @@ def build_codex_params(model_name, bounded_space, trials, task="classification",
         if result.returncode != 0:
             detail = result.stderr.strip()[-1500:] or result.stdout.strip()[-1500:]
             raise RuntimeError(f"Codex CLI failed ({result.returncode}): {detail}")
-        parsed = json.loads(answer_path.read_text(encoding="utf-8"))
+        answer = answer_path.read_text(encoding="utf-8") if answer_path.exists() else ""
+        if not answer.strip():
+            if use_external:
+                raise RuntimeError(
+                    "Codex external provider returned an empty structured response. "
+                    "Confirm the endpoint supports the OpenAI Responses API (/v1/responses) "
+                    "and that the selected model can return structured output."
+                )
+            raise RuntimeError(
+                "Codex returned an empty structured response. Check Codex authentication "
+                "on the host with `codex login`, then restart the service."
+            )
+        try:
+            parsed = _parse_codex_response(answer, parameters)
+        except ValueError as exc:
+            raise ValueError(f"Codex returned invalid structured JSON: {exc}") from exc
 
+    # Some OpenAI-compatible proxies/models return the schema's parameter object
+    # directly (often in a Markdown JSON fence) instead of wrapping it in `params`.
+    # Accept only an exact set of known parameter keys; values are validated below.
+    if isinstance(parsed, dict) and "params" not in parsed and set(parsed) == set(parameters):
+        parsed = {"params": parsed, "reason": "Codex parameter selection"}
+    if not isinstance(parsed, dict):
+        raise ValueError("Codex response is not a JSON object")
     candidate = parsed.get("params")
     if not isinstance(candidate, dict):
         raise ValueError("Codex response is missing params")
