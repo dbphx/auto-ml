@@ -12,7 +12,7 @@ services:
       CODEX_MODEL: ${CODEX_MODEL:-}
       CODEX_TIMEOUT_SECONDS: ${CODEX_TIMEOUT_SECONDS:-180}
       CODEX_HOME: /home/appuser/.codex
-      CODEX_HOST_AUTH_FILE: /run/codex-host-auth.json
+      CODEX_HOST_AUTH_FILE: /run/codex-host/auth.json
       LLM_API_URL: ${LLM_API_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-}
@@ -30,7 +30,7 @@ services:
     volumes:
       - ./data:/app/data:ro
       - auto-ml-output:/app/output
-      - ${HOME}/.codex/auth.json:/run/codex-host-auth.json:ro
+      - ${HOME}/.codex:/run/codex-host:ro
       - codex-home:/home/appuser/.codex
     restart: unless-stopped
 
