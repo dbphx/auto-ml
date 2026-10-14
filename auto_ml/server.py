@@ -16,6 +16,8 @@ from .storage import _s3_client, is_s3_uri
 app = Flask(__name__)
 JOBS = {}
 JOBS_LOCK = threading.Lock()
+CREATE_JOB_INTERVAL_SECONDS = 60
+LAST_JOB_REQUEST_BY_IP = {}
 JOBS_DB_PATH = Path(os.getenv("AUTO_ML_DB_PATH", str(Path(os.getenv("OUTPUT_DIR", "output")) / "jobs.sqlite3")))
 S3_SETTINGS_PATH = JOBS_DB_PATH.parent / "s3_settings.json"
 S3_SETTINGS_LOCK = threading.Lock()
@@ -325,6 +327,23 @@ def create_job():
     config.pop("llm-model", None)
     config.pop("codex_model", None)
     config.pop("codex-model", None)
+
+    client_ip = request.remote_addr or "unknown"
+    now = datetime.now(timezone.utc).timestamp()
+    with JOBS_LOCK:
+        last_request = LAST_JOB_REQUEST_BY_IP.get(client_ip)
+        if last_request is not None and now - last_request < CREATE_JOB_INTERVAL_SECONDS:
+            retry_after = max(1, int(CREATE_JOB_INTERVAL_SECONDS - (now - last_request)))
+            response = jsonify({"error": "Chỉ được tạo một job mỗi phút", "retry_after": retry_after})
+            response.headers["Retry-After"] = str(retry_after)
+            return response, 429
+
+        LAST_JOB_REQUEST_BY_IP[client_ip] = now
+        # Keep the in-memory limiter bounded as old client entries accumulate.
+        expired_before = now - CREATE_JOB_INTERVAL_SECONDS
+        for ip, timestamp in list(LAST_JOB_REQUEST_BY_IP.items()):
+            if timestamp < expired_before:
+                LAST_JOB_REQUEST_BY_IP.pop(ip, None)
 
     job_id = uuid.uuid4().hex
     config["job_id"] = job_id
