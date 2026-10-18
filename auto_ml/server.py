@@ -4,11 +4,14 @@ import os
 import json
 import sqlite3
 import tempfile
+import hmac
+import secrets
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 from flask import Flask, jsonify, request, send_from_directory
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from .trainer import train_job
 from .storage import _s3_client, is_s3_uri
@@ -26,6 +29,48 @@ try:
 except ValueError:
     MAX_WORKERS = 4
 JOB_EXECUTOR = ThreadPoolExecutor(max_workers=MAX_WORKERS, thread_name_prefix="auto-ml-job")
+AUTH_USERNAME = os.getenv("AUTO_ML_USERNAME", "admin")
+AUTH_PASSWORD = os.getenv("AUTO_ML_PASSWORD") or ""
+if not AUTH_PASSWORD:
+    AUTH_PASSWORD = secrets.token_urlsafe(12)
+    print(f"AUTO_ML_PASSWORD is not set; generated password for '{AUTH_USERNAME}': {AUTH_PASSWORD}", flush=True)
+try:
+    TOKEN_TTL_SECONDS = max(60, int(os.getenv("AUTO_ML_TOKEN_TTL_SECONDS", "43200")))
+except ValueError:
+    TOKEN_TTL_SECONDS = 43200
+TOKEN_SERIALIZER = URLSafeTimedSerializer(os.getenv("AUTO_ML_SECRET_KEY") or secrets.token_hex(32), salt="auto-ml-auth")
+PUBLIC_ENDPOINTS = {"management", "api_docs", "openapi_spec", "static", "health", "login"}
+
+
+@app.before_request
+def require_token():
+    if request.method == "OPTIONS" or request.endpoint in PUBLIC_ENDPOINTS:
+        return None
+    scheme, _, token = request.headers.get("Authorization", "").partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        return jsonify({"error": "missing bearer token"}), 401
+    try:
+        TOKEN_SERIALIZER.loads(token.strip(), max_age=TOKEN_TTL_SECONDS)
+    except SignatureExpired:
+        return jsonify({"error": "token expired"}), 401
+    except BadSignature:
+        return jsonify({"error": "invalid token"}), 401
+    return None
+
+
+@app.post("/auth/login")
+def login():
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"error": "request body must be a JSON object"}), 400
+    username = str(payload.get("username") or "")
+    password = str(payload.get("password") or "")
+    valid_user = hmac.compare_digest(username.encode(), AUTH_USERNAME.encode())
+    valid_password = hmac.compare_digest(password.encode(), AUTH_PASSWORD.encode())
+    if not (valid_user and valid_password):
+        return jsonify({"error": "invalid username or password"}), 401
+    token = TOKEN_SERIALIZER.dumps({"sub": username})
+    return jsonify({"access_token": token, "token_type": "Bearer", "expires_in": TOKEN_TTL_SECONDS})
 
 
 @app.get("/")
@@ -270,20 +315,18 @@ def create_job():
     normal_path = _request_value(config, "normal-path", "normal_path", "path1")
     attack_path = _request_value(config, "attack-path", "attack_path", "path2")
     output_path = _request_value(config, "output-path", "output_path")
-    llm_choice = _request_value(config, "llm", "llm_source", "llm-source")
+    codex_choice = _request_value(config, "codex_source", "codex-source")
     if request.path == "/hook" and not mode:
-        return jsonify({"error": "mode is required (llm or codex)"}), 400
-    if mode is not None:
-        if not isinstance(mode, str) or mode.lower() not in {"llm", "codex"}:
-            return jsonify({"error": "mode must be llm or codex"}), 400
-        config["agent_mode"] = mode.lower()
-    if mode and mode.lower() == "codex":
-        if not llm_choice:
-            llm_choice = "internal"
-        if llm_choice is not None:
-            if not isinstance(llm_choice, str) or llm_choice.lower() not in {"external", "internal"}:
-                return jsonify({"error": "llm must be external or internal in codex mode"}), 400
-            config["llm_source"] = llm_choice.lower()
+        return jsonify({"error": "mode is required (codex)"}), 400
+    if mode is not None and (not isinstance(mode, str) or mode.lower() != "codex"):
+        return jsonify({"error": "mode must be codex"}), 400
+    config["agent_mode"] = "codex"
+    if mode is None or mode.lower() == "codex":
+        if not codex_choice:
+            codex_choice = "internal"
+        if not isinstance(codex_choice, str) or codex_choice.lower() not in {"external", "internal"}:
+            return jsonify({"error": "codex_source must be external or internal"}), 400
+        config["codex_source"] = codex_choice.lower()
     if bool(normal_path) != bool(attack_path):
         return jsonify({"error": "provide both normal-path and attack-path"}), 400
     if isinstance(input_path, dict):

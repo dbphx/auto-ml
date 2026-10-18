@@ -20,8 +20,8 @@ if str(ML_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ML_ROOT / "src"))
 from feature_engineering import FeatureEngineer  # noqa: E402
 from preprocessing import expand_request_to_field_rows, parse_category_lines  # noqa: E402
-from .llm_planner import (DEFAULT_SPACE, REGRESSION_SPACE, build_codex_params,
-                          build_plan, load_dotenv)
+from .codex_tuner import (DEFAULT_SPACE, REGRESSION_SPACE, build_codex_params,
+                          load_dotenv)
 from .storage import download_dataset, is_s3_uri, resolve_input_file, upload_directory
 
 
@@ -138,10 +138,6 @@ def train_job(config, progress=None):
     category_target_accuracy = float(config.get("category_target_accuracy", 0.90))
     max_trials = max(1, min(int(config.get("max_trials", 10)), 100))
     test_size = float(config.get("test_size", 0.2))
-    agent_mode = config.get("agent_mode", os.getenv("TRAINING_AGENT_MODE", "llm")).lower()
-    if agent_mode not in {"llm", "codex"}:
-        raise ValueError("agent_mode must be llm or codex")
-
     feature_columns = [c for c in frame.columns if c not in {target, "weight", "category", "source_payload"}]
     x_frame = frame[feature_columns].copy()
     y = frame[target]
@@ -155,21 +151,9 @@ def train_job(config, progress=None):
     fe.fit(prepared_train)
     x_train = fe.transform(prepared_train)
     x_valid = fe.transform(prepared_valid)
-    summary = {"rows": len(frame), "features": feature_columns, "task": task,
-               "category_target_accuracy": category_target_accuracy,
-               "classes": sorted(map(str, y.unique())) if task == "classification" else None}
-    feedback = config.get("tuning_feedback")
-    if agent_mode == "codex":
-        bounded = DEFAULT_SPACE if task == "classification" else REGRESSION_SPACE
-        plan = {"search_space": {name: bounded[name] for name in models},
-                "reason": "Codex CLI tunes each model after every completed trial"}
-    else:
-        plan = build_plan(summary, models, feedback=feedback,
-                          require_llm=bool(config.get("require_llm", False)),
-                          timeout_seconds=config.get("llm_timeout_seconds"),
-                          retries=config.get("llm_retries"),
-                          max_tokens=config.get("llm_max_tokens"),
-                          model_override=config.get("llm_model"))
+    bounded = DEFAULT_SPACE if task == "classification" else REGRESSION_SPACE
+    plan = {"search_space": {name: bounded[name] for name in models},
+            "reason": "Codex CLI tunes each model after every completed trial"}
     output_root = Path(config.get("artifacts_dir", "output"))
     output_root.mkdir(parents=True, exist_ok=True)
     temp_root = Path(tempfile.mkdtemp(prefix=f".{job_id}-", dir=output_root))
@@ -215,15 +199,15 @@ def train_job(config, progress=None):
             if best is None or score.get(score_key, -np.inf) > best["metrics"].get(score_key, -np.inf):
                 best = {"model": model_name, "params": params, "metrics": score, "estimator": estimator}
             emit({"status": "running", "trial": len(trial_log), "model": model_name, "metrics": score})
-            if agent_mode == "codex" and trial_index + 1 < len(sampled_params):
+            if trial_index + 1 < len(sampled_params):
                 model_trials = [trial for trial in trial_log if trial["model"] == model_name]
                 emit({"status": "agent_tuning", "agent": "codex", "model": model_name,
                       "message": "Codex is reviewing trial metrics and selecting the next parameters"})
                 recommendation = build_codex_params(
                     model_name, plan["search_space"], model_trials, task=task,
                     timeout_seconds=config.get("codex_timeout_seconds"),
-                    model=config.get("llm_model") or config.get("codex_model"),
-                    llm_source=config.get("llm_source", "auto"))
+                    model=config.get("codex_model"),
+                    provider_source=config.get("codex_source", "auto"))
                 next_params = recommendation["params"]
                 emit({"status": "agent_recommendation", "agent": "codex", "model": model_name,
                       "params": next_params, "reason": recommendation["reason"]})
@@ -292,7 +276,7 @@ def train_job(config, progress=None):
         selection = {"metric": score_key, "model": best["model"],
                      "score": float(best["metrics"].get(score_key, 0.0))}
     report = {"job_id": job_id, "round": round_number, "created_at": _now(), "dataset_path": data_path,
-              "agent_mode": agent_mode,
+              "agent_mode": "codex",
               "task": task, "target": target, "plan": plan,
               "selection": selection,
               "best": {k: v for k, v in best.items() if k != "estimator"},

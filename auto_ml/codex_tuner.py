@@ -1,0 +1,179 @@
+import json
+import os
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+
+
+DEFAULT_SPACE = {
+    "random_forest": {
+        "n_estimators": [200, 400, 800],
+        "max_depth": [None, 16, 32],
+        "min_samples_leaf": [1, 2, 4],
+        "max_features": ["sqrt", "log2", 0.5],
+    },
+    "linear": {
+        "C": [0.05, 0.1, 0.5, 1.0, 2.0, 5.0],
+        "class_weight": [None, "balanced"],
+    },
+}
+REGRESSION_SPACE = {
+    "random_forest": {
+        "n_estimators": [200, 400, 800],
+        "max_depth": [None, 16, 32],
+        "min_samples_leaf": [1, 2, 4],
+        "max_features": [1.0, "sqrt", 0.5],
+    },
+    "linear": {},
+}
+
+
+def load_dotenv():
+    """Load simple KEY=VALUE entries without requiring dotenv at runtime."""
+    candidates = [Path.cwd() / ".env", Path(__file__).resolve().parents[1] / ".env"]
+    for path in candidates:
+        if not path.exists():
+            continue
+        for raw in path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key, value = key.strip(), value.strip().strip('"').strip("'")
+            os.environ.setdefault(key, value)
+
+
+def _parse_codex_response(answer, parameter_names):
+    """Extract a JSON object from Codex text, allowing fences or trailing prose."""
+    decoder = json.JSONDecoder()
+    for index, char in enumerate(answer):
+        if char != "{":
+            continue
+        try:
+            candidate, _ = decoder.raw_decode(answer[index:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(candidate, dict) and (
+            "params" in candidate or set(candidate) == set(parameter_names)
+        ):
+            return candidate
+    raise ValueError("response contains no parameter JSON object")
+
+
+def build_codex_params(model_name, bounded_space, trials, task="classification",
+                       timeout_seconds=None, model=None,
+                       provider_source="auto"):
+    """Ask Codex CLI for one bounded next trial, based only on observed metrics."""
+    executable = shutil.which(os.getenv("CODEX_CLI", "codex"))
+    if not executable:
+        raise RuntimeError("Codex mode requires the Codex CLI (`codex`) on PATH")
+    timeout_seconds = float(timeout_seconds or os.getenv("CODEX_TIMEOUT_SECONDS", "180"))
+    parameters = bounded_space.get(model_name, {})
+    if not parameters:
+        return {"params": {}, "reason": "model has no tunable parameters"}
+
+    schema = {
+        "type": "object", "additionalProperties": False,
+        "properties": {
+            "params": {
+                "type": "object", "additionalProperties": False,
+                "properties": {key: {"enum": values} for key, values in parameters.items()},
+                "required": list(parameters),
+            },
+            "reason": {"type": "string"},
+        },
+        "required": ["params", "reason"],
+    }
+    prompt = (
+        "You are the hyperparameter tuning agent for a machine learning training job. "
+        "Choose exactly one next parameter combination for the named model. Use only values "
+        "from bounded_space; do not run commands, access files, or modify anything. "
+        "Use prior trials to avoid repeats and improve the requested metric. Return JSON matching the schema.\n"
+        + json.dumps({"task": task, "model": model_name, "bounded_space": parameters,
+                     "previous_trials": trials[-30:]}, default=str)
+    )
+    with tempfile.TemporaryDirectory(prefix="auto-ml-codex-") as temp_dir:
+        temp = Path(temp_dir)
+        schema_path = temp / "schema.json"
+        answer_path = temp / "answer.json"
+        schema_path.write_text(json.dumps(schema), encoding="utf-8")
+        command = [executable, "exec", "--ephemeral", "--skip-git-repo-check", "--sandbox", "read-only",
+                   "--output-schema", str(schema_path), "--output-last-message", str(answer_path)]
+        provider_config = next((item for item in (
+            (os.getenv("VLLM_BASE_URL"), "VLLM_API_KEY", "VLLM_MODEL"),
+            (os.getenv("LLM_API_URL"), "LLM_API_KEY", "LLM_MODEL"),
+        ) if item[0] and os.getenv(item[1])), None)
+        if provider_source not in {"auto", "external", "internal"}:
+            raise ValueError("provider_source must be auto, external, or internal")
+        use_external = provider_source == "external" or (provider_source == "auto" and provider_config is not None)
+        if use_external and provider_config is None:
+            raise RuntimeError("Codex external mode requires a URL and API key in VLLM_* or LLM_* env vars")
+        endpoint, api_key_env, model_env = provider_config if use_external else (None, None, None)
+        if use_external:
+            selected_model = model or os.getenv(model_env) or os.getenv("CODEX_MODEL")
+        else:
+            selected_model = model or os.getenv("CODEX_MODEL")
+        if endpoint:
+            endpoint = endpoint.rstrip("/")
+            for suffix in ("/v1/chat/completions", "/chat/completions", "/v1/responses", "/responses"):
+                if endpoint.endswith(suffix):
+                    endpoint = endpoint[:-len(suffix)]
+                    break
+            if not endpoint.endswith("/v1"):
+                endpoint += "/v1"
+            command.extend([
+                "--config", 'model_provider="training-codex"',
+                "--config", 'model_providers.training-codex.name="Training Codex"',
+                "--config", f"model_providers.training-codex.base_url={json.dumps(endpoint)}",
+                "--config", f'model_providers.training-codex.env_key="{api_key_env}"',
+                "--config", 'model_providers.training-codex.wire_api="responses"',
+                "--config", 'model_providers.training-codex.requires_openai_auth=false',
+                "--config", 'model_providers.training-codex.supports_websockets=false',
+            ])
+        if selected_model:
+            command.extend(["--model", selected_model])
+        command.append("-")
+        result = subprocess.run(command, input=prompt, text=True, capture_output=True,
+                                timeout=timeout_seconds, check=False,
+                                cwd=Path(__file__).resolve().parents[1])
+        if result.returncode != 0:
+            detail = result.stderr.strip()[-1500:] or result.stdout.strip()[-1500:]
+            raise RuntimeError(f"Codex CLI failed ({result.returncode}): {detail}")
+        answer = answer_path.read_text(encoding="utf-8") if answer_path.exists() else ""
+        if not answer.strip():
+            if use_external:
+                raise RuntimeError(
+                    "Codex external provider returned an empty structured response. "
+                    "Confirm the endpoint supports the OpenAI Responses API (/v1/responses) "
+                    "and that the selected model can return structured output."
+                )
+            raise RuntimeError(
+                "Codex returned an empty structured response. Check Codex authentication "
+                "on the host with `codex login`, then restart the service."
+            )
+        try:
+            parsed = _parse_codex_response(answer, parameters)
+        except ValueError as exc:
+            raise ValueError(f"Codex returned invalid structured JSON: {exc}") from exc
+
+    # Some OpenAI-compatible proxies/models return the schema's parameter object
+    # directly (often in a Markdown JSON fence) instead of wrapping it in `params`.
+    # Accept only an exact set of known parameter keys; values are validated below.
+    if isinstance(parsed, dict) and "params" not in parsed and set(parsed) == set(parameters):
+        parsed = {"params": parsed, "reason": "Codex parameter selection"}
+    if not isinstance(parsed, dict):
+        raise ValueError("Codex response is not a JSON object")
+    candidate = parsed.get("params")
+    if not isinstance(candidate, dict):
+        raise ValueError("Codex response is missing params")
+    # Recheck every value locally; the CLI response is never trusted as executable input.
+    safe = {}
+    for key, values in parameters.items():
+        value = candidate.get(key)
+        if not any(value == allowed for allowed in values):
+            raise ValueError(f"Codex returned an out-of-range value for {key}")
+        safe[key] = value
+    return {"params": safe, "reason": str(parsed.get("reason", "Codex tuning"))[:1000]}
+
+

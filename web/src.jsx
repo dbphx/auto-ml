@@ -9,9 +9,49 @@ import './s3-selection.css';
 
 const statusNames = { queued: 'Đang chờ', running: 'Đang chạy', retrying: 'Thử lại', completed: 'Hoàn thành', failed: 'Lỗi', agent_tuning: 'Agent đang tối ưu', agent_recommendation: 'Agent đề xuất tham số', category_tests: 'Đang kiểm tra category' };
 const date = value => value ? new Date(value).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
+const TOKEN_KEY = 'auto-ml-token';
+const readToken = () => { try { return window.localStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } };
+const writeToken = token => { try { token ? window.localStorage.setItem(TOKEN_KEY, token) : window.localStorage.removeItem(TOKEN_KEY); } catch { /* ignore */ } };
+const api = async (url, options = {}) => {
+  const response = await fetch(url, { ...options, headers: { ...(options.headers || {}), Authorization: `Bearer ${readToken()}` } });
+  if (response.status === 401) { writeToken(''); window.dispatchEvent(new Event('auto-ml-logout')); throw new Error('Phiên đăng nhập đã hết hạn'); }
+  return response;
+};
 const statusFilters = [['', 'Tất cả'], ['queued', 'Đang chờ'], ['running', 'Đang chạy'], ['retrying', 'Thử lại'], ['completed', 'Hoàn thành'], ['failed', 'Lỗi']];
 
-function App() {
+function Root() {
+  const [token, setToken] = useState(readToken);
+  useEffect(() => { const logout = () => setToken(''); window.addEventListener('auto-ml-logout', logout); return () => window.removeEventListener('auto-ml-logout', logout); }, []);
+  if (!token) return <Login onLogin={value => { writeToken(value); setToken(value); }} />;
+  return <App onLogout={() => { writeToken(''); setToken(''); }} />;
+}
+
+function Login({ onLogin }) {
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const submit = async event => {
+    event.preventDefault(); setBusy(true); setError('');
+    try {
+      const response = await fetch('/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(response.status === 401 ? 'Sai tên đăng nhập hoặc mật khẩu' : data.error || 'Đăng nhập thất bại');
+      onLogin(data.access_token);
+    } catch (err) { setError(err.message); } finally { setBusy(false); }
+  };
+  return <div className="login-page"><form className="dialog login-card" onSubmit={submit}>
+    <div className="modal-head"><div className="brand"><span className="mark">✳</span> Auto ML <span className="slash">/ Đăng nhập</span></div></div>
+    <div className="form">
+      <div className="field"><label htmlFor="login-user">Tên đăng nhập</label><input id="login-user" autoComplete="username" value={username} onChange={event => setUsername(event.target.value)} required /></div>
+      <div className="field"><label htmlFor="login-pass">Mật khẩu</label><input id="login-pass" type="password" autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} autoFocus required /></div>
+      {error && <div className="error">{error}</div>}
+      <div className="form-actions"><button type="submit" disabled={busy}>{busy ? 'Đang đăng nhập…' : 'Đăng nhập'}</button></div>
+    </div>
+  </form></div>;
+}
+
+function App({ onLogout }) {
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState('');
   const [query, setQuery] = useState('');
@@ -20,8 +60,7 @@ function App() {
   const [selectedId, setSelectedId] = useState('');
   const [detail, setDetail] = useState(null);
   const [dialog, setDialog] = useState(false);
-  const [mode, setMode] = useState('llm');
-  const [llmSource, setLlmSource] = useState('internal');
+  const [codexSource, setCodexSource] = useState('internal');
   const [inputSource, setInputSource] = useState('local');
   const [outputSource, setOutputSource] = useState('local');
   const [s3Config, setS3Config] = useState({ has_credentials: false, region: '', endpoint_url: '', access_key_hint: '' });
@@ -41,7 +80,7 @@ function App() {
   const notify = message => { setToast(message); window.setTimeout(() => setToast(''), 3500); };
   const refresh = useCallback(async () => {
     try {
-      const response = await fetch('/tasks');
+      const response = await api('/tasks');
       if (!response.ok) throw new Error('Không tải được danh sách job');
       const data = await response.json();
       setTasks(data.tasks || []);
@@ -51,7 +90,7 @@ function App() {
   const loadDetail = useCallback(async id => {
     if (!id) { setDetail(null); return; }
     try {
-      const response = await fetch(`/tasks/${encodeURIComponent(id)}/process`);
+      const response = await api(`/tasks/${encodeURIComponent(id)}/process`);
       if (!response.ok) throw new Error('Không tải được chi tiết job');
       setDetail(await response.json());
     } catch (error) { notify(error.message); }
@@ -84,7 +123,7 @@ function App() {
 
   async function loadS3Config() {
     try {
-      const response = await fetch('/settings/s3');
+      const response = await api('/settings/s3');
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Không tải được cấu hình S3');
       setS3Config(data);
@@ -103,7 +142,7 @@ function App() {
   async function saveS3Settings(event) {
     event.preventDefault(); setBusy(true);
     try {
-      const response = await fetch('/settings/s3', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(s3Draft) });
+      const response = await api('/settings/s3', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(s3Draft) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Không lưu được cấu hình S3');
       setS3Config(data); setS3SettingsOpen(false); notify('Đã lưu cấu hình S3');
@@ -114,7 +153,7 @@ function App() {
 
   async function loadS3Buckets() {
     try {
-      const response = await fetch('/s3/buckets');
+      const response = await api('/s3/buckets');
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Không tải được danh sách bucket');
       setS3Buckets(data.buckets || []);
@@ -128,7 +167,7 @@ function App() {
     if (!bucket) return;
     try {
       const query = new URLSearchParams({ bucket, prefix: prefix || '' });
-      const response = await fetch(`/s3/browse?${query}`);
+      const response = await api(`/s3/browse?${query}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Không duyệt được S3');
       setS3Bucket(bucket); setS3Browse(data);
@@ -156,16 +195,16 @@ function App() {
   async function createJob(event) {
     event.preventDefault(); setBusy(true);
     try {
-      const response = await fetch('/hook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-        mode, 'input-path': inputSource === 's3' ? (s3Uri || { normal: s3Files.normal, attack: s3Files.attack }) : { normal: form.normal.trim(), attack: form.attack.trim() },
+      const response = await api('/hook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        mode: 'codex', 'input-path': inputSource === 's3' ? (s3Uri || { normal: s3Files.normal, attack: s3Files.attack }) : { normal: form.normal.trim(), attack: form.attack.trim() },
         ...(inputSource === 's3' ? { allow_local_fallback: false } : {}), 'output-path': '/app/output',
         ...(outputSource === 's3' ? { output_s3: outputS3Uri } : {}),
-        ...(mode === 'codex' ? { llm: llmSource } : {}),
+        codex_source: codexSource,
         max_trials: Number(form.maxTrials), category_target_accuracy: Number(form.target),
       }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Không tạo được job');
-      setDialog(false); setMode('llm'); setLlmSource('internal'); setInputSource('local'); setOutputSource('local'); setS3Uri(''); setOutputS3Uri(''); setSelectedId(data.job_id); notify('Đã thêm job vào hàng đợi'); await refresh();
+      setDialog(false); setCodexSource('internal'); setInputSource('local'); setOutputSource('local'); setS3Uri(''); setOutputS3Uri(''); setSelectedId(data.job_id); notify('Đã thêm job vào hàng đợi'); await refresh();
     } catch (error) { notify(error.message); }
     finally { setBusy(false); }
   }
@@ -174,7 +213,7 @@ function App() {
     const finishedCount = counts.completed + counts.failed;
     if (!finishedCount || !window.confirm(`Xóa ${finishedCount} job đã kết thúc khỏi lịch sử? Job đang chờ hoặc đang chạy sẽ được giữ lại.`)) return;
     try {
-      const response = await fetch('/tasks', { method: 'DELETE' });
+      const response = await api('/tasks', { method: 'DELETE' });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Không xóa được lịch sử');
       setSelectedId(''); setPage(1); notify(`Đã xóa ${data.deleted} job khỏi lịch sử`); await refresh();
@@ -186,7 +225,7 @@ function App() {
     if (!['completed', 'failed'].includes(task.status)) return;
     if (!window.confirm(`Xóa job ${task.job_id.slice(0, 12)} khỏi lịch sử?`)) return;
     try {
-      const response = await fetch(`/tasks/${encodeURIComponent(task.job_id)}`, { method: 'DELETE' });
+      const response = await api(`/tasks/${encodeURIComponent(task.job_id)}`, { method: 'DELETE' });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Không xóa được job');
       if (selectedId === task.job_id) setSelectedId('');
@@ -202,7 +241,7 @@ function App() {
   const progress = task => [task.process?.model, task.process?.trial && `Trial ${task.process.trial}`, task.process?.round && `Round ${task.process.round}`].filter(Boolean).join(' · ') || task.process?.message || '—';
 
   return <>
-    <header><div className="brand"><span className="mark">✳</span> Auto ML <span className="slash">/ Management</span></div><div className="header-actions"><button className="secondary s3-settings-button" onClick={openS3Settings}>☁ S3 {s3Config.has_credentials ? '✓' : '⚙'}</button><div className="live"><i />Đang cập nhật · tối đa 4 worker</div></div></header>
+    <header><div className="brand"><span className="mark">✳</span> Auto ML <span className="slash">/ Management</span></div><div className="header-actions"><button className="secondary s3-settings-button" onClick={openS3Settings}>☁ S3 {s3Config.has_credentials ? '✓' : '⚙'}</button><div className="live"><i />Đang cập nhật · tối đa 4 worker</div><button className="secondary s3-settings-button" onClick={onLogout}>Đăng xuất</button></div></header>
     <main>
       <div className="heading"><div><div className="eyebrow">Training operations</div><h1><span className="mark heading-mark" aria-hidden="true">✦</span> Quản lý training</h1><div className="sub">Theo dõi các job và kết quả huấn luyện.</div></div><button onClick={() => setDialog(true)}>＋ Tạo job</button></div>
       <section className="stats">
@@ -241,8 +280,7 @@ function App() {
       </div>}
     </section></div>}
     {dialog && <div className="overlay" onMouseDown={event => event.target === event.currentTarget && setDialog(false)}><section className="dialog"><div className="modal-head"><h2>Tạo job training</h2><button className="close" onClick={() => setDialog(false)}>×</button></div>
-      <form className="form" onSubmit={createJob}><div className="field"><label>Agent mode</label><div className="mode-picker">{[['llm', '✦', 'Custom'], ['codex', '⌘', 'Codex']].map(([value, icon, label]) => <button type="button" key={value} className={`mode-chip ${mode === value ? 'active' : ''}`} onClick={() => setMode(value)}><span>{icon}</span>{label}</button>)}</div></div>
-        {mode === 'codex' && <div className="field codex-source"><label>Nguồn model cho Codex</label><div className="mode-picker">{[['internal', '◉', 'Default'], ['external', '↗', 'External']].map(([value, icon, label]) => <button type="button" key={value} className={`mode-chip ${llmSource === value ? 'active' : ''}`} onClick={() => setLlmSource(value)}><span>{icon}</span>{label}</button>)}</div><div className="hint">Default dùng đăng nhập và model Codex. External dùng endpoint/API key trong môi trường; endpoint phải hỗ trợ OpenAI Responses API (/v1/responses).</div></div>}
+      <form className="form" onSubmit={createJob}><div className="field codex-source"><label>Nguồn model cho Codex</label><div className="mode-picker">{[['internal', '◉', 'Default'], ['external', '↗', 'External']].map(([value, icon, label]) => <button type="button" key={value} className={`mode-chip ${codexSource === value ? 'active' : ''}`} onClick={() => setCodexSource(value)}><span>{icon}</span>{label}</button>)}</div><div className="hint">Default dùng đăng nhập và model Codex. External dùng endpoint/API key trong môi trường; endpoint phải hỗ trợ OpenAI Responses API (/v1/responses).</div></div>
         <div className="field"><label>Nguồn dữ liệu</label><div className="mode-picker">{[['local', '▣', 'Local'], ['s3', '☁', 'S3']].map(([value, icon, label]) => <button type="button" key={value} className={`mode-chip ${inputSource === value ? 'active' : ''}`} onClick={() => selectInputSource(value)}><span>{icon}</span>{label}</button>)}</div></div>
         {inputSource === 'local' && <><div className="form-row"><Field label="File dữ liệu normal" name="normal" value={form.normal} onChange={updateForm} required /><Field label="File dữ liệu attack" name="attack" value={form.attack} onChange={updateForm} required /></div><div className="hint">Nhập đường dẫn bên trong container. Ví dụ: /app/data/normal.txt</div></>}
         {inputSource === 's3' && <div className="s3-picker">
@@ -296,4 +334,4 @@ function TrialChart({ trials }) {
   </section>;
 }
 
-createRoot(document.getElementById('root')).render(<App />);
+createRoot(document.getElementById('root')).render(<Root />);

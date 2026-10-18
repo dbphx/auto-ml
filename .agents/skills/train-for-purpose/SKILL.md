@@ -20,7 +20,7 @@ This repository's default product task is HTTP request security classification: 
 
 ## Train and evaluate
 
-- Treat the agent or LLM as a hyperparameter planner. It may select parameters within the configured search space; it must not redefine labels, drop difficult categories, or change the success measure to make the result look better.
+- Treat Codex as a hyperparameter planner. It may select parameters within the configured search space; it must not redefine labels, drop difficult categories, or change the success measure to make the result look better.
 - Use the existing train/validation split for trial selection. Keep evaluation examples out of fitting and tuning.
 - Review both aggregate metrics and category results. This repo runs category tests on raw and URL-encoded examples; report weak categories and failures even when aggregate accuracy is high.
 - The configured `category_target_accuracy` is the acceptance threshold for category testing. Do not claim the target is met unless the trainer's report says so.

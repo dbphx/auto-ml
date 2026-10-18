@@ -11,6 +11,9 @@ export default defineConfig({
       '/tasks': 'http://localhost:8080',
       '/hook': 'http://localhost:8080',
       '/jobs': 'http://localhost:8080',
+      '/auth': 'http://localhost:8080',
+      '/settings': 'http://localhost:8080',
+      '/s3': 'http://localhost:8080',
     },
   },
 });

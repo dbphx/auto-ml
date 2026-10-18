@@ -7,11 +7,26 @@
   },
   "servers": [{ "url": "/", "description": "Server hiện tại" }],
   "tags": [
+    { "name": "Auth", "description": "Đăng nhập lấy Bearer token" },
     { "name": "Training", "description": "Tạo và truy vấn training jobs" },
     { "name": "S3", "description": "Lưu cấu hình S3 và duyệt dataset" },
     { "name": "System", "description": "Health check" }
   ],
+  "security": [{ "BearerAuth": [] }],
   "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Đăng nhập",
+        "description": "Trả về access_token. Gửi kèm header `Authorization: Bearer <token>` cho các API khác.",
+        "security": [],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["username", "password"], "properties": { "username": { "type": "string", "example": "admin" }, "password": { "type": "string", "format": "password" } } } } } },
+        "responses": {
+          "200": { "description": "Đăng nhập thành công", "content": { "application/json": { "schema": { "type": "object", "properties": { "access_token": { "type": "string" }, "token_type": { "type": "string", "example": "Bearer" }, "expires_in": { "type": "integer", "example": 43200 } } } } } },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
     "/hook": {
       "post": {
         "tags": ["Training"],
@@ -23,7 +38,8 @@
             "application/json": {
               "schema": { "$ref": "#/components/schemas/TrainRequest" },
               "example": {
-                "mode": "llm",
+                "mode": "codex",
+                "codex_source": "internal",
                 "input-path": { "normal": "/app/data/normal.txt", "attack": "/app/data/attack.txt" },
                 "output-path": "/app/output",
                 "max_trials": 10,
@@ -154,6 +170,7 @@
       "get": {
         "tags": ["System"],
         "summary": "Health check",
+        "security": [],
         "responses": {
           "200": {
             "description": "Service hoạt động",
@@ -164,10 +181,14 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "BearerAuth": { "type": "http", "scheme": "bearer", "description": "Token lấy từ POST /auth/login" }
+    },
     "parameters": {
       "JobId": { "name": "job_id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "ID trả về khi tạo job" }
     },
     "responses": {
+      "Unauthorized": { "description": "Thiếu, sai hoặc hết hạn token", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
       "BadRequest": { "description": "Request không hợp lệ", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
       "NotFound": { "description": "Không tìm thấy job", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
       "Conflict": { "description": "Job chưa kết thúc nên không thể xóa", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
@@ -177,8 +198,8 @@
         "type": "object",
         "required": ["mode", "input-path"],
         "properties": {
-          "mode": { "type": "string", "enum": ["llm", "codex"], "description": "Agent mode" },
-          "llm": { "type": "string", "enum": ["internal", "external"], "description": "Nguồn model khi dùng codex mode" },
+          "mode": { "type": "string", "const": "codex", "description": "Codex CLI tuning mode" },
+          "codex_source": { "type": "string", "enum": ["internal", "external"], "default": "internal", "description": "Nguồn model cho Codex" },
           "input-path": {
             "oneOf": [
               { "type": "string", "description": "Dataset path" },
