@@ -25,11 +25,11 @@ python -m auto_ml.server
 docker compose up --build -d
 ```
 
-Compose mở server tại `http://localhost:8080`, mount `./data` read-only vào `/app/data` và lưu kết quả trong volume `auto-ml-output`. Codex nội bộ dùng phiên ChatGPT CLI đã đăng nhập trên host qua `~/.codex/auth.json`; Compose mount thư mục `.codex` (nếu file auth chưa có thì service vẫn khởi động, nhưng Codex cần được đăng nhập/cấu hình riêng). Copy `.env.example` thành `.env` để cấu hình Codex hoặc AWS. Image đã cài Codex CLI.
+Compose mở server tại `http://localhost:18080`, mount `./data` read-only vào `/app/data` và lưu kết quả trong volume `auto-ml-output`. Codex nội bộ dùng phiên ChatGPT CLI đã đăng nhập trên host qua `~/.codex/auth.json`; Compose mount thư mục `.codex` (nếu file auth chưa có thì service vẫn khởi động, nhưng Codex cần được đăng nhập/cấu hình riêng). Copy `.env.example` thành `.env` để cấu hình Codex hoặc AWS. Image đã cài Codex CLI.
 
-Mở `http://localhost:8080/` để vào trang management React: xem danh sách/trạng thái job, tiến trình và lịch sử cập nhật, hoặc tạo job training mới. React gọi trực tiếp API Flask; trang tự làm mới mỗi 3 giây. Job và lịch sử được lưu trong SQLite tại `/app/output/jobs.sqlite3` trên volume bền vững `auto-ml-output`, nên vẫn còn sau khi container khởi động lại. Job đang chạy dở lúc server dừng được đánh dấu lỗi với thông báo gián đoạn.
+Mở `http://localhost:18080/` để vào trang management React: xem danh sách/trạng thái job, tiến trình và lịch sử cập nhật, hoặc tạo job training mới. React gọi trực tiếp API Flask; trang tự làm mới mỗi 3 giây. Job và lịch sử được lưu trong SQLite tại `/app/output/jobs.sqlite3` trên volume bền vững `auto-ml-output`, nên vẫn còn sau khi container khởi động lại. Job đang chạy dở lúc server dừng được đánh dấu lỗi với thông báo gián đoạn.
 
-Tài liệu Swagger cho các endpoint có tại `http://localhost:8080/api`; OpenAPI 3.1.0 JSON để import vào công cụ khác tại `/openapi.json`.
+Tài liệu Swagger cho các endpoint có tại `http://localhost:18080/api`; OpenAPI 3.1.0 JSON để import vào công cụ khác tại `/openapi.json`.
 
 Trong management, có thể xóa từng job hoặc xóa toàn bộ lịch sử đã kết thúc. Chỉ job `completed` hoặc `failed` được xóa; job đang chờ/chạy sẽ được giữ lại.
 
@@ -40,7 +40,7 @@ Server chạy tối đa 4 job training đồng thời theo mặc định; job v�
 Mọi REST API (trừ `/health`, `POST /auth/login`, trang web và Swagger) yêu cầu header `Authorization: Bearer <token>`; thiếu/sai/hết hạn token trả `401`. Tài khoản cấu hình bằng `AUTO_ML_USERNAME` (mặc định `admin`) và `AUTO_ML_PASSWORD`; nếu không đặt mật khẩu, server tự sinh mật khẩu ngẫu nhiên và in ra log khi khởi động. Token được ký bằng `AUTO_ML_SECRET_KEY` (không đặt thì sinh ngẫu nhiên, token mất hiệu lực sau mỗi lần restart) và hết hạn sau `AUTO_ML_TOKEN_TTL_SECONDS` giây (mặc định 12 giờ). Trang management hiện form đăng nhập; trên Swagger dùng nút **Authorize**.
 
 ```bash
-TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:18080/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"username":"admin","password":"change-me"}' | python3 -c 'import sys,json;print(json.load(sys.stdin)["access_token"])')
 ```
@@ -48,7 +48,7 @@ TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
 Gửi hook để khởi chạy một job (đường dẫn là đường dẫn **bên trong container**):
 
 ```bash
-curl -X POST http://localhost:8080/hook \
+curl -X POST http://localhost:18080/hook \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{"mode":"codex","input-path":{"normal":"/app/data/normal.txt","attack":"/app/data/attack.txt"},"output-path":"/app/output"}'
@@ -60,13 +60,13 @@ Quản lý các task bằng API:
 
 ```bash
 # Liệt kê task, chỉ lọc task đang chạy
-curl -H "Authorization: Bearer $TOKEN" 'http://localhost:8080/tasks?status=running'
+curl -H "Authorization: Bearer $TOKEN" 'http://localhost:18080/tasks?status=running'
 
 # Xem chi tiết task và report nếu đã xong
-curl -H "Authorization: Bearer $TOKEN" 'http://localhost:8080/tasks/<job_id>'
+curl -H "Authorization: Bearer $TOKEN" 'http://localhost:18080/tasks/<job_id>'
 
 # Xem process hiện tại và lịch sử các bước
-curl -H "Authorization: Bearer $TOKEN" 'http://localhost:8080/tasks/<job_id>/process'
+curl -H "Authorization: Bearer $TOKEN" 'http://localhost:18080/tasks/<job_id>/process'
 ```
 
 Trạng thái gồm `queued`, `running`, `retrying`, `completed` hoặc `failed`. Lịch sử process giữ tối đa 500 event gần nhất; `/jobs/<job_id>` vẫn được hỗ trợ.
