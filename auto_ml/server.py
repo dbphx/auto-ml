@@ -11,12 +11,19 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 from flask import Flask, jsonify, request, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from .trainer import train_job
 from .storage import _s3_client, is_s3_uri
 
 app = Flask(__name__)
+try:
+    TRUSTED_PROXIES = max(0, int(os.getenv("AUTO_ML_TRUSTED_PROXIES", "0")))
+except ValueError:
+    TRUSTED_PROXIES = 0
+if TRUSTED_PROXIES:
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=TRUSTED_PROXIES, x_proto=TRUSTED_PROXIES)
 JOBS = {}
 JOBS_LOCK = threading.Lock()
 CREATE_JOB_INTERVAL_SECONDS = 60

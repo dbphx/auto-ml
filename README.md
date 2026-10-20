@@ -29,6 +29,8 @@ Compose mở server tại `http://localhost:18080`, mount `./data` read-only và
 
 Mở `http://localhost:18080/` để vào trang management React: xem danh sách/trạng thái job, tiến trình và lịch sử cập nhật, hoặc tạo job training mới. React gọi trực tiếp API Flask; trang tự làm mới mỗi 3 giây. Job và lịch sử được lưu trong SQLite tại `/app/output/jobs.sqlite3` trên volume bền vững `auto-ml-output`, nên vẫn còn sau khi container khởi động lại. Job đang chạy dở lúc server dừng được đánh dấu lỗi với thông báo gián đoạn.
 
+Compose chạy `nginx` phía trước trainer: chỉ nginx publish port `${AUTO_ML_PORT:-18080}`, trainer không mở port ra host. Nginx chặn theo IP bằng danh sách trong `nginx/allowlist.conf` (mỗi dòng `allow <IP hoặc CIDR>;`, còn lại trả `403`; mặc định cho phép localhost và dải mạng nội bộ). Sau khi sửa danh sách, chạy `docker compose exec nginx nginx -s reload`. Trainer đọc IP thật của client từ `X-Forwarded-For` do nginx gửi (`AUTO_ML_TRUSTED_PROXIES=1`) để giới hạn tạo job theo IP.
+
 Tài liệu Swagger cho các endpoint có tại `http://localhost:18080/api`; OpenAPI 3.1.0 JSON để import vào công cụ khác tại `/openapi.json`.
 
 Trong management, có thể xóa từng job hoặc xóa toàn bộ lịch sử đã kết thúc. Chỉ job `completed` hoặc `failed` được xóa; job đang chờ/chạy sẽ được giữ lại.

@@ -2,9 +2,10 @@ services:
   trainer:
     build: .
     user: "0:0"
-    ports:
-      - "${AUTO_ML_PORT:-18080}:8080"
+    expose:
+      - "8080"
     environment:
+      AUTO_ML_TRUSTED_PROXIES: 1
       AUTO_ML_WORKERS: ${AUTO_ML_WORKERS:-4}
       AUTO_ML_DB_PATH: ${AUTO_ML_DB_PATH:-/app/output/jobs.sqlite3}
       AUTO_ML_USERNAME: ${AUTO_ML_USERNAME:-admin}
@@ -31,6 +32,17 @@ services:
       - auto-ml-output:/app/output
       - ${HOME}/.codex:/run/codex-host:ro
       - codex-home:/home/appuser/.codex
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - trainer
+    ports:
+      - "${AUTO_ML_PORT:-18080}:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/allowlist.conf:/etc/nginx/allowlist.conf:ro
     restart: unless-stopped
 
 volumes:
